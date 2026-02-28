@@ -1,6 +1,6 @@
 # Claude Code Configuration
 
-Personal Claude Code configuration with specialized agents, skills, and commands for modern full-stack and Web3 development.
+Personal Claude Code configuration with specialized agents, skills, commands, and automated hooks for modern full-stack and Web3 development.
 
 ## Overview
 
@@ -9,6 +9,7 @@ This configuration extends Claude Code with:
 - **Agents** - Expert personas with specialized knowledge and behavioral traits
 - **Skills** - Technical reference materials with patterns and code examples
 - **Commands** - Slash commands for common development tasks
+- **Hooks** - Automated quality checks and planning tools that run during development
 
 ## Directory Structure
 
@@ -24,6 +25,27 @@ This configuration extends Claude Code with:
 │   ├── testing-expert.md      # Vitest, Playwright, mocking
 │   ├── database-expert.md     # PostgreSQL, Drizzle, migrations
 │   └── security-expert.md     # OWASP, auth, headers, secrets
+│
+├── hooks/                     # Automated quality & planning scripts
+│   ├── package.json           # Forces CommonJS (required for Node 23+)
+│   │
+│   ├── block-env-read.js      # PreToolUse: blocks reading .env files
+│   ├── block-dangerous-git.js # PreToolUse: blocks destructive git commands
+│   │
+│   ├── lint-with-feedback.js  # PostToolUse: ESLint with error feedback to Claude
+│   ├── typecheck.js           # PostToolUse: tsc --noEmit on .ts/.tsx edits
+│   ├── detect-secrets.js      # PostToolUse: catches hardcoded API keys/tokens
+│   ├── detect-duplicates.js   # PostToolUse: finds reimplemented existing functions
+│   ├── detect-missing-tests.js# PostToolUse: warns when exports have no test file
+│   ├── check-complexity.js    # PostToolUse: cyclomatic complexity + nesting + lines
+│   ├── detect-dead-code.js    # PostToolUse: exports never imported elsewhere
+│   ├── track-tech-debt.js     # PostToolUse: logs TODO/FIXME to tech-debt.md
+│   │
+│   ├── user-prompt-context.js # UserPromptSubmit: injects git context per prompt
+│   ├── session-context.js     # SessionStart: loads notes + worklog + git state
+│   ├── save-session-notes.js  # Stop: saves git snapshot to session-notes.md
+│   ├── pre-pr-checklist.js    # Stop: AI-generated PR checklist when ahead of remote
+│   └── pre-compact-snapshot.js# PreCompact: saves state before context compression
 │
 ├── skills/                    # Technical knowledge base
 │   ├── javascript.md          # ES6+, async/await, functional patterns
@@ -248,14 +270,62 @@ Invoke commands directly:
 
 ## Hooks
 
-Automated tasks configured in `.claude/settings.json`:
+Automated scripts in `.claude/hooks/` configured via `.claude/settings.json`. They run at specific lifecycle events and feed results back to Claude so it can self-correct.
 
-| Hook | Trigger | Action |
-|------|---------|--------|
-| `PostToolUse` | After Write/Edit | Run Prettier + ESLint |
-| `Stop` | Task complete | Run tests |
+> **Node.js 23+ requirement**: `.claude/hooks/package.json` sets `"type": "commonjs"` to prevent ESM auto-detection issues.
 
-See `skills/hooks.md` for more patterns and configuration options.
+### Security (PreToolUse — block before execution)
+
+| Hook | Trigger | Behavior |
+|------|---------|----------|
+| `block-env-read.js` | `Read` any `.env*` file | Blocks read, shows error |
+| `block-dangerous-git.js` | `Bash` with destructive git/rm | Blocks command, asks for confirmation |
+
+### Code Quality (PostToolUse — analyze after each edit)
+
+| Hook | Files | Checks |
+|------|-------|--------|
+| `lint-with-feedback.js` | `.js .ts .jsx .tsx` | ESLint auto-fix, then reports remaining errors |
+| `typecheck.js` | `.ts .tsx` | `tsc --noEmit` — catches cross-file type errors |
+| `detect-secrets.js` | All source files | API keys, tokens, private keys, passwords |
+| `detect-duplicates.js` | `.js .ts .jsx .tsx` | Functions already defined elsewhere in the project |
+| `detect-missing-tests.js` | `.ts .tsx .js .jsx` | Exports without a corresponding test file |
+| `check-complexity.js` | `.ts .tsx .js .jsx` | Cyclomatic complexity >10, nesting >3, lines >60 |
+| `detect-dead-code.js` | `.ts .tsx .js .jsx` | Named exports never imported anywhere |
+| `track-tech-debt.js` | All source files | TODO/FIXME/HACK → `.claude/tech-debt.md` |
+
+### Planning & Context
+
+| Hook | Event | Behavior |
+|------|-------|----------|
+| `session-context.js` | `SessionStart` | Injects session notes + worklog + git state into context |
+| `user-prompt-context.js` | `UserPromptSubmit` | Injects current branch + modified files before each prompt |
+| `save-session-notes.js` | `Stop` | Saves git snapshot to `.claude/session-notes.md` |
+| `pre-pr-checklist.js` | `Stop` | AI-generated PR checklist when commits are ahead of remote |
+| `pre-compact-snapshot.js` | `PreCompact` | Saves full git state before context window compression |
+
+### Toggling hooks
+
+To disable a hook for a project (e.g. lint feedback during noisy PRs), add to `.claude/settings.local.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_LINT": "false"
+  }
+}
+```
+
+### Generated files (gitignored)
+
+The planning hooks write to these local files — they are excluded from version control:
+
+```
+.claude/session-notes.md       # Persistent session context
+.claude/tech-debt.md           # Accumulated TODO/FIXME log
+.claude/pr-checklist.md        # Latest AI-generated PR checklist
+.claude/pre-compact-snapshot.md# Git state before last context compaction
+```
 
 ## License
 

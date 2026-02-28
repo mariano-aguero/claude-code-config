@@ -1,5 +1,15 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read",
+        "command": "node .claude/hooks/block-env-read.js"
+      },
+      {
+        "matcher": "Bash",
+        "command": "node .claude/hooks/block-dangerous-git.js"
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write",
@@ -11,19 +21,96 @@
       },
       {
         "matcher": "Write",
-        "command": "pnpm eslint --fix \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+        "command": "node .claude/hooks/lint-with-feedback.js"
       },
       {
         "matcher": "Edit",
-        "command": "pnpm eslint --fix \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+        "command": "node .claude/hooks/lint-with-feedback.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/typecheck.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/typecheck.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/detect-secrets.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/detect-secrets.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/detect-duplicates.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/detect-duplicates.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/detect-missing-tests.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/detect-missing-tests.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/check-complexity.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/check-complexity.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/detect-dead-code.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/detect-dead-code.js"
+      },
+      {
+        "matcher": "Write",
+        "command": "node .claude/hooks/track-tech-debt.js"
+      },
+      {
+        "matcher": "Edit",
+        "command": "node .claude/hooks/track-tech-debt.js"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "command": "node .claude/hooks/user-prompt-context.js"
+      }
+    ],
+    "PreCompact": [
+      {
+        "command": "node .claude/hooks/pre-compact-snapshot.js"
+      }
+    ],
+    "SessionStart": [
+      {
+        "command": "node .claude/hooks/session-context.js"
       }
     ],
     "Stop": [
       {
+        "command": "node .claude/hooks/save-session-notes.js"
+      },
+      {
+        "command": "node .claude/hooks/pre-pr-checklist.js"
+      },
+      {
         "command": "pnpm test 2>/dev/null || echo 'No tests configured'"
       },
       {
-        "command": "echo '\\n💡 Reminder: Run /init to update CLAUDE.md if needed\\n'"
+        "command": "echo '\\n💡 Reminder: Run /log-auto before closing the session\\n'"
       }
     ]
   }

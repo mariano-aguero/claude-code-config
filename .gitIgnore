@@ -32,6 +32,19 @@ Desktop.ini
 .claude/settings.local.json
 
 # ----------------------------------------------------------------------------
+# Claude Code Hook-generated files (session state, not code artifacts)
+# ----------------------------------------------------------------------------
+.claude/session-notes.md
+.claude/tech-debt.md
+.claude/pr-checklist.md
+.claude/pre-compact-snapshot.md
+
+# ----------------------------------------------------------------------------
+# Claude Code Planning docs (local brainstorming, not code artifacts)
+# ----------------------------------------------------------------------------
+docs/plans/
+
+# ----------------------------------------------------------------------------
 # Node.js (if using any tooling)
 # ----------------------------------------------------------------------------
 node_modules/
