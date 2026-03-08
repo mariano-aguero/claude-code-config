@@ -12,7 +12,7 @@ This is a Claude Code configuration repository containing specialized agents, sk
 
 Expert personas with behavioral traits and response methodologies:
 
-- `frontend-expert` - React 19, Next.js 15+, TanStack ecosystem
+- `frontend-expert` - React 19, Next.js 16+, TanStack ecosystem
 - `backend-expert` - Node.js, Hono, Drizzle, PostgreSQL
 - `infrastructure-expert` - Docker, CI/CD, GitHub Actions
 - `ui-expert` - Tailwind v4, shadcn/ui, Framer Motion

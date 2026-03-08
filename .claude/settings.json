@@ -33,35 +33,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh -c '[ \"${CLAUDE_FORMAT:-1}\" = \"0\" ] || pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true'"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/lint-with-feedback.js"
-          },
-          { "type": "command", "command": "node .claude/hooks/typecheck.js" },
-          { "type": "command", "command": "node .claude/hooks/analysis.js" },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/track-tech-debt.js"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/detect-dead-code.js"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/detect-duplicates.js"
-          },
-          { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
-        ]
-      },
-      {
-        "matcher": "Edit",
+        "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",

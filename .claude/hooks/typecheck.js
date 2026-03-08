@@ -17,11 +17,21 @@ if (![".ts", ".tsx"].includes(ext)) process.exit(0);
 const tsconfigPath = path.resolve(process.cwd(), "tsconfig.json");
 if (!fs.existsSync(tsconfigPath)) process.exit(0);
 
+// Detect package manager from lockfile
+function detectPackageManager() {
+  const cwd = process.cwd();
+  if (fs.existsSync(path.join(cwd, "bun.lockb"))) return "bun";
+  if (fs.existsSync(path.join(cwd, "yarn.lock"))) return "yarn";
+  if (fs.existsSync(path.join(cwd, "package-lock.json"))) return "npm";
+  return "pnpm"; // default
+}
+const pm = detectPackageManager();
+
 // Note: --incremental + --noEmit was removed — it corrupts .tsbuildinfo on TS < 5.4
 // and provides minimal benefit since we're only checking, not emitting.
 const args = ["tsc", "--noEmit"];
 
-const result = spawnSync("pnpm", args, {
+const result = spawnSync(pm, args, {
   encoding: "utf-8",
   timeout: 30_000,
   cwd: process.cwd(),

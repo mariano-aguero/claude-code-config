@@ -74,6 +74,15 @@ if (filePath) {
 
   const nameFiles = new Map([...names].map((n) => [n, []]));
 
+  const compiledPatterns = new Map(
+    [...names].map((n) => [
+      n,
+      new RegExp(
+        `\\bfunction\\s+${n}\\b|\\bconst\\s+${n}\\s*=|\\bclass\\s+${n}\\b`,
+      ),
+    ]),
+  );
+
   for (const file of walkFiles(process.cwd())) {
     const normalized = path.normalize(file);
     if (normalized === path.normalize(filePath)) continue;
@@ -86,7 +95,8 @@ if (filePath) {
     }
 
     for (const name of names) {
-      if (DEF_PATTERN(name).test(src)) nameFiles.get(name).push(normalized);
+      if (compiledPatterns.get(name).test(src))
+        nameFiles.get(name).push(normalized);
     }
   }
 
@@ -122,10 +132,20 @@ for (const file of walkFiles(process.cwd())) {
     continue;
   }
 
-  for (const name of extractNames(src)) {
+  const fileNames = extractNames(src);
+  const compiledStopPatterns = new Map(
+    [...fileNames].map((n) => [
+      n,
+      new RegExp(
+        `\\bfunction\\s+${n}\\b|\\bconst\\s+${n}\\s*=|\\bclass\\s+${n}\\b`,
+      ),
+    ]),
+  );
+  for (const name of fileNames) {
     if (!nameToFiles.has(name)) nameToFiles.set(name, []);
     nameToFiles.get(name).push(path.normalize(file));
   }
+  void compiledStopPatterns; // patterns available for future per-name checks
 }
 
 const projectDuplicates = [...nameToFiles.entries()].filter(

@@ -185,6 +185,9 @@ if (!skipAdvisory && isSource && !isTestFile) {
       }
 
       const body = content.slice(bodyStart, i + 1);
+      // Skip brace-counting complexity for functions with template literals
+      // (backtick braces would inflate nesting/complexity counts)
+      if (body.includes("`")) continue;
       const lineCount = body.split("\n").length;
       const complexity =
         1 +

@@ -21,7 +21,9 @@ try {
 } catch {}
 
 const timestamp = new Date().toISOString();
-const isGitRepo = fs.existsSync(path.join(process.cwd(), ".git"));
+const isGitRepo =
+  spawnSync("git", ["rev-parse", "--git-dir"], { encoding: "utf-8" }).status ===
+  0;
 
 // Git state
 const branch = isGitRepo

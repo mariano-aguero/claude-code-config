@@ -261,11 +261,12 @@ Runs just before Claude compresses the context window. Use to persist critical s
 
 ## Tips
 
-1. **Always use `|| true`** to prevent hook failures from blocking Claude
-2. **Use `2>/dev/null`** to suppress error output for optional tools
-3. **Use matchers** to target specific tools (Write, Edit, Bash, etc.)
-4. **Test hooks manually** before adding to settings
-5. **Keep hooks fast** - slow hooks delay Claude's responses
+1. **Use `|| true` for advisory hooks** to prevent optional failures from blocking Claude
+2. **Never use `|| true` on blocking security hooks** — `analysis.js` and `block-dangerous-git.js` intentionally exit 2 to block unsafe operations
+3. **Use `2>/dev/null`** to suppress error output for optional tools
+4. **Use matchers** to target specific tools (Write, Edit, Bash, etc.)
+5. **Test hooks manually** before adding to settings
+6. **Keep hooks fast** - slow hooks delay Claude's responses
 
 ## Limitations
 

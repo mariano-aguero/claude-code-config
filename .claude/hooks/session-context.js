@@ -27,9 +27,13 @@ try {
 
 // 1. Session notes (.claude/session-notes.md)
 const notesPath = path.join(cwd, ".claude", "session-notes.md");
+let notesHasAutoSnapshot = false;
 try {
   const notes = fs.readFileSync(notesPath, "utf-8").trim();
-  if (notes) parts.push(`## Session notes\n${notes}`);
+  if (notes) {
+    notesHasAutoSnapshot = notes.includes("<!-- auto-snapshot -->");
+    parts.push(`## Session notes\n${notes}`);
+  }
 } catch {}
 
 // 2. Last 3 work log entries
@@ -99,7 +103,7 @@ if (branch || modified.length) {
   if (modified.length)
     gitParts.push(`Modified: ${modified.slice(0, 5).join(", ")}`);
   else gitParts.push("Working tree: clean");
-  if (logOut)
+  if (logOut && !notesHasAutoSnapshot)
     gitParts.push(
       `Recent commits:\n${logOut
         .split("\n")

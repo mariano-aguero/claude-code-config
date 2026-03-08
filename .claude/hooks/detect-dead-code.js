@@ -89,13 +89,11 @@ for (const file of walkFiles(process.cwd())) {
   //   from './Button', from '../utils/Button', from '@/components/Button', from 'Button'
   //   require('./Button'), require('Button')
   // Require a '/' prefix or explicit from/require keyword to avoid matching string literals.
+  // Use word-boundary-aware check to avoid matching 'format' inside 'dateFormat'
   const importsFromUs =
-    src.includes(`/${baseName}'`) ||
-    src.includes(`/${baseName}"`) ||
-    src.includes(`from '${baseName}'`) ||
-    src.includes(`from "${baseName}"`) ||
-    src.includes(`require('${baseName}')`) ||
-    src.includes(`require("${baseName}")`);
+    new RegExp(`['"][^'"]*\\/${baseName}['"]`).test(src) ||
+    new RegExp(`from\\s+['"]${baseName}['"]`).test(src) ||
+    new RegExp(`require\\(['"]${baseName}['"]\\)`).test(src);
   if (!importsFromUs) continue;
 
   for (const name of namedExports) {

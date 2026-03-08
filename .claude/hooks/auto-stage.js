@@ -13,6 +13,14 @@ const { spawnSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+const SECRET_PATTERNS = [
+  /-----BEGIN\s+(RSA|EC|DSA|OPENSSH)\s+PRIVATE KEY-----/,
+  /AKIA[0-9A-Z]{16}/,
+  /ghp_[a-zA-Z0-9]{36}/,
+  /sk-ant-[a-zA-Z0-9\-]{20,}/,
+  /sk-(?:proj-|[a-zA-Z0-9]{20,}T3BlbkFJ)[a-zA-Z0-9\-_]{20,}/,
+];
+
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 if (!filePath) process.exit(0);
 
@@ -49,6 +57,13 @@ const gitRoot = revParseResult.stdout.trim();
 
 // Verify file still exists (Write might have been a delete in some edge case)
 if (!fs.existsSync(filePath)) process.exit(0);
+
+// Skip staging if file contains high-confidence secrets
+let fileContent = "";
+try {
+  fileContent = fs.readFileSync(filePath, "utf-8");
+} catch {}
+if (SECRET_PATTERNS.some((p) => p.test(fileContent))) process.exit(0);
 
 const result = spawnSync("git", ["add", filePath], {
   encoding: "utf-8",

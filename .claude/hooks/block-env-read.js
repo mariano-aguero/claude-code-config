@@ -10,9 +10,11 @@
 
 const path = require("path");
 
-// ── Read tool path ────────────────────────────────────────────────────────────
+// ── Read tool path ─────────────────────────────────────────────────────────
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
-if (filePath) {
+const toolName = process.env.CLAUDE_TOOL_NAME ?? "";
+
+if (toolName === "Read" || filePath) {
   const filename = path.basename(filePath);
   const isEnvFile = filename === ".env" || filename.startsWith(".env.");
   if (isEnvFile) {
@@ -24,7 +26,7 @@ if (filePath) {
   process.exit(0);
 }
 
-// ── Bash tool path ────────────────────────────────────────────────────────────
+// ── Bash tool path ─────────────────────────────────────────────────────────
 let command = "";
 try {
   command = JSON.parse(process.env.CLAUDE_TOOL_INPUT ?? "{}").command ?? "";

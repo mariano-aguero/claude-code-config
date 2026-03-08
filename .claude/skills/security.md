@@ -38,7 +38,7 @@ db.collection("users").find({ name: sanitizedName });
 
 ```typescript
 // Password hashing with Argon2
-import { hash, verify } from "@node-rs/argon2";
+import { hash, verify as verifyPassword } from "@node-rs/argon2";
 
 async function hashPassword(password: string): Promise<string> {
   return hash(password, {
@@ -279,7 +279,7 @@ async function refreshAccessToken(refreshToken: string) {
   });
 
   // Compare plaintext token against stored hash (argon2 verify: hash first, then plaintext)
-  if (!stored || !(await verify(stored.tokenHash, refreshToken))) {
+  if (!stored || !(await verifyPassword(stored.tokenHash, refreshToken))) {
     throw new Error("Invalid refresh token");
   }
 
@@ -481,13 +481,14 @@ app.delete("/api/users/:id", requirePermission("users:delete"), async (c) => {
 
 ```typescript
 // next.config.js
-// Next.js 13+ supports nonce-based CSP via middleware (recommended for production).
-// For static exports or simpler setups, use hash-based CSP instead of unsafe-inline.
+// Note: nonce-based CSP requires middleware to generate a unique nonce per request.
 // See: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
+// For a simpler starting point, use 'unsafe-inline' and migrate to nonce when ready:
+// "script-src 'self' 'unsafe-inline';"
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'nonce-{NONCE}';
-  style-src 'self' 'nonce-{NONCE}';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
   img-src 'self' blob: data: https:;
   font-src 'self';
   object-src 'none';

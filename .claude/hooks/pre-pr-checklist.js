@@ -153,7 +153,7 @@ const checklist = [
 sections.push(...checklist);
 
 const output = sections.join("\n");
-const checklistPath = path.join(".claude", "pr-checklist.md");
+const checklistPath = path.join(process.cwd(), ".claude", "pr-checklist.md");
 
 fs.writeFileSync(checklistPath, output, "utf-8");
 process.stderr.write(

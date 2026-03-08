@@ -251,7 +251,8 @@ type UnwrapPromise<T> = T extends Promise<infer U> ? UnwrapPromise<U> : T; // cu
 // Extract array element
 type ElementOf<T> = T extends (infer E)[] ? E : never;
 
-// Extract function parameters
+// Note: Parameters<T> is a built-in TypeScript utility type since TS 3.1
+// Shown here for educational purposes — don't redefine it in real code
 type Parameters<T> = T extends (...args: infer P) => any ? P : never;
 
 // Practical example: Extract event payload

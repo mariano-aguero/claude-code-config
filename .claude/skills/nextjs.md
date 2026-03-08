@@ -341,7 +341,7 @@ export default async function UsersPage() {
 }
 
 // app/users/user-list.tsx (Client Component)
-("use client");
+"use client";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -377,7 +377,7 @@ export async function createUser(data: { name: string; email: string }) {
 }
 
 // app/users/create-user-form.tsx
-("use client");
+"use client";
 
 import { useForm } from "@tanstack/react-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";
