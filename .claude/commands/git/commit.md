@@ -145,8 +145,5 @@ git config --global commit.template ~/.gitmessage
 
 ## Post-Execution
 
-After executing this command, update the project's `CLAUDE.md` file:
-
-1. Document any significant changes in the "Recent Changes" section
-2. Update version or changelog if applicable
-3. Note any breaking changes or migration steps required
+Update `CLAUDE.md` only if the commit introduces a breaking change, new
+architecture pattern, or environment variable that future sessions need to know.

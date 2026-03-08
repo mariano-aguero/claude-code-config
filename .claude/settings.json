@@ -33,6 +33,9 @@
           { "type": "command", "command": "node .claude/hooks/lint-with-feedback.js" },
           { "type": "command", "command": "node .claude/hooks/typecheck.js" },
           { "type": "command", "command": "node .claude/hooks/analysis.js" },
+          { "type": "command", "command": "node .claude/hooks/track-tech-debt.js" },
+          { "type": "command", "command": "node .claude/hooks/detect-dead-code.js" },
+          { "type": "command", "command": "node .claude/hooks/detect-duplicates.js" },
           { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
         ]
       },
@@ -43,6 +46,9 @@
           { "type": "command", "command": "node .claude/hooks/lint-with-feedback.js" },
           { "type": "command", "command": "node .claude/hooks/typecheck.js" },
           { "type": "command", "command": "node .claude/hooks/analysis.js" },
+          { "type": "command", "command": "node .claude/hooks/track-tech-debt.js" },
+          { "type": "command", "command": "node .claude/hooks/detect-dead-code.js" },
+          { "type": "command", "command": "node .claude/hooks/detect-duplicates.js" },
           { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
         ]
       }
@@ -93,14 +99,6 @@
           {
             "type": "command",
             "command": "node .claude/hooks/save-session-notes.js"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node .claude/hooks/track-tech-debt.js"
           }
         ]
       },

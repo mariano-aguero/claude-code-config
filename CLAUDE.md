@@ -30,7 +30,10 @@ Technical reference materials with patterns and code examples:
 - `nodejs.md` - Hono/Fastify, middleware, error handling, auth
 - `security.md` - OWASP, JWT, RBAC, headers, input validation
 - `react.md`, `nextjs.md`, `ui.md` - Frontend patterns
+- `better-auth.md` - Better Auth setup, session, OAuth, middleware protection
+- `drizzle.md` - Drizzle ORM schema, queries, relations, transactions, migrations
 - `testing.md`, `database.md` - Testing and data patterns
+- `hooks.md` - Claude Code hook types, env vars, configuration patterns
 - `solidity/`, `web3/` - Progressive folders with `SKILL.md` + `references/`
 
 ### Commands (`.claude/commands/`)
@@ -61,8 +64,8 @@ Use agents and skills **without waiting for the user to ask**. Route based on ta
 |------|-----|
 | React components, hooks, Next.js pages | `frontend-expert` agent |
 | API routes, DB queries, server logic | `backend-expert` agent |
-| SQL schema, migrations, Drizzle queries | `database-expert` agent |
-| Auth, OWASP, secrets, headers | `security-expert` agent |
+| SQL schema, migrations, Drizzle queries | `database-expert` agent + `drizzle.md` skill |
+| Auth, OWASP, secrets, headers | `security-expert` agent + `better-auth.md` skill |
 | Tailwind, shadcn/ui, animations | `ui-expert` agent |
 | Solidity contracts, DeFi, Wagmi | `web3-expert` agent |
 | Vitest, Playwright, mocking | `testing-expert` agent |

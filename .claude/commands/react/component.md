@@ -77,8 +77,5 @@ export function ${ComponentName}({ className, children }: ${ComponentName}Props)
 
 ## Post-Execution
 
-After executing this command, update the project's `CLAUDE.md` file:
-
-1. Add the new component to the "Components" or "Architecture" section
-2. Document the component's purpose and usage
-3. Update the project structure if a new directory was created
+If this component introduces a significant new pattern or directory structure,
+update `CLAUDE.md` to document it — otherwise no update needed.

@@ -63,12 +63,14 @@ for (const file of walkFiles(".")) {
   try { src = fs.readFileSync(file, "utf-8"); }
   catch { continue; }
 
-  // Only check files that import from ours (match import/from statement, not arbitrary strings)
+  // Check files that import from ours via any path variant:
+  //   from './Button', from '../utils/Button', from '@/components/Button', from 'Button'
+  // Require a '/' prefix or 'from ' prefix to avoid matching arbitrary string literals.
   const importsFromUs =
+    src.includes(`/${baseName}'`) ||
+    src.includes(`/${baseName}"`) ||
     src.includes(`from '${baseName}'`) ||
-    src.includes(`from "${baseName}"`) ||
-    src.includes(`from './${baseName}'`) ||
-    src.includes(`from "./${baseName}"`);
+    src.includes(`from "${baseName}"`);
   if (!importsFromUs) continue;
 
   for (const name of namedExports) {

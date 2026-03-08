@@ -18,13 +18,11 @@ if (!filePath) process.exit(0);
 
 // Skip binary and sensitive files
 const SKIP_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".ico", ".woff", ".woff2", ".ttf", ".eot", ".pdf", ".zip", ".tar", ".gz"]);
-const SKIP_NAMES = new Set([".env", ".env.local", ".env.production", ".env.development"]);
-
 const ext = path.extname(filePath).toLowerCase();
 const basename = path.basename(filePath);
 
 if (SKIP_EXTENSIONS.has(ext)) process.exit(0);
-if (SKIP_NAMES.has(basename)) process.exit(0);
+if (basename === ".env" || basename.startsWith(".env.")) process.exit(0);
 if (filePath.includes("node_modules")) process.exit(0);
 
 // Only stage inside a git repo

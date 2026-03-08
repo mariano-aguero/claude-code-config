@@ -132,7 +132,7 @@ if (isSource && !isTestFile) {
       const body = content.slice(bodyStart, i + 1);
       const lineCount = body.split("\n").length;
       const complexity =
-        1 + (body.match(/\bif\b|\belse\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\||\?\./g) ?? []).length;
+        1 + (body.match(/\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\||\?\./g) ?? []).length;
 
       let nestingDepth = 0, maxNest = 0;
       for (const ch of body) {

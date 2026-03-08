@@ -29,8 +29,8 @@ const message = payload.message ?? "";
 const ATTENTION_EVENTS = ["permission_prompt", "idle_prompt"];
 const isAttentionNeeded = ATTENTION_EVENTS.some((e) => message.toLowerCase().includes(e) || event.toLowerCase().includes(e));
 
-// Also notify on any Notification event (Claude is surfacing something)
-if (event !== "Notification" && !isAttentionNeeded) process.exit(0);
+// Exit silently if this is not an attention-required event
+if (!isAttentionNeeded) process.exit(0);
 
 // Build notification content
 const title = isAttentionNeeded && message.includes("permission")
