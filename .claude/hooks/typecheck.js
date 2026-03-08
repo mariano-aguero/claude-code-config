@@ -29,7 +29,8 @@ const pm = detectPackageManager();
 
 // Note: --incremental + --noEmit was removed — it corrupts .tsbuildinfo on TS < 5.4
 // and provides minimal benefit since we're only checking, not emitting.
-const args = ["tsc", "--noEmit"];
+const args =
+  pm === "npm" ? ["exec", "tsc", "--", "--noEmit"] : ["tsc", "--noEmit"];
 
 const result = spawnSync(pm, args, {
   encoding: "utf-8",

@@ -76,7 +76,7 @@ const SECRET_PATTERNS = [
     regex:
       /password\s*[:=]\s*["'](?!your|placeholder|example|test|dummy|changeme|xxx|sample)[^"']{8,}["']/i,
   },
-  { name: "Bearer token", regex: /Bearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
+  { name: "Bearer token", regex: /\bBearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
   {
     name: "Generic secret",
     regex: /(?:secret|token|api_key)\s*[:=]\s*["'][a-zA-Z0-9\-_]{16,}["']/i,
@@ -92,6 +92,8 @@ const HIGH_CONFIDENCE_NAMES = new Set([
   "Anthropic API key",
   "OpenAI API key",
   "Hardcoded password",
+  "Bearer token",
+  "Generic secret",
 ]);
 const patternsToRun = isTestFile
   ? SECRET_PATTERNS.filter((p) => HIGH_CONFIDENCE_NAMES.has(p.name))

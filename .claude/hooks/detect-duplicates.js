@@ -133,19 +133,10 @@ for (const file of walkFiles(process.cwd())) {
   }
 
   const fileNames = extractNames(src);
-  const compiledStopPatterns = new Map(
-    [...fileNames].map((n) => [
-      n,
-      new RegExp(
-        `\\bfunction\\s+${n}\\b|\\bconst\\s+${n}\\s*=|\\bclass\\s+${n}\\b`,
-      ),
-    ]),
-  );
   for (const name of fileNames) {
     if (!nameToFiles.has(name)) nameToFiles.set(name, []);
     nameToFiles.get(name).push(path.normalize(file));
   }
-  void compiledStopPatterns; // patterns available for future per-name checks
 }
 
 const projectDuplicates = [...nameToFiles.entries()].filter(
