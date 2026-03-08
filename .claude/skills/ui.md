@@ -363,14 +363,17 @@ function TransferForm() {
 ### TanStack Form Key Patterns
 
 ```tsx
-// Async validation
-validators: {
-  onChangeAsync: async ({ value }) => {
-    const exists = await checkEmailExists(value.email);
-    return exists ? "Email already registered" : undefined;
-  },
-  onChangeAsyncDebounceMs: 500,
-}
+// Async validation — asyncDebounceMs is a field-level prop, not inside validators
+<form.Field
+  name="email"
+  asyncDebounceMs={500}
+  validators={{
+    onChangeAsync: async ({ value }) => {
+      const exists = await checkEmailExists(value);
+      return exists ? "Email already registered" : undefined;
+    },
+  }}
+/>
 
 // Field-level validation
 <form.Field
@@ -391,27 +394,18 @@ validators: {
 ### Toast Notifications
 
 ```tsx
-import { useToast } from "@/components/ui/use-toast";
+// Current shadcn/ui default (sonner)
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 function ToastExample() {
-  const { toast } = useToast();
-
   return (
     <Button
       onClick={() => {
-        toast({
-          title: "Transaction Submitted",
-          description: "Your transaction has been submitted to the network.",
-          action: (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.open(txUrl)}
-            >
-              View
-            </Button>
-          ),
+        toast.success("Transaction submitted");
+        // With action:
+        toast("Transaction submitted", {
+          action: { label: "View", onClick: () => window.open(txUrl) },
         });
       }}
     >

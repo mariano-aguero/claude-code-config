@@ -27,7 +27,7 @@ Generate a Solidity smart contract with Foundry tests and deployment script.
 ```solidity
 // src/${ContractName}.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
@@ -94,7 +94,7 @@ contract ${ContractName} is Ownable, ReentrancyGuard {
 ```solidity
 // src/${TokenName}.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Permit} from "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
@@ -121,7 +121,7 @@ contract ${TokenName} is ERC20, ERC20Permit, Ownable {
 ```solidity
 // src/${NFTName}.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC721URIStorage} from "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
@@ -152,9 +152,14 @@ contract ${NFTName} is ERC721, ERC721URIStorage, Ownable {
         mintPrice = price;
     }
 
+    error WithdrawFailed();
+    event Withdrawn(address indexed to, uint256 amount);
+
     function withdraw() external onlyOwner {
-        (bool success, ) = owner().call{value: address(this).balance}("");
-        require(success);
+        uint256 amount = address(this).balance;
+        (bool success, ) = owner().call{value: amount}("");
+        if (!success) revert WithdrawFailed();
+        emit Withdrawn(owner(), amount);
     }
 
     // Overrides
@@ -173,7 +178,7 @@ contract ${NFTName} is ERC721, ERC721URIStorage, Ownable {
 ```solidity
 // src/${ContractName}.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -208,7 +213,7 @@ contract ${ContractName} is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 ```solidity
 // test/${ContractName}.t.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {${ContractName}} from "../src/${ContractName}.sol";
@@ -261,7 +266,7 @@ contract ${ContractName}Test is Test {
 ```solidity
 // script/Deploy${ContractName}.s.sol
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.33;
 
 import {Script, console2} from "forge-std/Script.sol";
 import {${ContractName}} from "../src/${ContractName}.sol";

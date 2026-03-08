@@ -32,13 +32,14 @@ export const metadata: Metadata = {
 };
 
 interface ${Page}PageProps {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ${Page}Page({ params, searchParams }: ${Page}PageProps) {
   // Fetch data here (Server Component)
-  const data = await getData(params.id);
+  const { id } = await params;
+  const data = await getData(id);
 
   return (
     <main className="container mx-auto py-8">

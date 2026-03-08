@@ -40,11 +40,14 @@ export const ${tableName} = pgTable('${table_name}', {
 
   // Timestamps
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
-}, (table) => ({
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+}, (table) => [
   // Indexes
-  nameIdx: index('${table_name}_name_idx').on(table.name),
-}));
+  index('${table_name}_name_idx').on(table.name),
+]);
 
 // Type inference
 export type ${TableName} = typeof ${tableName}.$inferSelect;

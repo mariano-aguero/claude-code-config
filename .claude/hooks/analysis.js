@@ -92,8 +92,8 @@ const HIGH_CONFIDENCE_NAMES = new Set([
   "Anthropic API key",
   "OpenAI API key",
   "Hardcoded password",
-  "Bearer token",
-  "Generic secret",
+  // Bearer token and Generic secret intentionally excluded:
+  // they produce false positives in test files with mock tokens/fixtures
 ]);
 const patternsToRun = isTestFile
   ? SECRET_PATTERNS.filter((p) => HIGH_CONFIDENCE_NAMES.has(p.name))

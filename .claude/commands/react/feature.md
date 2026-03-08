@@ -243,6 +243,7 @@ export function ${Feature}Form({ onSuccess }: ${Feature}FormProps) {
 
   const form = useForm({
     defaultValues: { name: "" },
+    validatorAdapter: zodValidator(),
     validators: {
       onSubmit: formSchema,
     },

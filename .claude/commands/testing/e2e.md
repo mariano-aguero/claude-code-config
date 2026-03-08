@@ -126,7 +126,7 @@ test.describe("${Feature} CRUD", () => {
 
     await expect(page.getByRole("list")).toBeVisible();
     const items = page.getByRole("listitem");
-    await expect(items).toHaveCount.greaterThan(0);
+    expect(await items.count()).toBeGreaterThan(0);
   });
 
   test("should update ${feature}", async ({ page }) => {
