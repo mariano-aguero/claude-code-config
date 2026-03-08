@@ -137,7 +137,7 @@ export const useWeb3Store = create<Web3Store>()(
 function TokenListSkeleton() {
   return (
     <div className="space-y-2">
-      {[...Array(5)].map((_, i) => (
+      {Array.from({ length: 5 }).map((_, i) => (
         <div key={i} className="flex items-center gap-3 p-3">
           <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
           <div className="flex-1">
@@ -154,7 +154,9 @@ function TokenListSkeleton() {
 
 ```tsx
 function NetworkStatus() {
-  const { chain } = useNetwork();
+  const chainId = useChainId();
+  const chains = useChains();
+  const chain = chains.find((c) => c.id === chainId);
   const [blockNumber, setBlockNumber] = useState<bigint>();
 
   useEffect(() => {

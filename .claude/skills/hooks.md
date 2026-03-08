@@ -60,7 +60,7 @@ After every `Write` or `Edit`, these run in order:
 5. **Tech Debt** — Track TODO/FIXME comments → `.claude/tech-debt.md`
 6. **Dead Code** — Check for unexported or unused named exports
 7. **Duplicates** — Per-file duplicate export check
-8. **Auto-stage** — `git add` the written file
+8. **Auto-stage** — `git add` the written file _(disable with `CLAUDE_GIT_ADD=0` if using `git add -p` workflows)_
 
 ### Stop Hooks (session-level, no CLAUDE_FILE_PATH)
 

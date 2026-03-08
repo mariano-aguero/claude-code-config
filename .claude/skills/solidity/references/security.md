@@ -5,7 +5,7 @@
 ```solidity
 // Solidity 0.8.24+ with Cancun
 contract ReentrancyGuardTransient {
-    bytes32 constant REENTRANCY_GUARD_SLOT = keccak256("reentrancy.guard");
+    uint256 private constant REENTRANCY_GUARD_SLOT = uint256(keccak256("reentrancy.guard"));
 
     modifier nonReentrant() {
         assembly {

@@ -34,8 +34,10 @@ export const users = pgTable("users", {
     .notNull()
     .default("member"),
   emailVerified: boolean("email_verified").notNull().default(false),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
     .$onUpdate(() => new Date()),
@@ -48,8 +50,10 @@ export const posts = pgTable("posts", {
   authorId: uuid("author_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  publishedAt: timestamp("published_at"),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // TypeScript types inferred from schema
@@ -355,7 +359,9 @@ export const posts = pgTable(
       .notNull()
       .references(() => users.id),
     status: text("status").notNull(),
-    createdAt: timestamp("created_at").notNull().defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
   },
   (table) => [
     index("posts_author_idx").on(table.authorId),

@@ -311,7 +311,6 @@ JWT_SECRET=your-secret-key-at-least-32-characters
 ├── .env.local
 ├── .env.example
 ├── next.config.ts
-├── tailwind.config.ts
 ├── tsconfig.json
 └── package.json
 ```
@@ -444,7 +443,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v4
         with:
           version: 9
 

@@ -133,7 +133,7 @@ import { z } from "zod";
 const createUserSchema = z.object({
   email: z.string().email(),
   name: z.string().min(1).max(100),
-  password: z.string().min(8),
+  password: z.string().min(12),
 });
 
 app.post("/users", zValidator("json", createUserSchema), async (c) => {
@@ -449,34 +449,34 @@ export const cache = {
   },
 
   async delPattern(pattern: string): Promise<void> {
-    const keys = await redis.keys(pattern);
-    if (keys.length > 0) {
-      await redis.del(...keys);
-    }
+    // Use SCAN instead of KEYS to avoid blocking the Redis event loop on large keyspaces
+    const stream = redis.scanStream({ match: pattern, count: 100 });
+    const pipeline = redis.pipeline();
+    stream.on("data", (keys: string[]) => {
+      if (keys.length) keys.forEach((k) => pipeline.del(k));
+    });
+    await new Promise<void>((resolve, reject) => {
+      stream.on("end", () => {
+        pipeline.exec().then(() => resolve());
+      });
+      stream.on("error", reject);
+    });
   },
 };
 
-// Cache decorator
-export function cached(keyFn: (...args: any[]) => string, ttl = 3600) {
-  return function (
-    target: any,
-    propertyKey: string,
-    descriptor: PropertyDescriptor,
-  ) {
-    const originalMethod = descriptor.value;
-
-    descriptor.value = async function (...args: any[]) {
-      const key = keyFn(...args);
-      const cached = await cache.get(key);
-
-      if (cached) return cached;
-
-      const result = await originalMethod.apply(this, args);
-      await cache.set(key, result, ttl);
-      return result;
-    };
-
-    return descriptor;
+// Cache wrapper — type-safe, no decorator needed
+export function withCache<TArgs extends unknown[], TReturn>(
+  fn: (...args: TArgs) => Promise<TReturn>,
+  keyFn: (...args: TArgs) => string,
+  ttl = 3600,
+): (...args: TArgs) => Promise<TReturn> {
+  return async (...args) => {
+    const key = keyFn(...args);
+    const hit = await cache.get<TReturn>(key);
+    if (hit) return hit;
+    const result = await fn(...args);
+    await cache.set(key, result, ttl);
+    return result;
   };
 }
 ```
@@ -530,6 +530,7 @@ export function paginated<T>(
 
 ```typescript
 import { serve } from "@hono/node-server";
+import { pool } from "./db"; // export pool from db/index.ts alongside the drizzle instance
 
 const server = serve({
   fetch: app.fetch,

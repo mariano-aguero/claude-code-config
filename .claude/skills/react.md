@@ -151,22 +151,23 @@ function MouseTracker({ children }: MouseTrackerProps) {
 ### Custom Hooks
 
 ```tsx
-// useLocalStorage
+// useLocalStorage — SSR-safe: initialValue on server, real value after hydration
 function useLocalStorage<T>(key: string, initialValue: T) {
-  const [storedValue, setStoredValue] = useState<T>(() => {
-    if (typeof window === "undefined") return initialValue;
+  const [storedValue, setStoredValue] = useState<T>(initialValue);
+
+  // Read from storage after mount to avoid SSR hydration mismatch
+  useEffect(() => {
     try {
       const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      if (item) setStoredValue(JSON.parse(item));
     } catch {
-      return initialValue;
+      /* ignore — quota exceeded or private mode */
     }
-  });
+  }, [key]);
 
   const setValue = (value: T | ((val: T) => T)) => {
     const valueToStore = value instanceof Function ? value(storedValue) : value;
     setStoredValue(valueToStore);
-    if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(key, JSON.stringify(valueToStore));
     } catch {
@@ -358,8 +359,7 @@ function CreateUserForm({
   const form = useForm({
     defaultValues: { name: "", email: "" },
     onSubmit: async ({ value }) => {
-      const parsed = schema.parse(value);
-      await onSubmit(parsed);
+      await onSubmit(value); // already validated by TanStack Form validators
     },
   });
 

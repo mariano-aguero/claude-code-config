@@ -272,13 +272,14 @@ type EventMap = {
 };
 
 class TypedEventEmitter<T extends Record<string, unknown>> {
-  private listeners = new Map<keyof T, Set<(data: any) => void>>();
+  // Internal map uses unknown; public API enforces types via generics
+  private listeners = new Map<keyof T, Set<(data: unknown) => void>>();
 
   on<K extends keyof T>(event: K, listener: (data: T[K]) => void): void {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(listener);
+    this.listeners.get(event)!.add(listener as (data: unknown) => void);
   }
 
   emit<K extends keyof T>(event: K, data: T[K]): void {
@@ -286,7 +287,7 @@ class TypedEventEmitter<T extends Record<string, unknown>> {
   }
 
   off<K extends keyof T>(event: K, listener: (data: T[K]) => void): void {
-    this.listeners.get(event)?.delete(listener);
+    this.listeners.get(event)?.delete(listener as (data: unknown) => void);
   }
 }
 

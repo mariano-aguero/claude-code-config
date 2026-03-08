@@ -82,7 +82,7 @@ contract VaultV1 is Initializable, UUPSUpgradeable, OwnableUpgradeable {
 
     function _authorizeUpgrade(address) internal override onlyOwner {}
 
-    uint256[49] private __gap; // Storage gap
+    uint256[50] private __gap; // Reserve 50 slots; reduce by 1 for each added state variable
 }
 ```
 

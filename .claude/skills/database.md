@@ -35,7 +35,8 @@ export const users = pgTable("users", {
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
-    .defaultNow(),
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 // Infer types from schema
@@ -65,7 +66,8 @@ export const posts = pgTable("posts", {
     .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
-    .defaultNow(),
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -106,9 +108,7 @@ export const postTags = pgTable(
       .notNull()
       .references(() => tags.id, { onDelete: "cascade" }),
   },
-  (table) => ({
-    pk: primaryKey({ columns: [table.postId, table.tagId] }),
-  }),
+  (table) => [primaryKey({ columns: [table.postId, table.tagId] })],
 );
 
 export const tagsRelations = relations(tags, ({ many }) => ({

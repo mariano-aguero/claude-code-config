@@ -414,17 +414,11 @@ function ToastExample() {
   );
 }
 
-// Success toast
-toast({
-  title: "Success!",
-  description: "Your changes have been saved.",
-  className: "bg-green-50 border-green-200",
-});
+// Success toast (Sonner API)
+toast.success("Success!", { description: "Your changes have been saved." });
 
 // Error toast
-toast({
-  variant: "destructive",
-  title: "Error",
+toast.error("Error", {
   description: "Something went wrong. Please try again.",
 });
 ```
@@ -702,7 +696,7 @@ function Counter({ from, to }: { from: number; to: number }) {
   useEffect(() => {
     const controls = animate(count, to, { duration: 2 });
     return controls.stop;
-  }, [count, to]);
+  }, [to]); // count is a stable MotionValue ref, not a dependency
 
   return <motion.span>{rounded}</motion.span>;
 }

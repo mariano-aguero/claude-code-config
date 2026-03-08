@@ -58,13 +58,13 @@ async function verifyPassword(
 
 // Account lockout after failed attempts
 const MAX_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes
+const LOCKOUT_DURATION_S = 15 * 60; // 15 minutes in seconds
 
 async function checkLoginAttempts(userId: string): Promise<boolean> {
   const attempts = await redis.get(`login_attempts:${userId}`);
   const lockoutUntil = await redis.get(`lockout:${userId}`);
 
-  if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
+  if (lockoutUntil && Math.floor(Date.now() / 1000) < parseInt(lockoutUntil)) {
     throw new Error("Account temporarily locked");
   }
 
@@ -76,8 +76,12 @@ async function recordFailedAttempt(userId: string): Promise<void> {
   await redis.expire(`login_attempts:${userId}`, 3600);
 
   if (attempts >= MAX_ATTEMPTS) {
-    await redis.set(`lockout:${userId}`, Date.now() + LOCKOUT_DURATION);
-    await redis.expire(`lockout:${userId}`, LOCKOUT_DURATION / 1000);
+    // Store epoch-seconds (consistent with Redis TTL unit)
+    await redis.set(
+      `lockout:${userId}`,
+      Math.floor(Date.now() / 1000) + LOCKOUT_DURATION_S,
+    );
+    await redis.expire(`lockout:${userId}`, LOCKOUT_DURATION_S);
   }
 }
 
@@ -276,9 +280,12 @@ async function generateTokens(user: {
 async function refreshAccessToken(refreshToken: string) {
   const payload = await verify(refreshToken, process.env.JWT_REFRESH_SECRET!);
 
-  // Verify token exists in database (not revoked)
+  // Verify token exists in database (not revoked, not expired)
   const stored = await db.query.refreshTokens.findFirst({
-    where: eq(refreshTokens.userId, payload.sub),
+    where: and(
+      eq(refreshTokens.userId, payload.sub),
+      gt(refreshTokens.expiresAt, new Date()),
+    ),
   });
 
   // Compare plaintext token against stored hash (argon2 verify: hash first, then plaintext)
