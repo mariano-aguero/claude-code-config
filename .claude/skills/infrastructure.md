@@ -191,7 +191,7 @@ import { NextResponse } from "next/server";
 export async function GET() {
   try {
     // Check database connection
-    await db.$queryRaw`SELECT 1`;
+    await db.execute(sql`SELECT 1`);
 
     // Check Redis
     await redis.ping();

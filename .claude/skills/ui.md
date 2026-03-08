@@ -118,7 +118,7 @@ export default {
 
 - **No config file** - Use `@theme` in CSS instead of `tailwind.config.js`
 - **oklch colors** - Vivid P3 display support
-- **Dynamic values** - Use `h-100` instead of `h-[100px]`
+- **Arbitrary values on-demand** - `h-[100px]` generated without safelist or JIT config
 - **Auto content detection** - No need to configure content paths
 - **5x faster builds** - Incremental builds in microseconds
 
@@ -686,19 +686,16 @@ import { useMotionValue, useTransform, animate, motion } from "framer-motion";
 
 function AnimatedNumber({ value }: { value: number }) {
   const count = useMotionValue(0);
+  const formatted = useTransform(count, (v) =>
+    v.toLocaleString(undefined, { maximumFractionDigits: 2 }),
+  );
 
   useEffect(() => {
     const controls = animate(count, value, { duration: 0.5, ease: "easeOut" });
     return controls.stop;
   }, [value, count]);
 
-  return (
-    <motion.span>
-      {useTransform(count, (v) =>
-        v.toLocaleString(undefined, { maximumFractionDigits: 2 }),
-      )}
-    </motion.span>
-  );
+  return <motion.span>{formatted}</motion.span>;
 }
 
 // With Framer Motion's useMotionValue

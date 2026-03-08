@@ -39,7 +39,7 @@ app/
 ```tsx
 // app/users/page.tsx - Server Component by default
 async function UsersPage() {
-  const users = await db.users.findMany(); // Direct DB access
+  const users = await db.select().from(users); // Direct DB access
   return <UserList users={users} />;
 }
 ```
@@ -72,9 +72,10 @@ export function Counter() {
 
 ```tsx
 async function Page() {
-  const data = await fetch("https://api.example.com/data", {
+  const res = await fetch("https://api.example.com/data", {
     next: { revalidate: 3600 }, // ISR: revalidate every hour
   });
+  const data = await res.json();
   return <Component data={data} />;
 }
 ```
@@ -112,8 +113,8 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const id = searchParams.get("id");
 
-  const users = await db.users.findMany();
-  return NextResponse.json(users);
+  const allUsers = await db.select().from(users);
+  return NextResponse.json(allUsers);
 }
 
 export async function POST(request: NextRequest) {
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
     email: z.string().email(),
   });
   const data = CreateUserSchema.parse(await request.json());
-  const user = await db.users.create({ data });
+  const [user] = await db.insert(users).values(data).returning();
   return NextResponse.json(user, { status: 201 });
 }
 ```
@@ -138,7 +139,7 @@ import { revalidatePath } from "next/cache";
 export async function createPost(formData: FormData) {
   const title = formData.get("title") as string;
 
-  await db.posts.create({ data: { title } });
+  await db.insert(posts).values({ title });
   revalidatePath("/posts");
 }
 
@@ -341,7 +342,7 @@ export default async function UsersPage() {
 }
 
 // app/users/user-list.tsx (Client Component)
-"use client";
+("use client");
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -371,13 +372,13 @@ export function UserList() {
 import { revalidatePath } from "next/cache";
 
 export async function createUser(data: { name: string; email: string }) {
-  const user = await db.users.create({ data });
+  const [user] = await db.insert(users).values(data).returning();
   revalidatePath("/users");
   return user;
 }
 
 // app/users/create-user-form.tsx
-"use client";
+("use client");
 
 import { useForm } from "@tanstack/react-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";

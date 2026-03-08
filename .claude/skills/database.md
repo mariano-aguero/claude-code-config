@@ -332,26 +332,24 @@ async function getUsers(page: number, pageSize: number) {
 
 // Cursor pagination (more efficient for large datasets)
 async function getPostsCursor(cursor?: string, limit = 20) {
-  const query = db
+  const [cursorDate, cursorId] = cursor ? cursor.split("_") : [];
+
+  const results = await db
     .select()
     .from(posts)
+    .where(
+      cursor
+        ? or(
+            sql`${posts.createdAt} < ${cursorDate}`,
+            and(
+              eq(posts.createdAt, new Date(cursorDate!)),
+              sql`${posts.id} < ${cursorId}`,
+            ),
+          )
+        : undefined,
+    )
     .orderBy(desc(posts.createdAt), desc(posts.id))
     .limit(limit + 1);
-
-  if (cursor) {
-    const [cursorDate, cursorId] = cursor.split("_");
-    query.where(
-      or(
-        sql`${posts.createdAt} < ${cursorDate}`,
-        and(
-          eq(posts.createdAt, new Date(cursorDate)),
-          sql`${posts.id} < ${cursorId}`,
-        ),
-      ),
-    );
-  }
-
-  const results = await query;
   const hasMore = results.length > limit;
   const data = hasMore ? results.slice(0, -1) : results;
 

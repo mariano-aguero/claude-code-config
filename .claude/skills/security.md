@@ -38,7 +38,7 @@ db.collection("users").find({ name: sanitizedName });
 
 ```typescript
 // Password hashing with Argon2
-import { hash, verify as verifyPassword } from "@node-rs/argon2";
+import { hash, verify } from "@node-rs/argon2";
 
 async function hashPassword(password: string): Promise<string> {
   return hash(password, {
@@ -51,9 +51,9 @@ async function hashPassword(password: string): Promise<string> {
 
 async function verifyPassword(
   password: string,
-  hash: string,
+  hashedPassword: string,
 ): Promise<boolean> {
-  return verify(hash, password);
+  return verify(hashedPassword, password);
 }
 
 // Account lockout after failed attempts
@@ -217,6 +217,9 @@ async function safeFetch(url: string): Promise<Response> {
 ```
 
 ## Authentication
+
+> **Next.js projects**: Use Better Auth instead of custom JWT. See `better-auth.md`.
+> The JWT patterns below apply to standalone APIs (Hono, Fastify) without Next.js.
 
 ### JWT Implementation
 

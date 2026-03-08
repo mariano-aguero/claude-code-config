@@ -354,13 +354,19 @@ export const userService = {
   },
 
   async delete(id: string) {
-    const result = await db.delete(users).where(eq(users.id, id));
-    if (result.rowCount === 0) throw new NotFoundError("User");
+    const [deleted] = await db
+      .delete(users)
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+    if (!deleted) throw new NotFoundError("User");
   },
 };
 ```
 
 ## Authentication
+
+> **Next.js projects**: Use Better Auth instead of custom JWT. See `better-auth.md`.
+> The JWT patterns below apply to standalone Hono APIs without Next.js.
 
 ### JWT Implementation
 

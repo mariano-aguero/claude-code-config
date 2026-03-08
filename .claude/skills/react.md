@@ -332,6 +332,88 @@ function VirtualList({ items }: { items: Item[] }) {
 }
 ```
 
+## Forms — TanStack Form v1
+
+Never use React Hook Form. Use `@tanstack/react-form`.
+
+```tsx
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+
+const schema = z.object({
+  name: z.string().min(1, "Required"),
+  email: z.string().email("Invalid email"),
+});
+
+function CreateUserForm({
+  onSubmit,
+}: {
+  onSubmit: (data: z.infer<typeof schema>) => Promise<void>;
+}) {
+  const form = useForm({
+    defaultValues: { name: "", email: "" },
+    onSubmit: async ({ value }) => {
+      const parsed = schema.parse(value);
+      await onSubmit(parsed);
+    },
+  });
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
+      <form.Field
+        name="name"
+        validators={{
+          onChange: ({ value }) => (!value ? "Required" : undefined),
+        }}
+        children={(field) => (
+          <div>
+            <input
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+            {field.state.meta.errors[0] && <p>{field.state.meta.errors[0]}</p>}
+          </div>
+        )}
+      />
+      <form.Field
+        name="email"
+        validators={{
+          onChange: ({ value }) =>
+            z.string().email().safeParse(value).success
+              ? undefined
+              : "Invalid email",
+        }}
+        children={(field) => (
+          <div>
+            <input
+              type="email"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+            />
+            {field.state.meta.errors[0] && <p>{field.state.meta.errors[0]}</p>}
+          </div>
+        )}
+      />
+      <form.Subscribe
+        selector={(state) => state.isSubmitting}
+        children={(isSubmitting) => (
+          <button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Submit"}
+          </button>
+        )}
+      />
+    </form>
+  );
+}
+```
+
 ## State Management
 
 ### Context + Reducer Pattern
