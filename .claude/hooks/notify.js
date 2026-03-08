@@ -25,6 +25,11 @@ try {
 const event = payload.hook_event_name ?? "";
 const message = payload.message ?? "";
 
+// Debug mode: print the raw payload to see actual event structure
+if (process.env.CLAUDE_NOTIFY_DEBUG === "1") {
+  process.stderr.write(`[notify] raw payload: ${JSON.stringify(payload)}\n`);
+}
+
 // Only handle events where Claude needs your attention
 const ATTENTION_EVENTS = ["permission_prompt", "idle_prompt"];
 const isAttentionNeeded = ATTENTION_EVENTS.some((e) => message.toLowerCase().includes(e) || event.toLowerCase().includes(e));

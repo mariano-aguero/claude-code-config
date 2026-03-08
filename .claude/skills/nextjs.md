@@ -111,8 +111,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
-  const user = await db.users.create({ data: body });
+  const CreateUserSchema = z.object({ name: z.string().min(1), email: z.string().email() });
+  const data = CreateUserSchema.parse(await request.json());
+  const user = await db.users.create({ data });
   return NextResponse.json(user, { status: 201 });
 }
 ```

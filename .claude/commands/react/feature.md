@@ -84,6 +84,8 @@ export const ${feature}Keys = {
   detail: (id: string) => [...${feature}Keys.details(), id] as const,
 };
 
+// Keep fetch functions in a separate api/ file (e.g. api/${feature}s.ts) and import here.
+// This prevents calling raw fetch directly from components and keeps queryFns reusable.
 async function fetch${Feature}s(filters: ${Feature}Filters): Promise<${Feature}[]> {
   const params = new URLSearchParams();
   if (filters.search) params.set("search", filters.search);

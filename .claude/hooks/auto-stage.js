@@ -25,8 +25,8 @@ if (SKIP_EXTENSIONS.has(ext)) process.exit(0);
 if (basename === ".env" || basename.startsWith(".env.")) process.exit(0);
 if (filePath.includes("node_modules")) process.exit(0);
 
-// Only stage inside a git repo
-const isGitRepo = fs.existsSync(path.join(process.cwd(), ".git"));
+// Only stage inside a git repo (use rev-parse to support monorepos where .git is in a parent dir)
+const isGitRepo = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf-8" }).status === 0;
 if (!isGitRepo) process.exit(0);
 
 // Verify file still exists (Write might have been a delete in some edge case)

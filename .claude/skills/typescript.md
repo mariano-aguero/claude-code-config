@@ -244,8 +244,9 @@ if (result.success) {
 // Extract return type
 type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
 
-// Extract promise value
-type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T;
+// Extract promise value — use built-in Awaited<T> (TypeScript 4.5+)
+// type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T; // built-in, no need to redefine
+type UnwrapPromise<T> = T extends Promise<infer U> ? UnwrapPromise<U> : T; // custom name to avoid shadowing
 
 // Extract array element
 type ElementOf<T> = T extends (infer E)[] ? E : never;

@@ -26,7 +26,7 @@ const args = supportsIncremental
   ? ["tsc", "--noEmit", "--incremental"]
   : ["tsc", "--noEmit"];
 
-const result = spawnSync("npx", args, {
+const result = spawnSync("pnpm", args, {
   encoding: "utf-8",
   timeout: 30_000,
   cwd: process.cwd(),

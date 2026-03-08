@@ -24,6 +24,10 @@ const SOURCE_EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 
 if (BINARY_SKIP.has(ext) || ENV_SKIP.has(basename)) process.exit(0);
 
+// Secrets always run regardless of CLAUDE_ANALYSIS (blocking check — not advisory)
+// Advisory checks (missing tests, complexity) respect CLAUDE_ANALYSIS=0
+const skipAdvisory = process.env.CLAUDE_ANALYSIS === "0";
+
 // Secrets check runs on all text files; rest only on source files
 const isSource = SOURCE_EXTS.has(ext);
 const isTestFile = /\.(test|spec)\.[jt]sx?$/.test(filePath) || filePath.includes("__tests__");
@@ -45,7 +49,7 @@ const SECRET_PATTERNS = [
   { name: "AWS Access Key",    regex: /AKIA[0-9A-Z]{16}/ },
   { name: "GitHub token",      regex: /ghp_[a-zA-Z0-9]{36}/ },
   { name: "Anthropic API key", regex: /sk-ant-[a-zA-Z0-9\-]{20,}/ },
-  { name: "OpenAI API key",    regex: /sk-[a-zA-Z0-9]{32,}/ },
+  { name: "OpenAI API key",    regex: /sk-(?:proj-|[a-zA-Z0-9]{20,}T3BlbkFJ)[a-zA-Z0-9\-_]{20,}/ },
   { name: "Hardcoded password",regex: /password\s*[:=]\s*["'][^"']{8,}["']/i },
   { name: "Bearer token",      regex: /Bearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
   { name: "Generic secret",    regex: /(?:secret|token|api_key)\s*[:=]\s*["'][a-zA-Z0-9\-_]{16,}["']/i },
@@ -61,7 +65,7 @@ if (secretsFound.length > 0) {
 }
 
 // ── 2. Detect Missing Tests ──────────────────────────────────────────────────
-if (isSource && !isTestFile && !isConfigFile) {
+if (!skipAdvisory && isSource && !isTestFile && !isConfigFile) {
   const EXPORT_PATTERN =
     /export\s+(?:async\s+)?(?:function|class)\s+(\w+)|export\s+(?:const|let)\s+(\w+)\s*=/g;
   const namedExports = new Set(
@@ -104,7 +108,9 @@ if (isSource && !isTestFile && !isConfigFile) {
 }
 
 // ── 3. Check Complexity ──────────────────────────────────────────────────────
-if (isSource && !isTestFile) {
+// Note: body extraction uses brace-counting and may over-count in template literals/strings.
+// Arrow functions without braces (e.g. `const fn = x => x`) are not detected.
+if (!skipAdvisory && isSource && !isTestFile) {
   const SKIP_COMPLEXITY = [/\.config\./, /\.d\.ts$/];
   if (!SKIP_COMPLEXITY.some((p) => p.test(filePath))) {
     const MAX_COMPLEXITY = 10;

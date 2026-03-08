@@ -27,14 +27,17 @@ if (input.stop_hook_active) process.exit(0);
 const timestamp = new Date().toISOString();
 const time = new Date().toTimeString().slice(0, 5);
 
-const branch = spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? "";
-const statusOut = spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" }).stdout?.trim() ?? "";
+const isGitRepo = spawnSync("git", ["rev-parse", "--git-dir"], { encoding: "utf-8" }).status === 0;
+
+const branch = isGitRepo ? spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
+const statusOut = isGitRepo ? spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
 const modified = statusOut.split("\n").filter(Boolean).slice(0, 10);
-const logOut = spawnSync("git", ["log", "--oneline", "-3"], { encoding: "utf-8" }).stdout?.trim() ?? "";
+const logOut = isGitRepo ? spawnSync("git", ["log", "--oneline", "-3"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
 
 // Recent commits: hash + message for dedup check
-const recentCommits = spawnSync("git", ["log", "--format=%H %s", "-5"], { encoding: "utf-8" })
-  .stdout?.trim().split("\n").filter(Boolean) ?? [];
+const recentCommits = isGitRepo
+  ? spawnSync("git", ["log", "--format=%H %s", "-5"], { encoding: "utf-8" }).stdout?.trim().split("\n").filter(Boolean) ?? []
+  : [];
 
 const notesPath = path.join(".claude", "session-notes.md");
 

@@ -665,18 +665,20 @@ function CardSkeleton() {
 ### Number Counter Animation
 
 ```tsx
-import { useSpring, animated } from "framer-motion";
+// Framer Motion: useMotionValue + useTransform + animate
+import { useMotionValue, useTransform, animate, motion } from "framer-motion";
 
 function AnimatedNumber({ value }: { value: number }) {
-  const spring = useSpring(0, { damping: 30, stiffness: 100 });
+  const count = useMotionValue(0);
 
   useEffect(() => {
-    spring.set(value);
-  }, [value, spring]);
+    const controls = animate(count, value, { duration: 0.5, ease: "easeOut" });
+    return controls.stop;
+  }, [value, count]);
 
   return (
     <motion.span>
-      {spring.get().toLocaleString(undefined, { maximumFractionDigits: 2 })}
+      {useTransform(count, (v) => v.toLocaleString(undefined, { maximumFractionDigits: 2 }))}
     </motion.span>
   );
 }
@@ -802,10 +804,8 @@ text-5xl   = 3rem     (48px)
 ### Container Queries
 
 ```tsx
-// tailwind.config.ts
-plugins: [require("@tailwindcss/container-queries")]
-
-// Usage
+// Tailwind v4: container queries are built-in — no plugin or config needed.
+// In Tailwind v3, add the @tailwindcss/container-queries plugin.
 <div className="@container">
   <div className="@lg:flex @lg:gap-4">
     {/* Responds to container width, not viewport */}

@@ -65,7 +65,9 @@ if (added > 0) fs.writeFileSync(debtPath, existing, "utf-8");
 
 // Report current debt for this file
 const escapedPath = filePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-const fileDebtCount = (existing.match(new RegExp(escapedPath, "g")) ?? []).length;
+// Count only open (unresolved) debt items to avoid inflating counts with resolved ones
+const openLines = existing.split("\n").filter((l) => l.startsWith("- [ ]"));
+const fileDebtCount = openLines.filter((l) => l.includes(filePath)).length;
 
 if (fileDebtCount > 0) {
   process.stderr.write(

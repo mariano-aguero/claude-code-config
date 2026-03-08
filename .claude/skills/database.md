@@ -527,10 +527,11 @@ export class UserRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.db
+    const [deleted] = await this.db
       .delete(users)
-      .where(eq(users.id, id));
-    return result.rowCount > 0;
+      .where(eq(users.id, id))
+      .returning({ id: users.id });
+    return deleted !== undefined;
   }
 }
 

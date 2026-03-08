@@ -92,11 +92,13 @@ When Claude finishes a response:
   "PostToolUse": [
     {
       "matcher": "Write",
-      "command": "[[ \"$CLAUDE_FILE_PATH\" == *.ts ]] && pnpm eslint --fix \"$CLAUDE_FILE_PATH\" || true"
+      "command": "node -e \"if(process.env.CLAUDE_FILE_PATH?.endsWith('.ts'))require('child_process').spawnSync('pnpm',['eslint','--fix',process.env.CLAUDE_FILE_PATH],{stdio:'inherit'})\""
     }
   ]
 }
 ```
+
+> **Note:** Avoid bash-specific `[[ ]]` syntax in hook commands — it requires bash and silently fails in sh/dash (Ubuntu, CI containers). Prefer Node.js one-liners or dedicated hook scripts for cross-shell compatibility.
 
 ### Run Tests for Changed Files
 

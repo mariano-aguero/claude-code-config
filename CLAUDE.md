@@ -87,16 +87,18 @@ Control formatting and linting per project via `.claude/settings.local.json` (no
   "env": {
     "CLAUDE_FORMAT": "0",
     "CLAUDE_LINT": "0",
-    "CLAUDE_ANALYSIS": "0"
+    "CLAUDE_ANALYSIS": "0",
+    "CLAUDE_RUN_TESTS": "1"
   }
 }
 ```
 
-| Variable | Default | Effect when `"0"` |
+| Variable | Default | Effect |
 |---|---|---|
-| `CLAUDE_FORMAT` | `"1"` | Skips Prettier on every Write/Edit |
-| `CLAUDE_LINT` | `"1"` | Skips ESLint on every Write/Edit |
-| `CLAUDE_ANALYSIS` | `"1"` | Skips dead-code and duplicate-export analysis on every Write/Edit |
+| `CLAUDE_FORMAT` | `"1"` | Set `"0"` to skip Prettier on every Write/Edit |
+| `CLAUDE_LINT` | `"1"` | Set `"0"` to skip ESLint on every Write/Edit |
+| `CLAUDE_ANALYSIS` | `"1"` | Set `"0"` to skip advisory analysis (missing tests, complexity, dead-code, duplicates) |
+| `CLAUDE_RUN_TESTS` | `"0"` | Set `"1"` to run `pnpm test` at every session Stop |
 
 Note: `detect-secrets` and `typecheck` always run regardless — they catch correctness and security issues, not style.
 

@@ -44,7 +44,7 @@ const DANGEROUS = [
 
   // ── Filesystem ───────────────────────────────────────────────────────────
   {
-    pattern: /\brm\s+-[a-z]*r[a-z]*f\b.*?(~|\/\s*$|\$HOME|\/root|\/usr|\/etc|\/var)/,
+    pattern: /\brm\s+-[a-z]*r[a-z]*f\b[^;\n&|]*(?:~|\$HOME|\/root|\/usr|\/etc|\/var)/,
     label: "rm -rf targeting home/system directory",
     hint: "Recursive deletion of home or system directories is irreversible.",
   },

@@ -27,8 +27,14 @@ const aheadResult = spawnSync(
   ["log", "origin/HEAD..HEAD", "--oneline"],
   { encoding: "utf-8" }
 );
-// If git fails (no remote, detached HEAD, etc.) just exit silently
-if (aheadResult.status !== 0) process.exit(0);
+// If git fails (no remote, detached HEAD, etc.) exit — but hint when remote ref is missing
+if (aheadResult.status !== 0) {
+  const stderr = aheadResult.stderr ?? "";
+  if (stderr.includes("unknown revision") || stderr.includes("no remote") || stderr.includes("not found")) {
+    process.stderr.write("📋 PR checklist skipped: no remote tracking branch found (run `git fetch` first)\n");
+  }
+  process.exit(0);
+}
 
 const commitsAhead = (aheadResult.stdout ?? "").trim().split("\n").filter(Boolean);
 if (commitsAhead.length === 0) process.exit(0);

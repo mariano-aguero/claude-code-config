@@ -58,7 +58,7 @@ function* walkFiles(dir) {
 
 const usedExports = new Set();
 
-for (const file of walkFiles(".")) {
+for (const file of walkFiles(process.cwd())) {
   if (path.normalize(file) === normalizedPath) continue;
 
   let src;
@@ -76,7 +76,7 @@ for (const file of walkFiles(".")) {
   if (!importsFromUs) continue;
 
   for (const name of namedExports) {
-    if (src.includes(name)) usedExports.add(name);
+    if (new RegExp(`\\b${name}\\b`).test(src)) usedExports.add(name);
   }
 }
 

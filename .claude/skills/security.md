@@ -267,16 +267,20 @@ async function refreshAccessToken(refreshToken: string) {
     where: eq(refreshTokens.userId, payload.sub),
   });
 
-  if (!stored || !(await verify(refreshToken, stored.tokenHash))) {
+  // Compare plaintext token against stored hash (argon2 verify: hash first, then plaintext)
+  if (!stored || !(await verify(stored.tokenHash, refreshToken))) {
     throw new Error('Invalid refresh token');
   }
 
-  // Generate new access token
+  // Rotate: invalidate old token before issuing new one (prevents replay if token leaks)
+  await db.delete(refreshTokens).where(eq(refreshTokens.userId, payload.sub));
+
+  // Generate new access token + new refresh token
   const user = await db.query.users.findFirst({
     where: eq(users.id, payload.sub),
   });
 
-  return generateTokens(user);
+  return generateTokens(user); // generateTokens stores a new refresh token hash
 }
 
 async function revokeRefreshToken(userId: string) {
@@ -463,10 +467,13 @@ app.delete('/api/users/:id', requirePermission('users:delete'), async (c) => {
 
 ```typescript
 // next.config.js
+// Next.js 13+ supports nonce-based CSP via middleware (recommended for production).
+// For static exports or simpler setups, use hash-based CSP instead of unsafe-inline.
+// See: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-eval' 'unsafe-inline';
-  style-src 'self' 'unsafe-inline';
+  script-src 'self' 'nonce-{NONCE}';
+  style-src 'self' 'nonce-{NONCE}';
   img-src 'self' blob: data: https:;
   font-src 'self';
   object-src 'none';
@@ -684,7 +691,7 @@ app.use('/api/auth/reset-password', authLimiter);
 // Redact sensitive fields
 const SENSITIVE_FIELDS = ['password', 'token', 'secret', 'authorization', 'cookie'];
 
-function redactSensitive(obj: Record<string, any>): Record<string, any> {
+function redactSensitive(obj: Record<string, unknown>): Record<string, unknown> {
   const redacted = { ...obj };
 
   for (const key of Object.keys(redacted)) {

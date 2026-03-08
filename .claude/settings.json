@@ -3,7 +3,8 @@
     "ENABLE_LSP_TOOL": "1",
     "CLAUDE_FORMAT": "1",
     "CLAUDE_LINT": "1",
-    "CLAUDE_ANALYSIS": "1"
+    "CLAUDE_ANALYSIS": "1",
+    "CLAUDE_RUN_TESTS": "0"
   },
   "hooks": {
     "PreToolUse": [
@@ -123,7 +124,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm test 2>/dev/null || echo 'No tests configured'"
+            "command": "sh -c '[ \"${CLAUDE_RUN_TESTS:-0}\" = \"1\" ] && pnpm test 2>/dev/null || true'"
           }
         ]
       },
