@@ -117,7 +117,9 @@ Create `.claude/settings.local.json` (gitignored):
 {
   "env": {
     "CLAUDE_FORMAT": "0",
-    "CLAUDE_LINT": "0"
+    "CLAUDE_LINT": "0",
+    "CLAUDE_ANALYSIS": "0",
+    "CLAUDE_RUN_TESTS": "1"
   }
 }
 ```
@@ -129,7 +131,7 @@ Create `.claude/settings.local.json` (gitignored):
 ```
 .claude/
 ├── agents/                      # Expert personas
-│   ├── frontend-expert.md       # React 19, Next.js 15+, TanStack
+│   ├── frontend-expert.md       # React 19, Next.js 16+, TanStack
 │   ├── backend-expert.md        # Node.js, Hono, Drizzle, PostgreSQL
 │   ├── infrastructure-expert.md # Docker, CI/CD, GitHub Actions
 │   ├── ui-expert.md             # Tailwind v4, shadcn/ui, Framer Motion
@@ -201,7 +203,7 @@ Expert personas that define behavior, approach, and specialized knowledge.
 
 | Agent                   | Expertise                                                    | Model    |
 | ----------------------- | ------------------------------------------------------------ | -------- |
-| `frontend-expert`       | React 19, Next.js 15+, TanStack ecosystem                    | sonnet   |
+| `frontend-expert`       | React 19, Next.js 16+, TanStack ecosystem                    | sonnet   |
 | `backend-expert`        | Node.js, Hono/Fastify, Drizzle ORM, PostgreSQL               | sonnet   |
 | `infrastructure-expert` | Docker, GitHub Actions, Kubernetes, Terraform                | sonnet   |
 | `ui-expert`             | Tailwind CSS v4, shadcn/ui, Framer Motion, a11y              | sonnet   |
@@ -272,10 +274,12 @@ Disable formatting or linting per project via `.claude/settings.local.json` (not
 }
 ```
 
-| Variable        | Default | Effect when `"0"`                  |
-| --------------- | ------- | ---------------------------------- |
-| `CLAUDE_FORMAT` | `"1"`   | Skips Prettier on every Write/Edit |
-| `CLAUDE_LINT`   | `"1"`   | Skips ESLint on every Write/Edit   |
+| Variable           | Default | Effect when `"0"`                                              |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| `CLAUDE_FORMAT`    | `"1"`   | Skips Prettier on every Write/Edit                             |
+| `CLAUDE_LINT`      | `"1"`   | Skips ESLint on every Write/Edit                               |
+| `CLAUDE_ANALYSIS`  | `"1"`   | Skips advisory analysis (dead code, missing tests, complexity) |
+| `CLAUDE_RUN_TESTS` | `"0"`   | Set `"1"` to run `pnpm test` at every session Stop             |
 
 `detect-secrets` and `typecheck` always run regardless.
 
@@ -335,7 +339,7 @@ The `save-session-notes.js` Stop hook also appends an `[AUTO-STOP]` entry automa
 
 | Domain   | Stack                                                                                         |
 | -------- | --------------------------------------------------------------------------------------------- |
-| Frontend | TypeScript 5.x, React 19, Next.js 15+, TanStack Query v5 + Form v1, Tailwind v4.1, Zustand v5 |
+| Frontend | TypeScript 5.x, React 19, Next.js 16+, TanStack Query v5 + Form v1, Tailwind v4.1, Zustand v5 |
 | Backend  | Node.js 20+, Hono/Fastify, Drizzle ORM, PostgreSQL 16+, Redis                                 |
 | Web3     | Solidity 0.8.33, Foundry, OpenZeppelin 5.4, Viem 2.45+, Wagmi 3.4+                            |
 | Testing  | Vitest, Testing Library, Playwright, MSW                                                      |
