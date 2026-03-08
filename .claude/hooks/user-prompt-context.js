@@ -73,4 +73,19 @@ if (lastLogEntry) {
   parts.push(`Last work log: ${lastLogEntry}`);
 }
 
-process.stdout.write(`<git-context>\n${parts.join("\n")}\n</git-context>\n`);
+// Available agents (read from .claude/agents/ if present)
+const agentsDir = path.join(process.cwd(), ".claude", "agents");
+let agentNames = [];
+try {
+  agentNames = fs.readdirSync(agentsDir)
+    .filter((f) => f.endsWith(".md"))
+    .map((f) => f.replace(".md", ""));
+} catch {}
+
+let output = `<git-context>\n${parts.join("\n")}\n</git-context>\n`;
+
+if (agentNames.length > 0) {
+  output += `<available-agents>\n${agentNames.join(", ")}\nUse these agents proactively when the task matches their domain — don't wait for the user to ask.\n</available-agents>\n`;
+}
+
+process.stdout.write(output);

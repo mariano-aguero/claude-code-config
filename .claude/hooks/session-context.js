@@ -15,6 +15,13 @@ const parts = [];
 // Fast git-repo guard — avoids 4-6 failed spawnSync calls in non-git directories
 const isGitRepo = fs.existsSync(path.join(process.cwd(), ".git"));
 
+// 0. Memory (.claude/memory.md) — stable preferences and patterns
+const memoryPath = path.join(".claude", "memory.md");
+try {
+  const memory = fs.readFileSync(memoryPath, "utf-8").trim();
+  if (memory) parts.push(`## Memory\n${memory}`);
+} catch {}
+
 // 1. Session notes (.claude/session-notes.md)
 const notesPath = path.join(".claude", "session-notes.md");
 try {

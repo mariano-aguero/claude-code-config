@@ -53,6 +53,28 @@ Slash command templates: `/react/*`, `/git/*`, `/testing/*`, `/api/*`, `/db/*`, 
 - **Drizzle for database** - Type-safe queries, proper migrations
 - **Web3 security** - CEI pattern, reentrancy guards, simulate before send
 
+## Proactive Agent & Skill Routing
+
+Use agents and skills **without waiting for the user to ask**. Route based on task type:
+
+| Task | Use |
+|------|-----|
+| React components, hooks, Next.js pages | `frontend-expert` agent |
+| API routes, DB queries, server logic | `backend-expert` agent |
+| SQL schema, migrations, Drizzle queries | `database-expert` agent |
+| Auth, OWASP, secrets, headers | `security-expert` agent |
+| Tailwind, shadcn/ui, animations | `ui-expert` agent |
+| Solidity contracts, DeFi, Wagmi | `web3-expert` agent |
+| Vitest, Playwright, mocking | `testing-expert` agent |
+| Advanced TypeScript, generics, Zod | `typescript-expert` agent |
+| Docker, CI/CD, GitHub Actions | `infrastructure-expert` agent |
+| After finishing a feature or PR | `code-reviewer` agent |
+| Creating a commit | `/commit` skill |
+| Starting a feature | `/react/feature` or `/api/route` skill |
+| Writing tests | `/testing/test` or `/react/test` skill |
+
+Skills also apply — check if a relevant skill exists before responding to any non-trivial request.
+
 ## Hook Toggles
 
 Control formatting and linting per project via `.claude/settings.local.json` (not committed to git):
