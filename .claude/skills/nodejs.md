@@ -457,7 +457,7 @@ export const cache = {
     });
     await new Promise<void>((resolve, reject) => {
       stream.on("end", () => {
-        pipeline.exec().then(() => resolve());
+        pipeline.exec().then(() => resolve(), reject);
       });
       stream.on("error", reject);
     });

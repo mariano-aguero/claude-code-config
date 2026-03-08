@@ -514,6 +514,8 @@ function CreateUserForm({
 }
 ```
 
+> For Zod schema validation, use `validatorAdapter: zodValidator()` from `@tanstack/zod-form-adapter` instead of inline validators (see nextjs.md for the full pattern).
+
 ## State Management
 
 ### Context + Reducer Pattern

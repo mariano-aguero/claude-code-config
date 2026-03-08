@@ -17,9 +17,10 @@ try {
 const DANGEROUS = [
   // ── Git ──────────────────────────────────────────────────────────────────
   {
-    pattern: /git\s+push\s+.*?(--force|-f)\b/,
+    // Use negative lookahead to allow --force-with-lease (safer alternative to --force)
+    pattern: /git\s+push\s+.*?(?:--force(?!-with-lease)|-f)\b/,
     label: "git push --force",
-    hint: "Force pushing can overwrite remote history.",
+    hint: "Force pushing can overwrite remote history. Use --force-with-lease instead.",
   },
   {
     pattern: /git\s+reset\s+--hard/,

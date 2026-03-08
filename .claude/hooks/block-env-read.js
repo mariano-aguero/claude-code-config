@@ -32,11 +32,17 @@ try {
   command = JSON.parse(process.env.CLAUDE_TOOL_INPUT ?? "{}").command ?? "";
 } catch {}
 
-// Match shell commands that read .env files: cat .env, cat .env.local, etc.
-const ENV_READ_PATTERN =
+// Match shell commands that read .env files in two forms:
+//   Direct: cat .env, head .env.local (filename is first arg)
+//   Grep:   grep SECRET .env, rg "" .env.local (filename is a later arg)
+const ENV_READ_DIRECT =
   /(?:cat|head|tail|sed|awk|less|more|bat|vim?|nano|open|print)\s+\S*\.env(?:\.\S+)?\b/i;
+// Requires at least one arg before .env so .env is the filename, not the pattern
+// (handles: grep SECRET .env, rg -n "" .env.local, but not: grep .env file.txt)
+const ENV_GREP_PATTERN =
+  /\b(?:grep|rg)\b\s+(?:\S+\s+)+\.env(?:\.[^\s;|&]*)?(?:\s|$)/;
 
-if (ENV_READ_PATTERN.test(command)) {
+if (ENV_READ_DIRECT.test(command) || ENV_GREP_PATTERN.test(command)) {
   process.stderr.write(
     "🚫 Blocked: Reading .env files via shell commands is not allowed.\n",
   );

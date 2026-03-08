@@ -20,7 +20,12 @@ if (!fs.existsSync(tsconfigPath)) process.exit(0);
 // Detect package manager from lockfile
 function detectPackageManager() {
   const cwd = process.cwd();
-  if (fs.existsSync(path.join(cwd, "bun.lockb"))) return "bun";
+  // bun.lockb = binary (< 1.1.14), bun.lock = textual (>= 1.1.14)
+  if (
+    fs.existsSync(path.join(cwd, "bun.lockb")) ||
+    fs.existsSync(path.join(cwd, "bun.lock"))
+  )
+    return "bun";
   if (fs.existsSync(path.join(cwd, "yarn.lock"))) return "yarn";
   if (fs.existsSync(path.join(cwd, "package-lock.json"))) return "npm";
   return "pnpm"; // default
