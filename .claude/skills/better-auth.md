@@ -45,7 +45,7 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
-export type User = typeof auth.$Infer.Session.user;
+export type User = Session["user"];
 ```
 
 ## API Route Handler (Next.js App Router)

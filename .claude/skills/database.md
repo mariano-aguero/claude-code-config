@@ -135,19 +135,16 @@ export const posts = pgTable(
     authorId: uuid("author_id").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
-  (table) => ({
+  (table) => [
     // Single column index
-    authorIdx: index("posts_author_idx").on(table.authorId),
+    index("posts_author_idx").on(table.authorId),
     // Descending index for sorting
-    createdAtIdx: index("posts_created_at_idx").on(table.createdAt.desc()),
+    index("posts_created_at_idx").on(table.createdAt.desc()),
     // Unique index
-    slugIdx: uniqueIndex("posts_slug_idx").on(table.slug),
+    uniqueIndex("posts_slug_idx").on(table.slug),
     // Composite index
-    authorCreatedIdx: index("posts_author_created_idx").on(
-      table.authorId,
-      table.createdAt,
-    ),
-  }),
+    index("posts_author_created_idx").on(table.authorId, table.createdAt),
+  ],
 );
 ```
 

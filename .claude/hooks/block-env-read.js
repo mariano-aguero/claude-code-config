@@ -14,7 +14,7 @@ const path = require("path");
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 const toolName = process.env.CLAUDE_TOOL_NAME ?? "";
 
-if (toolName === "Read" || filePath) {
+if (toolName === "Read") {
   const filename = path.basename(filePath);
   const isEnvFile = filename === ".env" || filename.startsWith(".env.");
   if (isEnvFile) {

@@ -103,7 +103,8 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 
 Reference these skills for detailed patterns and code examples:
 
-- `database.md` - Drizzle patterns, migrations, queries
+- `drizzle.md` - Drizzle ORM schema, queries, relations, transactions, migrations
+- `database.md` - PostgreSQL indexing, client setup, N+1 patterns
 
 ## Quick Reference
 

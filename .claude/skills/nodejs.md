@@ -547,7 +547,7 @@ signals.forEach((signal) => {
     });
 
     // Close database connections
-    await db.$client.end();
+    await pool.end(); // pool is the pg.Pool instance passed to drizzle()
     console.log("Database connections closed");
 
     // Close Redis

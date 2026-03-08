@@ -53,7 +53,7 @@ const diffStat = isGitRepo
 let sessionNotesContext = "";
 try {
   const notesRaw = fs.readFileSync(
-    path.join(".claude", "session-notes.md"),
+    path.join(process.cwd(), ".claude", "session-notes.md"),
     "utf-8",
   );
   const autoMarkerIdx = notesRaw.indexOf("<!-- auto-snapshot -->");

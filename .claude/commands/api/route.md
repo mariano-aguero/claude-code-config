@@ -86,7 +86,7 @@ app.delete('/:id', zValidator('param', paramsSchema), async (c) => {
     return c.json({ success: false, error: { code: 'NOT_FOUND', message: '${Resource} not found' } }, 404);
   }
 
-  return c.json({ success: true, data: null }, 204);
+  return c.body(null, 204);
 });
 
 export default app;

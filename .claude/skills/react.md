@@ -166,7 +166,12 @@ function useLocalStorage<T>(key: string, initialValue: T) {
   const setValue = (value: T | ((val: T) => T)) => {
     const valueToStore = value instanceof Function ? value(storedValue) : value;
     setStoredValue(valueToStore);
-    window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch {
+      /* quota exceeded or private mode */
+    }
   };
 
   return [storedValue, setValue] as const;

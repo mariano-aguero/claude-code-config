@@ -50,10 +50,10 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function verifyPassword(
-  password: string,
   hashedPassword: string,
+  plaintext: string,
 ): Promise<boolean> {
-  return verify(hashedPassword, password);
+  return verify(hashedPassword, plaintext);
 }
 
 // Account lockout after failed attempts
