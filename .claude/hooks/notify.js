@@ -40,10 +40,9 @@ const isAttentionNeeded = ATTENTION_EVENTS.some(
 if (!isAttentionNeeded) process.exit(0);
 
 // Build notification content
-const title =
-  isAttentionNeeded && message.includes("permission")
-    ? "Claude needs permission"
-    : "Claude is waiting";
+const title = message.includes("permission")
+  ? "Claude needs permission"
+  : "Claude is waiting";
 
 const body = message
   ? message.slice(0, 100) + (message.length > 100 ? "…" : "")

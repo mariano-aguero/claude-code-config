@@ -50,10 +50,10 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 async function verifyPassword(
+  password: string,
   hashedPassword: string,
-  plaintext: string,
 ): Promise<boolean> {
-  return verify(hashedPassword, plaintext);
+  return verify(hashedPassword, password);
 }
 
 // Account lockout after failed attempts
@@ -288,8 +288,8 @@ async function refreshAccessToken(refreshToken: string) {
     ),
   });
 
-  // Compare plaintext token against stored hash (argon2 verify: hash first, then plaintext)
-  if (!stored || !(await verifyPassword(stored.tokenHash, refreshToken))) {
+  // Compare plaintext token against stored hash
+  if (!stored || !(await verifyPassword(refreshToken, stored.tokenHash))) {
     throw new Error("Invalid refresh token");
   }
 

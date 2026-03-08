@@ -24,6 +24,7 @@ const IGNORE_DIRS = new Set([
   "dist",
   "build",
   ".cache",
+  "coverage",
 ]);
 
 const EXPORT_PATTERN =

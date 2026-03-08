@@ -160,6 +160,79 @@ export function PostForm() {
 }
 ```
 
+### `"use cache"` Directive (Next.js 15+)
+
+Fine-grained caching for Server Components and data functions. Replaces `fetch` cache options with explicit, composable cache control.
+
+```tsx
+// Cache a Server Component
+"use cache";
+
+import { cacheTag, cacheLife } from "next/cache";
+
+export async function UserProfile({ userId }: { userId: string }) {
+  cacheTag(`user-${userId}`); // tag for targeted revalidation
+  cacheLife("hours"); // preset lifetime
+
+  const user = await db.select().from(users).where(eq(users.id, userId));
+  return <div>{user.name}</div>;
+}
+```
+
+```tsx
+// Cache a data function
+"use cache";
+
+import { cacheTag, cacheLife } from "next/cache";
+
+export async function getProducts(category: string) {
+  cacheTag("products", `category-${category}`);
+  cacheLife({ revalidate: 3600, expire: 86400 }); // custom: revalidate/1h, expire/1d
+
+  return db.select().from(products).where(eq(products.category, category));
+}
+```
+
+```tsx
+// On-demand revalidation via Server Action
+"use server";
+
+import { revalidateTag } from "next/cache";
+
+export async function updateProduct(id: string, data: ProductUpdate) {
+  await db.update(products).set(data).where(eq(products.id, id));
+  revalidateTag("products"); // invalidate all caches tagged "products"
+  revalidateTag(`product-${id}`); // or just the specific entry
+}
+```
+
+**`cacheLife` presets**
+
+| Preset      | stale | revalidate | expire |
+| ----------- | ----- | ---------- | ------ |
+| `"seconds"` | 0s    | 1s         | 60s    |
+| `"minutes"` | 5m    | 1m         | 1h     |
+| `"hours"`   | 5m    | 1h         | 1d     |
+| `"days"`    | 1h    | 1d         | 7d     |
+| `"weeks"`   | 1d    | 7d         | 30d    |
+| `"max"`     | 1d    | 30d        | ∞      |
+
+Key rules:
+
+- `"use cache"` must be the **first statement** in the file or function
+- Dynamic data (`cookies()`, `headers()`, `searchParams`) inside a cached function causes a **build error** — extract them above the cache boundary
+- `cacheTag` / `cacheLife` must be called at the **top level** of the cached function (not inside conditionals)
+- Requires `experimental.dynamicIO: true` in `next.config.ts`
+
+```ts
+// next.config.ts
+export default {
+  experimental: {
+    dynamicIO: true,
+  },
+};
+```
+
 ### Metadata & SEO
 
 ```tsx

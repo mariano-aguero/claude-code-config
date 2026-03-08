@@ -262,6 +262,101 @@ function ItemList() {
 }
 ```
 
+## React 19 Hooks
+
+### useOptimistic
+
+Optimistic UI updates while an async action is in flight. Automatically reverts if the action fails.
+
+```tsx
+import { useOptimistic } from "react";
+
+interface Message {
+  id: string;
+  text: string;
+  sending?: boolean;
+}
+
+function MessageList({
+  messages,
+  sendMessage,
+}: {
+  messages: Message[];
+  sendMessage: (text: string) => Promise<void>;
+}) {
+  const [optimisticMessages, addOptimistic] = useOptimistic(
+    messages,
+    // Pure updater: (currentState, optimisticValue) => newState
+    (state, newText: string) => [
+      ...state,
+      { id: crypto.randomUUID(), text: newText, sending: true },
+    ],
+  );
+
+  async function handleSubmit(formData: FormData) {
+    const text = formData.get("text") as string;
+    addOptimistic(text); // update UI immediately
+    await sendMessage(text); // actual async op
+    // React reverts the optimistic entry and replaces with real server state
+  }
+
+  return (
+    <>
+      <ul>
+        {optimisticMessages.map((msg) => (
+          <li key={msg.id} style={{ opacity: msg.sending ? 0.5 : 1 }}>
+            {msg.text}
+            {msg.sending && " (sending…)"}
+          </li>
+        ))}
+      </ul>
+      <form action={handleSubmit}>
+        <input name="text" required />
+        <button type="submit">Send</button>
+      </form>
+    </>
+  );
+}
+```
+
+### use()
+
+Reads a resource (Promise or Context) inside a component. Unlike other hooks, can be called conditionally.
+
+```tsx
+import { use, Suspense } from "react";
+
+// --- Unwrap a Promise (suspends until resolved) ---
+function UserCard({ userPromise }: { userPromise: Promise<User> }) {
+  const user = use(userPromise); // suspends here, caught by nearest Suspense
+  return <div>{user.name}</div>;
+}
+
+// Pass the un-awaited promise from Server Component → Client Component
+// This lets streaming start immediately
+async function Page() {
+  const userPromise = fetchUser("123"); // intentionally NOT awaited
+  return (
+    <Suspense fallback={<Skeleton />}>
+      <UserCard userPromise={userPromise} />
+    </Suspense>
+  );
+}
+
+// --- Read Context conditionally (unlike useContext) ---
+function ThemeLabel({ show }: { show: boolean }) {
+  if (!show) return null;
+  const theme = use(ThemeContext); // valid — use() can be called after a conditional return
+  return <span>{theme}</span>;
+}
+```
+
+Key rules:
+
+- In **Client Components**, the Promise must be **stable** (created outside render or memoized) — an unstable Promise (created inline each render) causes infinite re-renders. In Server Components this is not a concern since they render once.
+- Errors from the Promise bubble to the nearest **Error Boundary**
+- `use(Context)` is equivalent to `useContext()` but works conditionally
+
 ## Performance
 
 ### React.memo
