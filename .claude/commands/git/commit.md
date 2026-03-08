@@ -11,7 +11,6 @@ Create a git commit following Conventional Commits specification.
 ## Options
 
 - `--amend` - Amend previous commit
-- `--no-verify` - Skip pre-commit hooks
 - `--scope` - Specify scope explicitly
 
 ## Commit Format

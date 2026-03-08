@@ -8,8 +8,8 @@
 const { spawnSync } = require("child_process");
 const path = require("path");
 
-// Set CLAUDE_LINT=false in settings.local.json → env to disable feedback
-if (process.env.CLAUDE_LINT === "false") process.exit(0);
+// Set CLAUDE_LINT=0 in settings.local.json → env to disable linting
+if (process.env.CLAUDE_LINT === "0") process.exit(0);
 
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 const ext = path.extname(filePath);

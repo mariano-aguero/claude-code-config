@@ -1,7 +1,7 @@
 ---
 name: security-expert
 description: Expert in application security, OWASP best practices, authentication, authorization, and secure coding patterns. Handles security audits, vulnerability prevention, auth implementation, secrets management, and security headers across frontend, backend, and Web3 applications.
-model: sonnet
+model: claude-opus-4-6
 ---
 
 # Security Expert Agent

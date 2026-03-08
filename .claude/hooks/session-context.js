@@ -12,6 +12,9 @@ const { spawnSync } = require("child_process");
 
 const parts = [];
 
+// Fast git-repo guard — avoids 4-6 failed spawnSync calls in non-git directories
+const isGitRepo = fs.existsSync(path.join(process.cwd(), ".git"));
+
 // 1. Session notes (.claude/session-notes.md)
 const notesPath = path.join(".claude", "session-notes.md");
 try {
@@ -39,6 +42,11 @@ try {
 } catch {}
 
 // 4. Git state
+if (!isGitRepo) {
+  if (parts.length > 0) process.stdout.write(`<session-context>\n${parts.join("\n\n")}\n</session-context>\n`);
+  process.exit(0);
+}
+
 const branch = spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? "";
 const statusOut = spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" }).stdout?.trim() ?? "";
 const modified = statusOut.split("\n").filter(Boolean);

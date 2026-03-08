@@ -1,116 +1,140 @@
 {
+  "env": {
+    "ENABLE_LSP_TOOL": "1",
+    "CLAUDE_FORMAT": "1",
+    "CLAUDE_LINT": "1"
+  },
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Read",
-        "command": "node .claude/hooks/block-env-read.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/block-env-read.js"
+          }
+        ]
       },
       {
         "matcher": "Bash",
-        "command": "node .claude/hooks/block-dangerous-git.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/block-dangerous-git.js"
+          }
+        ]
       }
     ],
     "PostToolUse": [
       {
         "matcher": "Write",
-        "command": "pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
+        "hooks": [
+          { "type": "command", "command": "sh -c '[ \"${CLAUDE_FORMAT:-1}\" = \"0\" ] || pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true'" },
+          { "type": "command", "command": "node .claude/hooks/lint-with-feedback.js" },
+          { "type": "command", "command": "node .claude/hooks/typecheck.js" },
+          { "type": "command", "command": "node .claude/hooks/analysis.js" },
+          { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
+        ]
       },
       {
         "matcher": "Edit",
-        "command": "pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/lint-with-feedback.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/lint-with-feedback.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/typecheck.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/typecheck.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/detect-secrets.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/detect-secrets.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/detect-duplicates.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/detect-duplicates.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/detect-missing-tests.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/detect-missing-tests.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/check-complexity.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/check-complexity.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/detect-dead-code.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/detect-dead-code.js"
-      },
-      {
-        "matcher": "Write",
-        "command": "node .claude/hooks/track-tech-debt.js"
-      },
-      {
-        "matcher": "Edit",
-        "command": "node .claude/hooks/track-tech-debt.js"
+        "hooks": [
+          { "type": "command", "command": "sh -c '[ \"${CLAUDE_FORMAT:-1}\" = \"0\" ] || pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true'" },
+          { "type": "command", "command": "node .claude/hooks/lint-with-feedback.js" },
+          { "type": "command", "command": "node .claude/hooks/typecheck.js" },
+          { "type": "command", "command": "node .claude/hooks/analysis.js" },
+          { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
+        ]
       }
     ],
     "UserPromptSubmit": [
       {
-        "command": "node .claude/hooks/user-prompt-context.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/user-prompt-context.js"
+          }
+        ]
       }
     ],
     "PreCompact": [
       {
-        "command": "node .claude/hooks/pre-compact-snapshot.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-compact-snapshot.js"
+          }
+        ]
       }
     ],
     "SessionStart": [
       {
-        "command": "node .claude/hooks/session-context.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/session-context.js"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/notify.js"
+          }
+        ]
       }
     ],
     "Stop": [
       {
-        "command": "node .claude/hooks/save-session-notes.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/save-session-notes.js"
+          }
+        ]
       },
       {
-        "command": "node .claude/hooks/pre-pr-checklist.js"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/track-tech-debt.js"
+          }
+        ]
       },
       {
-        "command": "pnpm test 2>/dev/null || echo 'No tests configured'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/detect-duplicates.js"
+          }
+        ]
       },
       {
-        "command": "echo '\\n💡 Reminder: Run /log-auto before closing the session\\n'"
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/pre-pr-checklist.js"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm test 2>/dev/null || echo 'No tests configured'"
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "printf '\\n💡 Reminder: Run /log-auto before closing the session\\n'"
+          }
+        ]
       }
     ]
   }

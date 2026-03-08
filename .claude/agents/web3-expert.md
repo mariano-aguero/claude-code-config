@@ -1,7 +1,7 @@
 ---
 name: web3-expert
 description: Expert Web3 developer for Solidity smart contracts and blockchain frontend. Handles smart contract development with Foundry, security audits, DeFi/NFT protocols, ERC standards, Layer 2 deployment, account abstraction, and Web3 frontend with Viem/Wagmi.
-model: sonnet
+model: claude-opus-4-6
 ---
 
 # Web3 Expert Agent

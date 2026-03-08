@@ -221,26 +221,16 @@ export function ${Feature}List() {
 // features/<feature>/components/<feature>-form.tsx
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { useCreate${Feature} } from "../hooks/use-${feature}-mutations";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required").max(100),
 });
-
-type FormValues = z.infer<typeof formSchema>;
 
 interface ${Feature}FormProps {
   onSuccess?: () => void;
@@ -249,44 +239,50 @@ interface ${Feature}FormProps {
 export function ${Feature}Form({ onSuccess }: ${Feature}FormProps) {
   const createMutation = useCreate${Feature}();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
+  const form = useForm({
+    defaultValues: { name: "" },
+    validators: {
+      onSubmit: formSchema,
+    },
+    onSubmit: async ({ value }) => {
+      await createMutation.mutateAsync(value);
+      form.reset();
+      onSuccess?.();
     },
   });
 
-  async function onSubmit(values: FormValues) {
-    try {
-      await createMutation.mutateAsync(values);
-      form.reset();
-      onSuccess?.();
-    } catch (error) {
-      // Error handled by mutation
-    }
-  }
-
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter name..." {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={createMutation.isPending}>
-          {createMutation.isPending ? "Creating..." : "Create"}
-        </Button>
-      </form>
-    </Form>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+      className="space-y-4"
+    >
+      <form.Field name="name">
+        {(field) => (
+          <div className="space-y-1">
+            <Label htmlFor={field.name}>Name</Label>
+            <Input
+              id={field.name}
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(e) => field.handleChange(e.target.value)}
+              placeholder="Enter name..."
+            />
+            {field.state.meta.errors.length > 0 && (
+              <p className="text-sm text-destructive">
+                {field.state.meta.errors[0]}
+              </p>
+            )}
+          </div>
+        )}
+      </form.Field>
+
+      <Button type="submit" disabled={createMutation.isPending || form.state.isSubmitting}>
+        {createMutation.isPending ? "Creating..." : "Create"}
+      </Button>
+    </form>
   );
 }
 ```

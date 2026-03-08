@@ -63,8 +63,13 @@ for (const file of walkFiles(".")) {
   try { src = fs.readFileSync(file, "utf-8"); }
   catch { continue; }
 
-  // Only check files that import from ours
-  if (!src.includes(baseName)) continue;
+  // Only check files that import from ours (match import/from statement, not arbitrary strings)
+  const importsFromUs =
+    src.includes(`from '${baseName}'`) ||
+    src.includes(`from "${baseName}"`) ||
+    src.includes(`from './${baseName}'`) ||
+    src.includes(`from "./${baseName}"`);
+  if (!importsFromUs) continue;
 
   for (const name of namedExports) {
     if (src.includes(name)) usedExports.add(name);

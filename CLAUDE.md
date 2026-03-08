@@ -10,7 +10,7 @@ This is a Claude Code configuration repository containing specialized agents, sk
 
 ### Agents (`.claude/agents/`)
 Expert personas with behavioral traits and response methodologies:
-- `frontend-expert` - React 19, Next.js 16+, TanStack ecosystem
+- `frontend-expert` - React 19, Next.js 15+, TanStack ecosystem
 - `backend-expert` - Node.js, Hono, Drizzle, PostgreSQL
 - `infrastructure-expert` - Docker, CI/CD, GitHub Actions
 - `ui-expert` - Tailwind v4, shadcn/ui, Framer Motion
@@ -19,6 +19,7 @@ Expert personas with behavioral traits and response methodologies:
 - `testing-expert` - Vitest, Playwright, MSW, mocking
 - `database-expert` - PostgreSQL, Drizzle ORM, migrations
 - `security-expert` - OWASP, auth, headers, secrets management
+- `code-reviewer` - Evidence-based reviews with severity classification
 
 Format: YAML frontmatter (`name`, `description`, `model`) + Capabilities, Behavioral Traits, Response Approach, Example Interactions.
 
@@ -46,8 +47,40 @@ Slash command templates: `/react/*`, `/git/*`, `/testing/*`, `/api/*`, `/db/*`, 
 
 ## Key Principles
 
-- **TanStack for data** - Use Query for server state, Form for forms (never React Hook Form or raw fetch)
+- **TanStack for data** - Use Query for client-side server state, Form for forms (never React Hook Form); use `fetch()` or ORM calls directly in Server Components
 - **Server Components default** - Use `"use client"` only when necessary
 - **TypeScript strict** - No `any`, proper generics, Zod for runtime validation
 - **Drizzle for database** - Type-safe queries, proper migrations
 - **Web3 security** - CEI pattern, reentrancy guards, simulate before send
+
+## Hook Toggles
+
+Control formatting and linting per project via `.claude/settings.local.json` (not committed to git):
+
+```json
+{
+  "env": {
+    "CLAUDE_FORMAT": "0",
+    "CLAUDE_LINT": "0"
+  }
+}
+```
+
+| Variable | Default | Effect when `"0"` |
+|---|---|---|
+| `CLAUDE_FORMAT` | `"1"` | Skips Prettier on every Write/Edit |
+| `CLAUDE_LINT` | `"1"` | Skips ESLint on every Write/Edit |
+
+Note: `detect-secrets` and `typecheck` always run regardless — they catch correctness and security issues, not style.
+
+## Code Intelligence
+
+Claude Code has native LSP support (enabled via `ENABLE_LSP_TOOL=1` in shell). Prefer LSP tools over Grep/Read for code navigation — 900x faster and semantically precise:
+- `workspaceSymbol` to find where something is defined
+- `findReferences` to see all usages across the codebase
+- `goToDefinition` / `goToImplementation` to jump to source
+- `hover` for type info without reading the file
+
+Use Grep only for text/pattern searches (comments, strings, config files).
+
+After writing or editing code, check LSP diagnostics and fix errors before proceeding.

@@ -1,6 +1,6 @@
 ---
 name: frontend-expert
-description: Expert frontend developer for TypeScript, React 19, Next.js 16+, and TanStack ecosystem. Handles modern web applications, complex UI, performance optimization, and frontend architecture.
+description: Expert frontend developer for TypeScript, React 19, Next.js 15+, and TanStack ecosystem. Handles modern web applications, complex UI, performance optimization, and frontend architecture.
 model: sonnet
 ---
 

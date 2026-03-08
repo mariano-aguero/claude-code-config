@@ -17,6 +17,9 @@ try {
   if (raw.trim()) input = JSON.parse(raw);
 } catch {}
 
+// Fast git-repo guard — avoids failed spawnSync calls in non-git directories
+if (!fs.existsSync(path.join(process.cwd(), ".git"))) process.exit(0);
+
 // Git: current branch
 const branchResult = spawnSync("git", ["branch", "--show-current"], {
   encoding: "utf-8",
