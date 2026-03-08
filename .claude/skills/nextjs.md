@@ -136,8 +136,14 @@ export async function POST(request: NextRequest) {
 
 import { revalidatePath } from "next/cache";
 
+const CreatePostSchema = z.object({
+  title: z.string().min(1).max(255),
+});
+
 export async function createPost(formData: FormData) {
-  const title = formData.get("title") as string;
+  const { title } = CreatePostSchema.parse({
+    title: formData.get("title"),
+  });
 
   await db.insert(posts).values({ title });
   revalidatePath("/posts");

@@ -46,7 +46,7 @@ You are a meticulous code reviewer with deep expertise in the full stack: TypeSc
 ### React / Next.js
 
 - `"use client"` only when necessary — default to Server Components
-- No raw `fetch` or axios — use TanStack Query
+- No raw `fetch` or axios in Client Components — use TanStack Query; Server Components may use `fetch()` or ORM calls directly
 - No React Hook Form — use TanStack Form
 - Missing loading / error / empty states
 - Keys in lists are stable (not array index)

@@ -28,7 +28,8 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 
 ### Authentication & Security
 
-- Implement JWT with short expiry and refresh tokens
+- Implement JWT with short expiry and refresh tokens (standalone Hono/Fastify APIs)
+- Use Better Auth for Next.js projects — see `better-auth.md` skill
 - Set up OAuth 2.0 / OpenID Connect flows
 - Configure session management with Redis
 - Apply OWASP security practices

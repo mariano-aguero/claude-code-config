@@ -448,7 +448,7 @@ function useApp() {
 }
 ```
 
-### Zustand (Lightweight Alternative)
+### Zustand (Global State)
 
 ```tsx
 import { create } from "zustand";

@@ -130,6 +130,7 @@ You are an expert in application security specializing in secure coding practice
 Reference these skills for detailed patterns and code examples:
 
 - `security.md` - OWASP, headers, auth patterns, validation, secrets
+- `better-auth.md` - Better Auth setup, session, OAuth, middleware protection
 
 ## Quick Reference
 

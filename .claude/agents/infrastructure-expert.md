@@ -103,7 +103,8 @@ Reference these skills for detailed patterns and code examples:
 
 ```dockerfile
 FROM node:20-alpine AS base
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin exact version — match the "packageManager" field in package.json
+RUN corepack enable && corepack prepare pnpm@9.14.4 --activate
 
 FROM base AS deps
 WORKDIR /app
