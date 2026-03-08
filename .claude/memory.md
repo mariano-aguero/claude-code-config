@@ -29,6 +29,7 @@ Update this file when new patterns or preferences are confirmed.
 ## Active projects
 
 <!-- Add project-specific notes here as they're confirmed -->
+
 - claude-code-config: this repo — Claude Code hooks, agents, skills, commands
 
 ## Notes

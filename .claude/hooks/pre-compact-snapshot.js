@@ -25,26 +25,40 @@ const isGitRepo = fs.existsSync(path.join(process.cwd(), ".git"));
 
 // Git state
 const branch = isGitRepo
-  ? spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? ""
+  ? (spawnSync("git", ["branch", "--show-current"], {
+      encoding: "utf-8",
+    }).stdout?.trim() ?? "")
   : "";
 const modifiedFiles = isGitRepo
-  ? (spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" }).stdout ?? "").trim()
+  ? (
+      spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" })
+        .stdout ?? ""
+    ).trim()
   : "";
 const recentCommits = isGitRepo
-  ? (spawnSync("git", ["log", "--oneline", "-5"], { encoding: "utf-8" }).stdout ?? "").trim()
+  ? (
+      spawnSync("git", ["log", "--oneline", "-5"], { encoding: "utf-8" })
+        .stdout ?? ""
+    ).trim()
   : "";
 const diffStat = isGitRepo
-  ? spawnSync("git", ["diff", "--stat", "HEAD"], { encoding: "utf-8" }).stdout?.trim() ?? ""
+  ? (spawnSync("git", ["diff", "--stat", "HEAD"], {
+      encoding: "utf-8",
+    }).stdout?.trim() ?? "")
   : "";
 
 // Session notes (manual section only — above auto-snapshot marker)
 let sessionNotesContext = "";
 try {
-  const notesRaw = fs.readFileSync(path.join(".claude", "session-notes.md"), "utf-8");
+  const notesRaw = fs.readFileSync(
+    path.join(".claude", "session-notes.md"),
+    "utf-8",
+  );
   const autoMarkerIdx = notesRaw.indexOf("<!-- auto-snapshot -->");
-  const manual = autoMarkerIdx !== -1
-    ? notesRaw.slice(0, autoMarkerIdx).trimEnd()
-    : notesRaw.trimEnd();
+  const manual =
+    autoMarkerIdx !== -1
+      ? notesRaw.slice(0, autoMarkerIdx).trimEnd()
+      : notesRaw.trimEnd();
   if (manual) sessionNotesContext = manual;
 } catch {}
 
@@ -52,7 +66,10 @@ try {
 const worklogPath = path.join(os.homedir(), ".daily-worklog", "current.md");
 let worklogContext = "";
 try {
-  const lines = fs.readFileSync(worklogPath, "utf-8").split("\n").filter(Boolean);
+  const lines = fs
+    .readFileSync(worklogPath, "utf-8")
+    .split("\n")
+    .filter(Boolean);
   const recent = lines.filter((l) => !l.includes("[COMPACT]")).slice(-5);
   if (recent.length) worklogContext = recent.join("\n");
 } catch {}
@@ -73,7 +90,7 @@ if (branch || modifiedFiles || recentCommits) {
     `\n### Diff stat`,
     diffStat || "(none)",
     `\n### Recent commits`,
-    recentCommits || "(none)"
+    recentCommits || "(none)",
   );
 }
 
@@ -88,7 +105,11 @@ if (worklogContext) {
 const snapshot = sections.join("\n");
 
 // Write global snapshot
-const globalPath = path.join(os.homedir(), ".claude", "pre-compact-snapshot.md");
+const globalPath = path.join(
+  os.homedir(),
+  ".claude",
+  "pre-compact-snapshot.md",
+);
 fs.writeFileSync(globalPath, snapshot, "utf-8");
 
 // Write local snapshot (project-level) if in a git repo
@@ -103,7 +124,7 @@ if (isGitRepo) {
 try {
   fs.appendFileSync(
     worklogPath,
-    `\n[${timestamp}] [COMPACT] Context window compacted on branch '${branch}' — snapshot at ${globalPath}\n`
+    `\n[${timestamp}] [COMPACT] Context window compacted on branch '${branch}' — snapshot at ${globalPath}\n`,
   );
 } catch {}
 

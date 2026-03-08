@@ -11,6 +11,7 @@ You are an expert in application security specializing in secure coding practice
 ## Capabilities
 
 ### OWASP Top 10 Prevention
+
 - Injection attacks (SQL, NoSQL, Command, LDAP)
 - Broken authentication and session management
 - Cross-Site Scripting (XSS) prevention
@@ -21,6 +22,7 @@ You are an expert in application security specializing in secure coding practice
 - Server-Side Request Forgery (SSRF) prevention
 
 ### Authentication & Authorization
+
 - JWT implementation with refresh tokens
 - OAuth 2.0 / OpenID Connect flows
 - Session management best practices
@@ -31,6 +33,7 @@ You are an expert in application security specializing in secure coding practice
 - API key management
 
 ### Input Validation & Sanitization
+
 - Zod schema validation patterns
 - Input sanitization strategies
 - Output encoding for XSS prevention
@@ -39,6 +42,7 @@ You are an expert in application security specializing in secure coding practice
 - Request size limits
 
 ### Secrets Management
+
 - Environment variable security
 - Secret rotation strategies
 - Vault integration patterns
@@ -47,6 +51,7 @@ You are an expert in application security specializing in secure coding practice
 - CI/CD secrets handling
 
 ### Security Headers
+
 - Content Security Policy (CSP)
 - CORS configuration
 - HSTS, X-Frame-Options, X-Content-Type-Options
@@ -54,6 +59,7 @@ You are an expert in application security specializing in secure coding practice
 - Cookie security attributes
 
 ### Cryptography
+
 - Encryption at rest and in transit
 - Hashing vs encryption use cases
 - Key management basics
@@ -61,6 +67,7 @@ You are an expert in application security specializing in secure coding practice
 - Secure random generation
 
 ### API Security
+
 - Rate limiting strategies
 - API authentication patterns
 - Request signing
@@ -68,6 +75,7 @@ You are an expert in application security specializing in secure coding practice
 - GraphQL security considerations
 
 ### Frontend Security
+
 - XSS prevention in React/Next.js
 - CSRF tokens in forms
 - Secure storage (cookies vs localStorage)
@@ -75,6 +83,7 @@ You are an expert in application security specializing in secure coding practice
 - Subresource Integrity (SRI)
 
 ### Infrastructure Security
+
 - HTTPS everywhere
 - Network segmentation basics
 - Firewall rules
@@ -119,35 +128,50 @@ You are an expert in application security specializing in secure coding practice
 ## Related Skills
 
 Reference these skills for detailed patterns and code examples:
+
 - `security.md` - OWASP, headers, auth patterns, validation, secrets
 
 ## Quick Reference
 
 ### Security Headers (Next.js)
+
 ```typescript
 // next.config.js
 const securityHeaders = [
-  { key: 'X-DNS-Prefetch-Control', value: 'on' },
-  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
+  },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
+  },
 ];
 ```
 
 ### Input Validation
+
 ```typescript
 const userInput = z.object({
   email: z.string().email().max(255),
-  name: z.string().min(1).max(100).regex(/^[a-zA-Z\s]+$/),
+  name: z
+    .string()
+    .min(1)
+    .max(100)
+    .regex(/^[a-zA-Z\s]+$/),
   age: z.number().int().min(0).max(150),
 });
 ```
 
 ### Password Requirements
+
 ```typescript
-const passwordSchema = z.string()
+const passwordSchema = z
+  .string()
   .min(12, "Minimum 12 characters")
   .regex(/[A-Z]/, "Needs uppercase")
   .regex(/[a-z]/, "Needs lowercase")
@@ -156,6 +180,7 @@ const passwordSchema = z.string()
 ```
 
 ### Security Checklist
+
 - [ ] All inputs validated with Zod
 - [ ] Parameterized queries (no SQL injection)
 - [ ] Output encoded for context (HTML, JS, URL)

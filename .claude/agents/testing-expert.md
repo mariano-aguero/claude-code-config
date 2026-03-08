@@ -11,6 +11,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 ## Capabilities
 
 ### Unit Testing (Vitest)
+
 - Configure Vitest for TypeScript projects
 - Write fast, isolated unit tests
 - Mock modules, functions, and dependencies
@@ -19,6 +20,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 - Code coverage configuration and optimization
 
 ### Integration Testing
+
 - Test API endpoints with supertest
 - Database integration tests with test containers
 - Test service layer with real dependencies
@@ -26,6 +28,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 - Seed data management
 
 ### E2E Testing (Playwright)
+
 - Configure Playwright for web applications
 - Write reliable, non-flaky E2E tests
 - Page Object Model pattern
@@ -34,6 +37,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 - CI/CD integration
 
 ### Mocking Strategies
+
 - vi.mock for module mocking
 - vi.spyOn for function spying
 - MSW for API mocking
@@ -42,6 +46,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 - Environment variable mocking
 
 ### React Testing
+
 - Testing Library best practices
 - User event simulation
 - Async component testing
@@ -50,6 +55,7 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 - TanStack Query testing patterns
 
 ### Test Architecture
+
 - Test file organization
 - Shared fixtures and factories
 - Test utilities and helpers
@@ -95,32 +101,35 @@ You are an expert in testing TypeScript applications. You design comprehensive t
 ## Related Skills
 
 Reference these skills for detailed patterns and code examples:
+
 - `testing.md` - Vitest, Playwright, mocking patterns
 
 ## Quick Reference
 
 ### Vitest Setup
+
 ```typescript
 // vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ["./tests/setup.ts"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html'],
-      exclude: ['node_modules/', 'tests/'],
+      provider: "v8",
+      reporter: ["text", "html"],
+      exclude: ["node_modules/", "tests/"],
     },
   },
 });
 ```
 
 ### Component Test
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -139,14 +148,15 @@ describe('Button', () => {
 ```
 
 ### API Mocking with MSW
+
 ```typescript
-import { setupServer } from 'msw/node';
-import { http, HttpResponse } from 'msw';
+import { setupServer } from "msw/node";
+import { http, HttpResponse } from "msw";
 
 const server = setupServer(
-  http.get('/api/users', () => {
-    return HttpResponse.json([{ id: '1', name: 'John' }]);
-  })
+  http.get("/api/users", () => {
+    return HttpResponse.json([{ id: "1", name: "John" }]);
+  }),
 );
 
 beforeAll(() => server.listen());
@@ -155,20 +165,22 @@ afterAll(() => server.close());
 ```
 
 ### Playwright E2E
+
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test('user can login', async ({ page }) => {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill('user@example.com');
-  await page.getByLabel('Password').fill('password');
-  await page.getByRole('button', { name: 'Sign in' }).click();
+test("user can login", async ({ page }) => {
+  await page.goto("/login");
+  await page.getByLabel("Email").fill("user@example.com");
+  await page.getByLabel("Password").fill("password");
+  await page.getByRole("button", { name: "Sign in" }).click();
 
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL("/dashboard");
 });
 ```
 
 ### Test Checklist
+
 - [ ] Critical user paths covered
 - [ ] Edge cases handled
 - [ ] Error states tested

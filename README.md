@@ -74,30 +74,30 @@ Use the security-expert agent to review this auth flow.
 Use the code-reviewer agent after I finish this feature.
 ```
 
-| Task type | Agent invoked |
-|-----------|--------------|
-| React, Next.js, TanStack | `frontend-expert` |
-| API, DB queries, server logic | `backend-expert` |
-| SQL schema, Drizzle, migrations | `database-expert` |
-| Auth, OWASP, secrets | `security-expert` |
-| Tailwind, shadcn/ui, animations | `ui-expert` |
-| Solidity, DeFi, Wagmi | `web3-expert` |
-| Vitest, Playwright, mocking | `testing-expert` |
-| Advanced TypeScript, Zod | `typescript-expert` |
-| Docker, CI/CD, GitHub Actions | `infrastructure-expert` |
-| PR / feature review | `code-reviewer` |
+| Task type                       | Agent invoked           |
+| ------------------------------- | ----------------------- |
+| React, Next.js, TanStack        | `frontend-expert`       |
+| API, DB queries, server logic   | `backend-expert`        |
+| SQL schema, Drizzle, migrations | `database-expert`       |
+| Auth, OWASP, secrets            | `security-expert`       |
+| Tailwind, shadcn/ui, animations | `ui-expert`             |
+| Solidity, DeFi, Wagmi           | `web3-expert`           |
+| Vitest, Playwright, mocking     | `testing-expert`        |
+| Advanced TypeScript, Zod        | `typescript-expert`     |
+| Docker, CI/CD, GitHub Actions   | `infrastructure-expert` |
+| PR / feature review             | `code-reviewer`         |
 
 ### Hooks — what runs automatically
 
-| Event | What happens |
-|-------|-------------|
-| Every `Write` / `Edit` | Prettier → ESLint → tsc → secrets scan → `git add` |
-| Every `Bash` command | Blocks dangerous commands (rm -rf ~, force push, etc.) |
-| Every `Read` on `.env*` | Blocked — secrets stay out of context |
-| Every prompt submitted | Injects branch + modified files + recent commits |
-| Session start | Loads session notes + worklog + git state |
-| Context compaction | Saves full git snapshot before compressing |
-| Session end | Saves snapshot, scans tech debt, generates PR checklist, runs tests |
+| Event                   | What happens                                                        |
+| ----------------------- | ------------------------------------------------------------------- |
+| Every `Write` / `Edit`  | Prettier → ESLint → tsc → secrets scan → `git add`                  |
+| Every `Bash` command    | Blocks dangerous commands (rm -rf ~, force push, etc.)              |
+| Every `Read` on `.env*` | Blocked — secrets stay out of context                               |
+| Every prompt submitted  | Injects branch + modified files + recent commits                    |
+| Session start           | Loads session notes + worklog + git state                           |
+| Context compaction      | Saves full git snapshot before compressing                          |
+| Session end             | Saves snapshot, scans tech debt, generates PR checklist, runs tests |
 
 ### Inspect Claude's work
 
@@ -199,18 +199,18 @@ Create `.claude/settings.local.json` (gitignored):
 
 Expert personas that define behavior, approach, and specialized knowledge.
 
-| Agent | Expertise | Model |
-|-------|-----------|-------|
-| `frontend-expert` | React 19, Next.js 15+, TanStack ecosystem | sonnet |
-| `backend-expert` | Node.js, Hono/Fastify, Drizzle ORM, PostgreSQL | sonnet |
-| `infrastructure-expert` | Docker, GitHub Actions, Kubernetes, Terraform | sonnet |
-| `ui-expert` | Tailwind CSS v4, shadcn/ui, Framer Motion, a11y | sonnet |
-| `web3-expert` | Solidity, Foundry, Viem, Wagmi, DeFi, NFTs | **opus** |
-| `typescript-expert` | Advanced types, generics, Zod, type-safe patterns | sonnet |
-| `testing-expert` | Vitest, Playwright, Testing Library, MSW, mocking | sonnet |
-| `database-expert` | PostgreSQL, Drizzle ORM, migrations, query optimization | sonnet |
-| `security-expert` | OWASP, authentication, authorization, security headers | **opus** |
-| `code-reviewer` | Evidence-based reviews, severity classification, stack-aware | **opus** |
+| Agent                   | Expertise                                                    | Model    |
+| ----------------------- | ------------------------------------------------------------ | -------- |
+| `frontend-expert`       | React 19, Next.js 15+, TanStack ecosystem                    | sonnet   |
+| `backend-expert`        | Node.js, Hono/Fastify, Drizzle ORM, PostgreSQL               | sonnet   |
+| `infrastructure-expert` | Docker, GitHub Actions, Kubernetes, Terraform                | sonnet   |
+| `ui-expert`             | Tailwind CSS v4, shadcn/ui, Framer Motion, a11y              | sonnet   |
+| `web3-expert`           | Solidity, Foundry, Viem, Wagmi, DeFi, NFTs                   | **opus** |
+| `typescript-expert`     | Advanced types, generics, Zod, type-safe patterns            | sonnet   |
+| `testing-expert`        | Vitest, Playwright, Testing Library, MSW, mocking            | sonnet   |
+| `database-expert`       | PostgreSQL, Drizzle ORM, migrations, query optimization      | sonnet   |
+| `security-expert`       | OWASP, authentication, authorization, security headers       | **opus** |
+| `code-reviewer`         | Evidence-based reviews, severity classification, stack-aware | **opus** |
 
 > Opus is used for security, web3, and code review — tasks where deeper reasoning has high impact.
 
@@ -222,42 +222,42 @@ Automated scripts configured via `.claude/settings.json`.
 
 ### Security — PreToolUse (block before execution)
 
-| Hook | Trigger | Blocks |
-|------|---------|--------|
-| `block-env-read.js` | `Read` on `.env*` files | Prevents exposing secrets |
-| `block-dangerous-git.js` | `Bash` | `rm -rf ~`, `curl\|bash`, fork bombs, force push, `chmod -R 777`, `mkfs` |
+| Hook                     | Trigger                 | Blocks                                                                   |
+| ------------------------ | ----------------------- | ------------------------------------------------------------------------ |
+| `block-env-read.js`      | `Read` on `.env*` files | Prevents exposing secrets                                                |
+| `block-dangerous-git.js` | `Bash`                  | `rm -rf ~`, `curl\|bash`, fork bombs, force push, `chmod -R 777`, `mkfs` |
 
 ### Code Quality — PostToolUse (runs on every Write/Edit)
 
-| Hook | What it does |
-|------|-------------|
-| Prettier | Auto-formats the file (`CLAUDE_FORMAT=0` to disable) |
+| Hook                    | What it does                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| Prettier                | Auto-formats the file (`CLAUDE_FORMAT=0` to disable)                             |
 | `lint-with-feedback.js` | ESLint auto-fix, reports unfixable errors to Claude (`CLAUDE_LINT=0` to disable) |
-| `typecheck.js` | `tsc --noEmit --incremental` on `.ts`/`.tsx` files |
-| `analysis.js` | Secrets detection (blocking) + missing tests + complexity (advisory) |
-| `auto-stage.js` | `git add` every edited file — `git diff --staged` shows all of Claude's work |
+| `typecheck.js`          | `tsc --noEmit --incremental` on `.ts`/`.tsx` files                               |
+| `analysis.js`           | Secrets detection (blocking) + missing tests + complexity (advisory)             |
+| `auto-stage.js`         | `git add` every edited file — `git diff --staged` shows all of Claude's work     |
 
 `detect-dead-code.js` is also available but not wired by default — add it to `settings.json` PostToolUse to enable.
 
 ### Session — Stop (once per session, not per file)
 
-| Hook | What it does |
-|------|-------------|
+| Hook                    | What it does                                                               |
+| ----------------------- | -------------------------------------------------------------------------- |
 | `save-session-notes.js` | Snapshots git state + last 5 worklog entries to `.claude/session-notes.md` |
-| `track-tech-debt.js` | Scans TODO/FIXME/HACK → `.claude/tech-debt.md` |
-| `detect-duplicates.js` | Full project scan for duplicate export names |
-| `pre-pr-checklist.js` | AI-generated PR checklist when commits are ahead of remote |
-| `pnpm test` | Runs test suite (silently skips if not configured) |
-| `/log-auto` reminder | Prints a reminder to run `/log-auto` before closing the session |
+| `track-tech-debt.js`    | Scans TODO/FIXME/HACK → `.claude/tech-debt.md`                             |
+| `detect-duplicates.js`  | Full project scan for duplicate export names                               |
+| `pre-pr-checklist.js`   | AI-generated PR checklist when commits are ahead of remote                 |
+| `pnpm test`             | Runs test suite (silently skips if not configured)                         |
+| `/log-auto` reminder    | Prints a reminder to run `/log-auto` before closing the session            |
 
 ### Context Injection
 
-| Hook | Event | Injects |
-|------|-------|---------|
-| `session-context.js` | `SessionStart` | Session notes + worklog + git state |
-| `user-prompt-context.js` | `UserPromptSubmit` | Branch + modified files + recent commits |
-| `notify.js` | `Notification` | Native macOS alert (osascript) when Claude needs attention |
-| `pre-compact-snapshot.js` | `PreCompact` | Full git state before context compression |
+| Hook                      | Event              | Injects                                                    |
+| ------------------------- | ------------------ | ---------------------------------------------------------- |
+| `session-context.js`      | `SessionStart`     | Session notes + worklog + git state                        |
+| `user-prompt-context.js`  | `UserPromptSubmit` | Branch + modified files + recent commits                   |
+| `notify.js`               | `Notification`     | Native macOS alert (osascript) when Claude needs attention |
+| `pre-compact-snapshot.js` | `PreCompact`       | Full git state before context compression                  |
 
 ### Hook Toggles
 
@@ -272,10 +272,10 @@ Disable formatting or linting per project via `.claude/settings.local.json` (not
 }
 ```
 
-| Variable | Default | Effect when `"0"` |
-|---|---|---|
-| `CLAUDE_FORMAT` | `"1"` | Skips Prettier on every Write/Edit |
-| `CLAUDE_LINT` | `"1"` | Skips ESLint on every Write/Edit |
+| Variable        | Default | Effect when `"0"`                  |
+| --------------- | ------- | ---------------------------------- |
+| `CLAUDE_FORMAT` | `"1"`   | Skips Prettier on every Write/Edit |
+| `CLAUDE_LINT`   | `"1"`   | Skips ESLint on every Write/Edit   |
 
 `detect-secrets` and `typecheck` always run regardless.
 
@@ -293,52 +293,52 @@ git reset HEAD             # unstage everything
 
 Persistent work log for daily standups, stored at `~/.daily-worklog/current.md`.
 
-| Command | What it does |
-|---------|-------------|
-| `/log <message>` | Manually log a work entry (supports `[BLOCKER]` and `[HOY]` prefixes) |
-| `/log-auto` | Auto-generates a summary of the current session and appends it |
-| `/daily` | Generates a daily standup report from git history, PRs, and the work log |
+| Command          | What it does                                                             |
+| ---------------- | ------------------------------------------------------------------------ |
+| `/log <message>` | Manually log a work entry (supports `[BLOCKER]` and `[HOY]` prefixes)    |
+| `/log-auto`      | Auto-generates a summary of the current session and appends it           |
+| `/daily`         | Generates a daily standup report from git history, PRs, and the work log |
 
 The `save-session-notes.js` Stop hook also appends an `[AUTO-STOP]` entry automatically at the end of every session.
 
 ## Skills
 
-| Skill | Content |
-|-------|---------|
-| `javascript.md` | ES6+, destructuring, async/await, functional patterns |
-| `typescript.md` | Generics, conditional types, infer, branded types |
-| `nodejs.md` | Hono/Fastify, middleware, error handling, auth, caching |
-| `react.md` | Components, hooks, TanStack Query v5, TanStack Form v1, Zustand |
-| `nextjs.md` | App Router, Server Components, Server Actions, caching |
-| `ui.md` | Tailwind v4, shadcn/ui, forms, accessibility |
-| `testing.md` | Vitest, Playwright, Testing Library, MSW, mocking |
-| `database.md` | Drizzle ORM, PostgreSQL, migrations, queries |
-| `security.md` | OWASP Top 10, JWT, RBAC, headers, input validation |
-| `hooks.md` | Claude Code hook patterns and event reference |
-| `solidity/` | Foundry, OpenZeppelin 5.4, security patterns, testing |
-| `web3/` | Viem 2.45+, Wagmi 3.4+, wallet connection, transactions |
+| Skill           | Content                                                         |
+| --------------- | --------------------------------------------------------------- |
+| `javascript.md` | ES6+, destructuring, async/await, functional patterns           |
+| `typescript.md` | Generics, conditional types, infer, branded types               |
+| `nodejs.md`     | Hono/Fastify, middleware, error handling, auth, caching         |
+| `react.md`      | Components, hooks, TanStack Query v5, TanStack Form v1, Zustand |
+| `nextjs.md`     | App Router, Server Components, Server Actions, caching          |
+| `ui.md`         | Tailwind v4, shadcn/ui, forms, accessibility                    |
+| `testing.md`    | Vitest, Playwright, Testing Library, MSW, mocking               |
+| `database.md`   | Drizzle ORM, PostgreSQL, migrations, queries                    |
+| `security.md`   | OWASP Top 10, JWT, RBAC, headers, input validation              |
+| `hooks.md`      | Claude Code hook patterns and event reference                   |
+| `solidity/`     | Foundry, OpenZeppelin 5.4, security patterns, testing           |
+| `web3/`         | Viem 2.45+, Wagmi 3.4+, wallet connection, transactions         |
 
 ## Commands
 
-| Category | Commands |
-|----------|---------|
-| React | `/component`, `/hook`, `/page`, `/feature` |
-| Git | `/commit`, `/pr`, `/review` |
-| Web3 | `/contract`, `/audit`, `/wagmi-hook`, `/gas` |
-| Database | `/schema`, `/migration` |
-| API | `/route` |
-| Infrastructure | `/dockerfile`, `/github-action` |
-| Testing | `/test`, `/e2e` |
-| Tooling | `/audit-package` |
+| Category       | Commands                                     |
+| -------------- | -------------------------------------------- |
+| React          | `/component`, `/hook`, `/page`, `/feature`   |
+| Git            | `/commit`, `/pr`, `/review`                  |
+| Web3           | `/contract`, `/audit`, `/wagmi-hook`, `/gas` |
+| Database       | `/schema`, `/migration`                      |
+| API            | `/route`                                     |
+| Infrastructure | `/dockerfile`, `/github-action`              |
+| Testing        | `/test`, `/e2e`                              |
+| Tooling        | `/audit-package`                             |
 
 ## Tech Stack
 
-| Domain | Stack |
-|--------|-------|
+| Domain   | Stack                                                                                         |
+| -------- | --------------------------------------------------------------------------------------------- |
 | Frontend | TypeScript 5.x, React 19, Next.js 15+, TanStack Query v5 + Form v1, Tailwind v4.1, Zustand v5 |
-| Backend | Node.js 20+, Hono/Fastify, Drizzle ORM, PostgreSQL 16+, Redis |
-| Web3 | Solidity 0.8.33, Foundry, OpenZeppelin 5.4, Viem 2.45+, Wagmi 3.4+ |
-| Testing | Vitest, Testing Library, Playwright, MSW |
+| Backend  | Node.js 20+, Hono/Fastify, Drizzle ORM, PostgreSQL 16+, Redis                                 |
+| Web3     | Solidity 0.8.33, Foundry, OpenZeppelin 5.4, Viem 2.45+, Wagmi 3.4+                            |
+| Testing  | Vitest, Testing Library, Playwright, MSW                                                      |
 
 ## Key Principles
 

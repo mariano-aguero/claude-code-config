@@ -75,11 +75,11 @@ function isContract(address account) internal view returns (bool) {
 
 ## Key Optimizations
 
-| Technique | Gas Saved |
-|-----------|-----------|
-| Custom errors vs require strings | ~50 gas/revert |
-| Unchecked increment in loops | ~30-40 gas/iteration |
-| Packing storage variables | ~20,000 gas/slot saved |
-| ++i vs i++ | ~5 gas |
-| Cache storage in memory | ~100 gas/read |
-| Short-circuit && and \|\| | Variable |
+| Technique                        | Gas Saved              |
+| -------------------------------- | ---------------------- |
+| Custom errors vs require strings | ~50 gas/revert         |
+| Unchecked increment in loops     | ~30-40 gas/iteration   |
+| Packing storage variables        | ~20,000 gas/slot saved |
+| ++i vs i++                       | ~5 gas                 |
+| Cache storage in memory          | ~100 gas/read          |
+| Short-circuit && and \|\|        | Variable               |

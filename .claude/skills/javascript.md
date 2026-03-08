@@ -502,7 +502,9 @@ const clone = structuredClone(original);
 function deepClone(obj) {
   if (obj === null || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map(deepClone);
-  return Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, deepClone(v)]));
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [k, deepClone(v)]),
+  );
 }
 ```
 

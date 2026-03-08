@@ -136,15 +136,11 @@ const createUserSchema = z.object({
   password: z.string().min(8),
 });
 
-app.post(
-  "/users",
-  zValidator("json", createUserSchema),
-  async (c) => {
-    const data = c.req.valid("json"); // Typed!
-    const user = await userService.create(data);
-    return c.json(user, 201);
-  }
-);
+app.post("/users", zValidator("json", createUserSchema), async (c) => {
+  const data = c.req.valid("json"); // Typed!
+  const user = await userService.create(data);
+  return c.json(user, 201);
+});
 ```
 
 ### Rate Limiting
@@ -196,7 +192,7 @@ export const requestLogger = createMiddleware(async (c, next) => {
       status,
       duration,
       timestamp: new Date().toISOString(),
-    })
+    }),
   );
 });
 ```
@@ -211,7 +207,7 @@ export class AppError extends Error {
     public message: string,
     public statusCode: number = 500,
     public code: string = "INTERNAL_ERROR",
-    public isOperational: boolean = true
+    public isOperational: boolean = true,
   ) {
     super(message);
     Object.setPrototypeOf(this, AppError.prototype);
@@ -267,7 +263,7 @@ app.onError((err, c) => {
           message: err.message,
         },
       },
-      err.statusCode
+      err.statusCode,
     );
   }
 
@@ -282,7 +278,7 @@ app.onError((err, c) => {
           details: err.errors,
         },
       },
-      400
+      400,
     );
   }
 
@@ -298,7 +294,7 @@ app.onError((err, c) => {
             : err.message,
       },
     },
-    500
+    500,
   );
 });
 ```
@@ -380,7 +376,7 @@ export async function generateTokens(userId: string) {
       sub: userId,
       exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
     },
-    process.env.JWT_SECRET!
+    process.env.JWT_SECRET!,
   );
 
   const refreshToken = await sign(
@@ -388,7 +384,7 @@ export async function generateTokens(userId: string) {
       sub: userId,
       exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, // 7 days
     },
-    process.env.JWT_REFRESH_SECRET!
+    process.env.JWT_REFRESH_SECRET!,
   );
 
   return { accessToken, refreshToken };
@@ -419,7 +415,7 @@ export async function hashPassword(password: string): Promise<string> {
 
 export async function verifyPassword(
   password: string,
-  hashedPassword: string
+  hashedPassword: string,
 ): Promise<boolean> {
   return verify(hashedPassword, password);
 }
@@ -459,7 +455,7 @@ export function cached(keyFn: (...args: any[]) => string, ttl = 3600) {
   return function (
     target: any,
     propertyKey: string,
-    descriptor: PropertyDescriptor
+    descriptor: PropertyDescriptor,
   ) {
     const originalMethod = descriptor.value;
 
@@ -513,7 +509,7 @@ export function paginated<T>(
   data: T[],
   page: number,
   limit: number,
-  total: number
+  total: number,
 ) {
   return success(data, {
     page,
@@ -588,7 +584,7 @@ app.get("/health", async (c) => {
       checks,
       timestamp: new Date().toISOString(),
     },
-    healthy ? 200 : 503
+    healthy ? 200 : 503,
   );
 });
 ```
@@ -599,7 +595,9 @@ app.get("/health", async (c) => {
 import { z } from "zod";
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
   PORT: z.coerce.number().default(3000),
   DATABASE_URL: z.string().url(),
   REDIS_URL: z.string().url(),

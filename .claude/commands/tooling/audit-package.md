@@ -62,16 +62,19 @@ Perform a comprehensive security audit and automatically fix vulnerabilities in 
 7. **Generate a summary report:**
 
 ### Actions Taken
+
 - List all packages that were updated
 - Show version changes (from → to)
 - Note any manual changes made to manifest files
 
 ### Remaining Issues
+
 - Vulnerabilities that couldn't be fixed automatically
 - Reason why (no patch available, requires major version, etc.)
 - Suggested workarounds or alternatives
 
 ### Verification
+
 - Confirm audit passes after fixes
 - Note any new issues introduced by updates
 
@@ -92,11 +95,13 @@ Perform a comprehensive security audit and automatically fix vulnerabilities in 
    - Report the issue and suggest manual intervention
 
 ### Test Results
+
 - Show test execution output
 - Confirm all tests pass after fixes
 - If tests fail, show which tests broke and likely cause
 
 ## Important
+
 - Always create a backup awareness: remind user to commit current state before major updates
 - For breaking changes (major versions), ask user for confirmation before proceeding
 - If a fix breaks tests, revert the problematic update and report the issue

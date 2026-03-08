@@ -44,7 +44,9 @@ const DANGEROUS = [
 
   // ── Filesystem ───────────────────────────────────────────────────────────
   {
-    pattern: /\brm\s+-[a-z]*r[a-z]*f\b[^;\n&|]*(?:~|\$HOME|\/root|\/usr|\/etc|\/var)/,
+    // Word boundary after each path prevents false positives like /var_backups or /usrshare
+    pattern:
+      /\brm\s+-[a-z]*r[a-z]*f\b[^;\n&|]*(?:~|\$HOME|\/root\b|\/usr\b|\/etc\b|\/var\b)/,
     label: "rm -rf targeting home/system directory",
     hint: "Recursive deletion of home or system directories is irreversible.",
   },
@@ -93,7 +95,7 @@ const matched = DANGEROUS.find((d) => d.pattern.test(command));
 
 if (matched) {
   process.stderr.write(
-    `🚨 Blocked: '${matched.label}' is a destructive command.\n${matched.hint}\nAsk the user for explicit confirmation before running this.\n`
+    `🚨 Blocked: '${matched.label}' is a destructive command.\n${matched.hint}\nAsk the user for explicit confirmation before running this.\n`,
   );
   process.exit(2);
 }

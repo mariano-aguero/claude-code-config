@@ -25,18 +25,18 @@ Create a git commit following Conventional Commits specification.
 
 ## Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Formatting (no code change) |
-| `refactor` | Code restructuring |
-| `perf` | Performance improvement |
-| `test` | Adding/fixing tests |
-| `chore` | Build, dependencies, tooling |
-| `ci` | CI/CD changes |
-| `revert` | Revert previous commit |
+| Type       | Description                  |
+| ---------- | ---------------------------- |
+| `feat`     | New feature                  |
+| `fix`      | Bug fix                      |
+| `docs`     | Documentation only           |
+| `style`    | Formatting (no code change)  |
+| `refactor` | Code restructuring           |
+| `perf`     | Performance improvement      |
+| `test`     | Adding/fixing tests          |
+| `chore`    | Build, dependencies, tooling |
+| `ci`       | CI/CD changes                |
+| `revert`   | Revert previous commit       |
 
 ## Workflow
 
@@ -50,6 +50,7 @@ Create a git commit following Conventional Commits specification.
 ## Examples
 
 ### Feature
+
 ```bash
 git commit -m "feat(auth): add OAuth2 login flow
 
@@ -61,6 +62,7 @@ Closes #123"
 ```
 
 ### Bug Fix
+
 ```bash
 git commit -m "fix(api): handle null response from users endpoint
 
@@ -69,11 +71,13 @@ Now returns empty object with default values."
 ```
 
 ### Refactor
+
 ```bash
 git commit -m "refactor(hooks): extract common fetch logic to useQuery"
 ```
 
 ### Breaking Change
+
 ```bash
 git commit -m "feat(api)!: change response format for /users endpoint
 
@@ -83,11 +87,13 @@ New: { data: [...], meta: { page, total } }"
 ```
 
 ### Multiple Scopes
+
 ```bash
 git commit -m "feat(auth,api): implement JWT authentication"
 ```
 
 ### Chore
+
 ```bash
 git commit -m "chore(deps): update dependencies
 
@@ -139,6 +145,7 @@ Based on common project structure:
 ```
 
 Configure:
+
 ```bash
 git config --global commit.template ~/.gitmessage
 ```

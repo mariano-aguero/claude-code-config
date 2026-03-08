@@ -33,7 +33,10 @@ const balance = await publicClient.readContract({
 
 // Contract instance
 const token = getContract({ address, abi: erc20Abi, client: publicClient });
-const [name, symbol] = await Promise.all([token.read.name(), token.read.symbol()]);
+const [name, symbol] = await Promise.all([
+  token.read.name(),
+  token.read.symbol(),
+]);
 ```
 
 ## Writing Contracts
@@ -41,7 +44,11 @@ const [name, symbol] = await Promise.all([token.read.name(), token.read.symbol()
 ```typescript
 // Simulate first (recommended)
 const { request } = await publicClient.simulateContract({
-  address, abi, functionName: "deposit", args: [parseEther("1")], account,
+  address,
+  abi,
+  functionName: "deposit",
+  args: [parseEther("1")],
+  account,
 });
 
 // Execute
@@ -71,13 +78,19 @@ if (balance.status === "success") console.log(balance.result);
 ```typescript
 // Watch new events
 const unwatch = publicClient.watchContractEvent({
-  address, abi, eventName: "Transfer",
-  onLogs: (logs) => logs.forEach(log => console.log(log.args)),
+  address,
+  abi,
+  eventName: "Transfer",
+  onLogs: (logs) => logs.forEach((log) => console.log(log.args)),
 });
 
 // Historical events
 const logs = await publicClient.getContractEvents({
-  address, abi, eventName: "Transfer", fromBlock, toBlock,
+  address,
+  abi,
+  eventName: "Transfer",
+  fromBlock,
+  toBlock,
 });
 ```
 
@@ -89,18 +102,26 @@ const signature = await walletClient.signMessage({ account, message: "Hello" });
 
 // EIP-712 typed data
 const signature = await walletClient.signTypedData({
-  account, domain, types, primaryType: "Permit", message,
+  account,
+  domain,
+  types,
+  primaryType: "Permit",
+  message,
 });
 ```
 
 ## Error Handling
 
 ```typescript
-import { BaseError, ContractFunctionRevertedError, UserRejectedRequestError } from "viem";
+import {
+  BaseError,
+  ContractFunctionRevertedError,
+  UserRejectedRequestError,
+} from "viem";
 
 if (error instanceof UserRejectedRequestError) return "Cancelled by user";
 if (error instanceof BaseError) {
-  const revert = error.walk(e => e instanceof ContractFunctionRevertedError);
+  const revert = error.walk((e) => e instanceof ContractFunctionRevertedError);
   if (revert) return revert.data?.errorName;
 }
 ```

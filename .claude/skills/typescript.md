@@ -332,10 +332,7 @@ class UserBuilder<T extends BuilderState = {}> {
 }
 
 // Usage - build() only available when required fields are set
-const user = new UserBuilder()
-  .name("John")
-  .email("john@example.com")
-  .build(); // OK
+const user = new UserBuilder().name("John").email("john@example.com").build(); // OK
 
 // new UserBuilder().name("John").build(); // Error! Missing email
 ```
@@ -395,23 +392,26 @@ interface ApiEndpoints {
   };
 }
 
-type ExtractParams<T extends string> = T extends `${infer _}:${infer Param}/${infer Rest}`
-  ? Param | ExtractParams<`/${Rest}`>
-  : T extends `${infer _}:${infer Param}`
-  ? Param
-  : never;
+type ExtractParams<T extends string> =
+  T extends `${infer _}:${infer Param}/${infer Rest}`
+    ? Param | ExtractParams<`/${Rest}`>
+    : T extends `${infer _}:${infer Param}`
+      ? Param
+      : never;
 
 async function api<
   Path extends keyof ApiEndpoints,
-  Method extends keyof ApiEndpoints[Path]
+  Method extends keyof ApiEndpoints[Path],
 >(
   path: Path,
   method: Method,
   options?: {
     params?: Record<ExtractParams<Path>, string>;
     body?: ApiEndpoints[Path][Method] extends { body: infer B } ? B : never;
-  }
-): Promise<ApiEndpoints[Path][Method] extends { response: infer R } ? R : never> {
+  },
+): Promise<
+  ApiEndpoints[Path][Method] extends { response: infer R } ? R : never
+> {
   // Implementation
 }
 

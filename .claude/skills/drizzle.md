@@ -30,17 +30,24 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   name: text("name").notNull(),
-  role: text("role", { enum: ["admin", "member", "viewer"] }).notNull().default("member"),
+  role: text("role", { enum: ["admin", "member", "viewer"] })
+    .notNull()
+    .default("member"),
   emailVerified: boolean("email_verified").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at").notNull().defaultNow().$onUpdate(() => new Date()),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
 });
 
 export const posts = pgTable("posts", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   content: text("content"),
-  authorId: uuid("author_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
@@ -77,7 +84,20 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 ### Select
 
 ```typescript
-import { eq, and, or, like, gt, lt, gte, lte, isNull, desc, asc, sql } from "drizzle-orm";
+import {
+  eq,
+  and,
+  or,
+  like,
+  gt,
+  lt,
+  gte,
+  lte,
+  isNull,
+  desc,
+  asc,
+  sql,
+} from "drizzle-orm";
 
 // Single record
 const user = await db.query.users.findFirst({
@@ -175,10 +195,7 @@ const [deleted] = await db
 ```typescript
 // Always use transactions for multi-step mutations
 const result = await db.transaction(async (tx) => {
-  const [user] = await tx
-    .insert(users)
-    .values({ email, name })
-    .returning();
+  const [user] = await tx.insert(users).values({ email, name }).returning();
 
   const [profile] = await tx
     .insert(profiles)
@@ -191,8 +208,14 @@ const result = await db.transaction(async (tx) => {
 // Transaction with rollback on error
 try {
   await db.transaction(async (tx) => {
-    await tx.update(accounts).set({ balance: sql`balance - ${amount}` }).where(eq(accounts.id, fromId));
-    await tx.update(accounts).set({ balance: sql`balance + ${amount}` }).where(eq(accounts.id, toId));
+    await tx
+      .update(accounts)
+      .set({ balance: sql`balance - ${amount}` })
+      .where(eq(accounts.id, fromId));
+    await tx
+      .update(accounts)
+      .set({ balance: sql`balance + ${amount}` })
+      .where(eq(accounts.id, toId));
   });
 } catch (err) {
   // tx auto-rolled back
@@ -248,11 +271,20 @@ async function getPostsPage(page: number, pageSize = 20) {
   const offset = (page - 1) * pageSize;
 
   const [data, [{ total }]] = await Promise.all([
-    db.select().from(posts).orderBy(desc(posts.createdAt)).limit(pageSize).offset(offset),
+    db
+      .select()
+      .from(posts)
+      .orderBy(desc(posts.createdAt))
+      .limit(pageSize)
+      .offset(offset),
     db.select({ total: count() }).from(posts),
   ]);
 
-  return { data, total: Number(total), pages: Math.ceil(Number(total) / pageSize) };
+  return {
+    data,
+    total: Number(total),
+    pages: Math.ceil(Number(total) / pageSize),
+  };
 }
 
 // Cursor-based (scalable for infinite scroll)
@@ -307,20 +339,28 @@ pnpm drizzle-kit studio
 ## Indexing
 
 ```typescript
-import { pgTable, text, timestamp, index, uniqueIndex } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/pg-core";
 
 export const posts = pgTable(
   "posts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    authorId: uuid("author_id").notNull().references(() => users.id),
+    authorId: uuid("author_id")
+      .notNull()
+      .references(() => users.id),
     status: text("status").notNull(),
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [
     index("posts_author_idx").on(table.authorId),
     index("posts_status_created_idx").on(table.status, table.createdAt),
-  ]
+  ],
 );
 ```
 
@@ -339,7 +379,7 @@ const results = await db
 
 // Full raw query (parameterized — safe from injection)
 const result = await db.execute(
-  sql`SELECT * FROM users WHERE email = ${email} LIMIT 1`
+  sql`SELECT * FROM users WHERE email = ${email} LIMIT 1`,
 );
 ```
 

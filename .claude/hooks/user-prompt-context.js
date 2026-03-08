@@ -17,8 +17,12 @@ try {
   if (raw.trim()) input = JSON.parse(raw);
 } catch {}
 
-// Fast git-repo guard — avoids failed spawnSync calls in non-git directories
-if (!fs.existsSync(path.join(process.cwd(), ".git"))) process.exit(0);
+// Git-repo guard — uses rev-parse so it works in monorepos where .git is in a parent dir
+if (
+  spawnSync("git", ["rev-parse", "--git-dir"], { encoding: "utf-8" }).status !==
+  0
+)
+  process.exit(0);
 
 // Git: current branch
 const branchResult = spawnSync("git", ["branch", "--show-current"], {
@@ -46,7 +50,10 @@ const recentCommits = (logResult.stdout ?? "").trim();
 const worklogPath = path.join(os.homedir(), ".daily-worklog", "current.md");
 let lastLogEntry = "";
 try {
-  const lines = fs.readFileSync(worklogPath, "utf-8").split("\n").filter(Boolean);
+  const lines = fs
+    .readFileSync(worklogPath, "utf-8")
+    .split("\n")
+    .filter(Boolean);
   const last = lines.at(-1);
   if (last) lastLogEntry = last;
 } catch {}
@@ -60,32 +67,28 @@ const parts = [];
 if (branch) parts.push(`Branch: ${branch}`);
 
 if (modifiedFiles.length > 0) {
-  parts.push(`Modified files (${modifiedFiles.length}):\n${modifiedFiles.map((f) => `  ${f}`).join("\n")}`);
+  parts.push(
+    `Modified files (${modifiedFiles.length}):\n${modifiedFiles.map((f) => `  ${f}`).join("\n")}`,
+  );
 } else {
   parts.push("Working tree: clean");
 }
 
 if (recentCommits) {
-  parts.push(`Recent commits:\n${recentCommits.split("\n").map((l) => `  ${l}`).join("\n")}`);
+  parts.push(
+    `Recent commits:\n${recentCommits
+      .split("\n")
+      .map((l) => `  ${l}`)
+      .join("\n")}`,
+  );
 }
 
 if (lastLogEntry) {
   parts.push(`Last work log: ${lastLogEntry}`);
 }
 
-// Available agents (read from .claude/agents/ if present)
-const agentsDir = path.join(process.cwd(), ".claude", "agents");
-let agentNames = [];
-try {
-  agentNames = fs.readdirSync(agentsDir)
-    .filter((f) => f.endsWith(".md"))
-    .map((f) => f.replace(".md", ""));
-} catch {}
-
-let output = `<git-context>\n${parts.join("\n")}\n</git-context>\n`;
-
-if (agentNames.length > 0) {
-  output += `<available-agents>\n${agentNames.join(", ")}\nUse these agents proactively when the task matches their domain — don't wait for the user to ask.\n</available-agents>\n`;
-}
+// Note: available agents are injected once per session in session-context.js (SessionStart),
+// not here, to avoid adding ~300 bytes of agent list overhead to every prompt.
+const output = `<git-context>\n${parts.join("\n")}\n</git-context>\n`;
 
 process.stdout.write(output);

@@ -147,7 +147,7 @@ services:
     command: pnpm dev
     volumes:
       - .:/app
-      - /app/node_modules  # Prevent overwriting node_modules
+      - /app/node_modules # Prevent overwriting node_modules
     ports:
       - "3000:3000"
     environment:
@@ -200,7 +200,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { status: "unhealthy", error: String(error) },
-      { status: 503 }
+      { status: 503 },
     );
   }
 }

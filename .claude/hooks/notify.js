@@ -32,15 +32,18 @@ if (process.env.CLAUDE_NOTIFY_DEBUG === "1") {
 
 // Only handle events where Claude needs your attention
 const ATTENTION_EVENTS = ["permission_prompt", "idle_prompt"];
-const isAttentionNeeded = ATTENTION_EVENTS.some((e) => message.toLowerCase().includes(e) || event.toLowerCase().includes(e));
+const isAttentionNeeded = ATTENTION_EVENTS.some(
+  (e) => message.toLowerCase().includes(e) || event.toLowerCase().includes(e),
+);
 
 // Exit silently if this is not an attention-required event
 if (!isAttentionNeeded) process.exit(0);
 
 // Build notification content
-const title = isAttentionNeeded && message.includes("permission")
-  ? "Claude needs permission"
-  : "Claude is waiting";
+const title =
+  isAttentionNeeded && message.includes("permission")
+    ? "Claude needs permission"
+    : "Claude is waiting";
 
 const body = message
   ? message.slice(0, 100) + (message.length > 100 ? "…" : "")
@@ -49,8 +52,9 @@ const body = message
 const isMac = process.platform === "darwin";
 
 if (isMac) {
-  // Native macOS notification via osascript
-  const script = `display notification "${body.replace(/"/g, '\\"')}" with title "${title}" sound name "Ping"`;
+  // Native macOS notification via osascript.
+  // JSON.stringify handles all escaping (quotes, backslashes, control chars) safely.
+  const script = `display notification ${JSON.stringify(body)} with title ${JSON.stringify(title)} sound name "Ping"`;
   spawnSync("osascript", ["-e", script], { stdio: "ignore" });
 } else {
   // Fallback: terminal bell + stderr

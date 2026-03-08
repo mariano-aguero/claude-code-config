@@ -37,8 +37,12 @@ function useOptimisticBalance() {
 
   const displayBalance = optimistic ?? balance?.value ?? 0n;
 
-  const update = (delta: bigint) => setOptimistic(prev => (prev ?? balance?.value ?? 0n) + delta);
-  const clear = () => { setOptimistic(null); refetch(); };
+  const update = (delta: bigint) =>
+    setOptimistic((prev) => (prev ?? balance?.value ?? 0n) + delta);
+  const clear = () => {
+    setOptimistic(null);
+    refetch();
+  };
 
   return { displayBalance, update, clear };
 }
@@ -56,12 +60,18 @@ function TokenInput({ token, value, onChange, balance }) {
         <span>Amount</span>
         <span>
           Balance: {formatUnits(balance, token.decimals)}
-          <button onClick={() => onChange(formatUnits(balance, token.decimals))}>MAX</button>
+          <button
+            onClick={() => onChange(formatUnits(balance, token.decimals))}
+          >
+            MAX
+          </button>
         </span>
       </div>
       <input
         value={value}
-        onChange={(e) => /^\d*\.?\d*$/.test(e.target.value) && onChange(e.target.value)}
+        onChange={(e) =>
+          /^\d*\.?\d*$/.test(e.target.value) && onChange(e.target.value)
+        }
         className={isOverBalance ? "text-red-500" : ""}
       />
     </div>
@@ -75,13 +85,18 @@ function TokenInput({ token, value, onChange, balance }) {
 import { toast } from "sonner";
 
 function useTransactionToast() {
-  const showPending = (hash, message) => toast.loading(message, {
-    id: hash,
-    action: { label: "View", onClick: () => window.open(`https://etherscan.io/tx/${hash}`) },
-  });
+  const showPending = (hash, message) =>
+    toast.loading(message, {
+      id: hash,
+      action: {
+        label: "View",
+        onClick: () => window.open(`https://etherscan.io/tx/${hash}`),
+      },
+    });
 
   const showSuccess = (hash, message) => toast.success(message, { id: hash });
-  const showError = (hash, error) => toast.error("Failed", { id: hash, description: error });
+  const showError = (hash, error) =>
+    toast.error("Failed", { id: hash, description: error });
 
   return { showPending, showSuccess, showError };
 }
@@ -106,12 +121,13 @@ export const useWeb3Store = create<Web3Store>()(
       slippage: 0.5,
       recentTransactions: [],
       setSlippage: (slippage) => set({ slippage }),
-      addTransaction: (tx) => set((state) => ({
-        recentTransactions: [tx, ...state.recentTransactions].slice(0, 10),
-      })),
+      addTransaction: (tx) =>
+        set((state) => ({
+          recentTransactions: [tx, ...state.recentTransactions].slice(0, 10),
+        })),
     }),
-    { name: "web3-storage" }
-  )
+    { name: "web3-storage" },
+  ),
 );
 ```
 

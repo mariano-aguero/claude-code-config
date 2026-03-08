@@ -16,17 +16,17 @@ Analyze and optimize gas usage in Solidity smart contracts.
 
 ## Gas Cost Reference
 
-| Operation | Gas Cost |
-|-----------|----------|
-| SSTORE (0 → non-0) | 20,000 |
-| SSTORE (non-0 → non-0) | 5,000 |
-| SSTORE (non-0 → 0) | Refund 4,800 |
-| SLOAD | 2,100 (cold) / 100 (warm) |
-| CALL | 2,600 (cold) / 100 (warm) |
-| Memory expansion | Quadratic |
-| MLOAD/MSTORE | 3 |
-| ADD/SUB/MUL | 3-5 |
-| Deployment per byte | 200 |
+| Operation              | Gas Cost                  |
+| ---------------------- | ------------------------- |
+| SSTORE (0 → non-0)     | 20,000                    |
+| SSTORE (non-0 → non-0) | 5,000                     |
+| SSTORE (non-0 → 0)     | Refund 4,800              |
+| SLOAD                  | 2,100 (cold) / 100 (warm) |
+| CALL                   | 2,600 (cold) / 100 (warm) |
+| Memory expansion       | Quadratic                 |
+| MLOAD/MSTORE           | 3                         |
+| ADD/SUB/MUL            | 3-5                       |
+| Deployment per byte    | 200                       |
 
 ## Optimization Patterns
 
@@ -251,19 +251,21 @@ forge snapshot --diff .gas-snapshot
 
 ## Summary
 
-| Metric | Before | After | Savings |
-|--------|--------|-------|---------|
-| Deploy | 500,000 | 400,000 | 20% |
-| deposit() | 50,000 | 35,000 | 30% |
-| withdraw() | 45,000 | 30,000 | 33% |
+| Metric     | Before  | After   | Savings |
+| ---------- | ------- | ------- | ------- |
+| Deploy     | 500,000 | 400,000 | 20%     |
+| deposit()  | 50,000  | 35,000  | 30%     |
+| withdraw() | 45,000  | 30,000  | 33%     |
 
 ## Optimizations Applied
 
 ### 1. Storage Packing
+
 - Reduced slots from 5 to 3
 - Estimated savings: 40,000 gas per tx
 
 ### 2. Unchecked Math
+
 - Applied to loop counters
 - Estimated savings: 500 gas per iteration
 

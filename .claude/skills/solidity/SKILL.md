@@ -9,14 +9,14 @@ Professional Solidity 0.8.33 development with Foundry and OpenZeppelin 5.4.
 
 ## Quick Reference
 
-| Task | Reference |
-|------|-----------|
-| Project setup, config, structure | [references/foundry.md](references/foundry.md) |
-| Access control, vaults, governance, upgrades | [references/openzeppelin.md](references/openzeppelin.md) |
-| Permit2, Uniswap V4 hooks, flash loans, clones | [references/protocols.md](references/protocols.md) |
-| Reentrancy, oracles, timelocks | [references/security.md](references/security.md) |
-| Unit, fuzz, invariant, fork testing | [references/testing.md](references/testing.md) |
-| Storage packing, unchecked, custom errors | [references/gas-optimization.md](references/gas-optimization.md) |
+| Task                                           | Reference                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------- |
+| Project setup, config, structure               | [references/foundry.md](references/foundry.md)                   |
+| Access control, vaults, governance, upgrades   | [references/openzeppelin.md](references/openzeppelin.md)         |
+| Permit2, Uniswap V4 hooks, flash loans, clones | [references/protocols.md](references/protocols.md)               |
+| Reentrancy, oracles, timelocks                 | [references/security.md](references/security.md)                 |
+| Unit, fuzz, invariant, fork testing            | [references/testing.md](references/testing.md)                   |
+| Storage packing, unchecked, custom errors      | [references/gas-optimization.md](references/gas-optimization.md) |
 
 ## Foundry Commands
 
@@ -49,13 +49,13 @@ forge script script/Deploy.s.sol --rpc-url $RPC --broadcast
 
 ## Security Checklist
 
-| Vulnerability | Prevention |
-|--------------|------------|
-| Reentrancy | CEI pattern, ReentrancyGuard |
-| Access Control | Ownable2Step, AccessManager |
+| Vulnerability       | Prevention                       |
+| ------------------- | -------------------------------- |
+| Reentrancy          | CEI pattern, ReentrancyGuard     |
+| Access Control      | Ownable2Step, AccessManager      |
 | Oracle Manipulation | TWAP, Chainlink staleness checks |
-| Flash Loan Attacks | Same-block checks, invariants |
-| Centralization | Timelocks, multisig |
+| Flash Loan Attacks  | Same-block checks, invariants    |
+| Centralization      | Timelocks, multisig              |
 
 ## Best Practices
 

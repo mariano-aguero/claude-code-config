@@ -17,14 +17,9 @@ if (![".ts", ".tsx"].includes(ext)) process.exit(0);
 const tsconfigPath = path.resolve(process.cwd(), "tsconfig.json");
 if (!fs.existsSync(tsconfigPath)) process.exit(0);
 
-// Use --incremental if tsconfig has incremental support (avoids full rebuild on each file)
-const tsconfigContent = fs.readFileSync(tsconfigPath, "utf-8");
-const supportsIncremental =
-  tsconfigContent.includes('"incremental"') || tsconfigContent.includes('"tsBuildInfoFile"');
-
-const args = supportsIncremental
-  ? ["tsc", "--noEmit", "--incremental"]
-  : ["tsc", "--noEmit"];
+// Note: --incremental + --noEmit was removed — it corrupts .tsbuildinfo on TS < 5.4
+// and provides minimal benefit since we're only checking, not emitting.
+const args = ["tsc", "--noEmit"];
 
 const result = spawnSync("pnpm", args, {
   encoding: "utf-8",
@@ -35,7 +30,7 @@ const result = spawnSync("pnpm", args, {
 if (result.status !== 0) {
   const output = (result.stdout ?? "") + (result.stderr ?? "");
   process.stderr.write(
-    `⚠️  TypeScript errors detected — fix before proceeding:\n\n${output}\n`
+    `⚠️  TypeScript errors detected — fix before proceeding:\n\n${output}\n`,
   );
   process.exit(2);
 }

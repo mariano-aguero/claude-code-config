@@ -101,6 +101,7 @@ shamefully-hoist=true  # compatibility with some packages
 ```
 
 **Types:**
+
 - `feat`: New feature
 - `fix`: Bug fix
 - `docs`: Documentation only
@@ -112,6 +113,7 @@ shamefully-hoist=true  # compatibility with some packages
 - `ci`: CI/CD changes
 
 **Examples:**
+
 ```bash
 git commit -m "feat(auth): add OAuth2 login flow"
 git commit -m "fix(api): handle null response from endpoint"
@@ -179,13 +181,16 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   {
     rules: {
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_" },
+      ],
       "@typescript-eslint/no-explicit-any": "warn",
     },
   },
   {
     ignores: ["dist/", "node_modules/", ".next/"],
-  }
+  },
 );
 ```
 
@@ -258,7 +263,9 @@ const envSchema = z.object({
   DATABASE_URL: z.string().url(),
   NEXT_PUBLIC_API_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
-  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  NODE_ENV: z
+    .enum(["development", "production", "test"])
+    .default("development"),
 });
 
 export const env = envSchema.parse(process.env);

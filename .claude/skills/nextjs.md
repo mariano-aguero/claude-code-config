@@ -8,6 +8,7 @@ description: Next.js 16+ App Router patterns including Server Components, Client
 ## App Router (Next.js 16+)
 
 ### File Structure
+
 ```
 app/
 ├── layout.tsx          # Root layout (required)
@@ -29,6 +30,7 @@ app/
 ### Server vs Client Components
 
 **Server Components (default)**
+
 - Fetch data directly
 - Access backend resources
 - Keep sensitive info on server
@@ -43,6 +45,7 @@ async function UsersPage() {
 ```
 
 **Client Components**
+
 - Use `"use client"` directive
 - For interactivity, hooks, browser APIs
 
@@ -53,19 +56,20 @@ import { useState } from "react";
 
 export function Counter() {
   const [count, setCount] = useState(0);
-  return <button onClick={() => setCount(c => c + 1)}>{count}</button>;
+  return <button onClick={() => setCount((c) => c + 1)}>{count}</button>;
 }
 ```
 
 ### Data Fetching Strategy
 
-| Location | Use Case | Solution |
-|----------|----------|----------|
-| Server Component | Initial page data | Direct `fetch` or DB query |
+| Location         | Use Case                   | Solution                           |
+| ---------------- | -------------------------- | ---------------------------------- |
+| Server Component | Initial page data          | Direct `fetch` or DB query         |
 | Client Component | Interactive/real-time data | **TanStack Query** (NOT raw fetch) |
-| Server Action | Mutations | `"use server"` functions |
+| Server Action    | Mutations                  | `"use server"` functions           |
 
 **Server Components with async/await (for initial data)**
+
 ```tsx
 async function Page() {
   const data = await fetch("https://api.example.com/data", {
@@ -76,6 +80,7 @@ async function Page() {
 ```
 
 **Client Components: ALWAYS use TanStack Query**
+
 ```tsx
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -85,6 +90,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 ```
 
 **Parallel Data Fetching**
+
 ```tsx
 async function Page() {
   // Start both requests in parallel
@@ -111,7 +117,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const CreateUserSchema = z.object({ name: z.string().min(1), email: z.string().email() });
+  const CreateUserSchema = z.object({
+    name: z.string().min(1),
+    email: z.string().email(),
+  });
   const data = CreateUserSchema.parse(await request.json());
   const user = await db.users.create({ data });
   return NextResponse.json(user, { status: 201 });
@@ -220,6 +229,7 @@ export function Avatar({ src, alt }) {
 ### Common Patterns
 
 **Protected Routes**
+
 ```tsx
 // app/dashboard/layout.tsx
 import { redirect } from "next/navigation";
@@ -234,6 +244,7 @@ export default async function DashboardLayout({ children }) {
 ```
 
 **Error Handling**
+
 ```tsx
 // app/error.tsx
 "use client";
@@ -269,7 +280,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             gcTime: 5 * 60 * 1000, // 5 minutes
           },
         },
-      })
+      }),
   );
 
   return (
@@ -283,7 +294,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 // app/layout.tsx
 import { Providers } from "./providers";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <body>
@@ -295,9 +310,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ```
 
 **Hydration with Server Data**
+
 ```tsx
 // app/users/page.tsx (Server Component)
-import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient,
+} from "@tanstack/react-query";
 import { UserList } from "./user-list";
 
 async function getUsers() {
@@ -321,7 +341,7 @@ export default async function UsersPage() {
 }
 
 // app/users/user-list.tsx (Client Component)
-"use client";
+("use client");
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -343,6 +363,7 @@ export function UserList() {
 ```
 
 **Server Actions with Mutations**
+
 ```tsx
 // app/actions.ts
 "use server";
@@ -356,7 +377,7 @@ export async function createUser(data: { name: string; email: string }) {
 }
 
 // app/users/create-user-form.tsx
-"use client";
+("use client");
 
 import { useForm } from "@tanstack/react-form";
 import { zodValidator } from "@tanstack/zod-form-adapter";
@@ -408,7 +429,9 @@ export function CreateUserForm() {
               className="border rounded px-3 py-2"
             />
             {field.state.meta.errors[0] && (
-              <p className="text-red-500 text-sm">{field.state.meta.errors[0]}</p>
+              <p className="text-red-500 text-sm">
+                {field.state.meta.errors[0]}
+              </p>
             )}
           </div>
         )}
@@ -424,7 +447,9 @@ export function CreateUserForm() {
               className="border rounded px-3 py-2"
             />
             {field.state.meta.errors[0] && (
-              <p className="text-red-500 text-sm">{field.state.meta.errors[0]}</p>
+              <p className="text-red-500 text-sm">
+                {field.state.meta.errors[0]}
+              </p>
             )}
           </div>
         )}

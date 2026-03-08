@@ -14,8 +14,22 @@ const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 const ext = path.extname(filePath);
 
 const CHECKABLE = [".ts", ".tsx", ".js", ".jsx"];
-const SKIP = [/index\.[jt]sx?$/, /\.test\./, /\.spec\./, /\.d\.ts$/, /\.config\./];
-const IGNORE_DIRS = new Set(["node_modules", ".git", ".next", "dist", "build", ".cache", "coverage"]);
+const SKIP = [
+  /index\.[jt]sx?$/,
+  /\.test\./,
+  /\.spec\./,
+  /\.d\.ts$/,
+  /\.config\./,
+];
+const IGNORE_DIRS = new Set([
+  "node_modules",
+  ".git",
+  ".next",
+  "dist",
+  "build",
+  ".cache",
+  "coverage",
+]);
 
 if (!CHECKABLE.includes(ext)) process.exit(0);
 if (SKIP.some((p) => p.test(filePath))) process.exit(0);
@@ -27,14 +41,14 @@ try {
   process.exit(0);
 }
 
-// Extract named namedExports using matchAll
+// Extract named exports using matchAll
 const EXPORT_PATTERN =
   /export\s+(?:async\s+)?(?:function|class)\s+(\w+)|export\s+(?:const|let|var)\s+(\w+)|export\s+(?:type|interface)\s+(\w+)/g;
 
 const namedExports = new Set(
   [...content.matchAll(EXPORT_PATTERN)]
     .map((m) => m[1] ?? m[2] ?? m[3])
-    .filter((n) => n && n.length > 2)
+    .filter((n) => n && n.length > 2),
 );
 
 if (namedExports.size === 0) process.exit(0);
@@ -46,8 +60,11 @@ const baseName = path.basename(withoutExt);
 // Walk project files
 function* walkFiles(dir) {
   let entries;
-  try { entries = fs.readdirSync(dir, { withFileTypes: true }); }
-  catch { return; }
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
   for (const entry of entries) {
     if (IGNORE_DIRS.has(entry.name)) continue;
     const full = path.join(dir, entry.name);
@@ -62,20 +79,28 @@ for (const file of walkFiles(process.cwd())) {
   if (path.normalize(file) === normalizedPath) continue;
 
   let src;
-  try { src = fs.readFileSync(file, "utf-8"); }
-  catch { continue; }
+  try {
+    src = fs.readFileSync(file, "utf-8");
+  } catch {
+    continue;
+  }
 
   // Check files that import from ours via any path variant:
   //   from './Button', from '../utils/Button', from '@/components/Button', from 'Button'
-  // Require a '/' prefix or 'from ' prefix to avoid matching arbitrary string literals.
+  //   require('./Button'), require('Button')
+  // Require a '/' prefix or explicit from/require keyword to avoid matching string literals.
   const importsFromUs =
     src.includes(`/${baseName}'`) ||
     src.includes(`/${baseName}"`) ||
     src.includes(`from '${baseName}'`) ||
-    src.includes(`from "${baseName}"`);
+    src.includes(`from "${baseName}"`) ||
+    src.includes(`require('${baseName}')`) ||
+    src.includes(`require("${baseName}")`);
   if (!importsFromUs) continue;
 
   for (const name of namedExports) {
+    // Validate name is a safe identifier before using in RegExp constructor
+    if (!/^\w+$/.test(name)) continue;
     if (new RegExp(`\\b${name}\\b`).test(src)) usedExports.add(name);
   }
 }
@@ -86,6 +111,6 @@ if (deadExports.length > 0) {
   process.stderr.write(
     `⚠️  Potentially unused namedExports in ${path.basename(filePath)}:\n` +
       deadExports.map((n) => `  - ${n}`).join("\n") +
-      `\nVerify these are used or remove them to keep the codebase clean.\n`
+      `\nVerify these are used or remove them to keep the codebase clean.\n`,
   );
 }

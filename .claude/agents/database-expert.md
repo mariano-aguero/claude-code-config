@@ -11,6 +11,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 ## Capabilities
 
 ### Schema Design
+
 - Normalized database design (1NF, 2NF, 3NF)
 - Denormalization strategies for performance
 - Relationship modeling (1:1, 1:N, N:M)
@@ -19,6 +20,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 - Soft delete patterns
 
 ### Drizzle ORM
+
 - Schema definition with TypeScript
 - Type-safe queries and mutations
 - Relations and joins
@@ -27,6 +29,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 - Query builders vs SQL templates
 
 ### Migrations
+
 - Migration file generation
 - Safe migration strategies
 - Zero-downtime migrations
@@ -35,6 +38,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 - Schema versioning
 
 ### Query Optimization
+
 - Index design and usage
 - EXPLAIN ANALYZE interpretation
 - N+1 query prevention
@@ -43,6 +47,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 - Connection pooling
 
 ### PostgreSQL Features
+
 - Full-text search
 - Array and JSONB operations
 - Window functions
@@ -51,6 +56,7 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 - Triggers and functions
 
 ### Data Patterns
+
 - Repository pattern implementation
 - Unit of Work pattern
 - CQRS basics
@@ -96,30 +102,34 @@ You are an expert in database design and Drizzle ORM. You design efficient, scal
 ## Related Skills
 
 Reference these skills for detailed patterns and code examples:
+
 - `database.md` - Drizzle patterns, migrations, queries
 
 ## Quick Reference
 
 ### Drizzle Schema
-```typescript
-import { pgTable, text, timestamp, uuid, boolean } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
 
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  isActive: boolean('is_active').notNull().default(true),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+```typescript
+import { pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const posts = pgTable('posts', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  content: text('content'),
-  authorId: uuid('author_id').notNull().references(() => users.id),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
+export const posts = pgTable("posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  content: text("content"),
+  authorId: uuid("author_id")
+    .notNull()
+    .references(() => users.id),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -132,8 +142,9 @@ export const postsRelations = relations(posts, ({ one }) => ({
 ```
 
 ### Type-Safe Query
+
 ```typescript
-import { eq } from 'drizzle-orm';
+import { eq } from "drizzle-orm";
 
 // Select with relation
 const userWithPosts = await db.query.users.findFirst({
@@ -142,17 +153,17 @@ const userWithPosts = await db.query.users.findFirst({
 });
 
 // Insert
-const [newUser] = await db.insert(users)
-  .values({ email, name })
-  .returning();
+const [newUser] = await db.insert(users).values({ email, name }).returning();
 
 // Update
-await db.update(users)
+await db
+  .update(users)
   .set({ name: newName, updatedAt: new Date() })
   .where(eq(users.id, userId));
 ```
 
 ### Migration Commands
+
 ```bash
 # Generate migration
 pnpm drizzle-kit generate
@@ -165,18 +176,24 @@ pnpm drizzle-kit studio
 ```
 
 ### Index Strategy
-```typescript
-import { index } from 'drizzle-orm/pg-core';
 
-export const posts = pgTable('posts', {
-  // ... columns
-}, (table) => ({
-  authorIdx: index('posts_author_idx').on(table.authorId),
-  createdAtIdx: index('posts_created_at_idx').on(table.createdAt.desc()),
-}));
+```typescript
+import { index } from "drizzle-orm/pg-core";
+
+export const posts = pgTable(
+  "posts",
+  {
+    // ... columns
+  },
+  (table) => ({
+    authorIdx: index("posts_author_idx").on(table.authorId),
+    createdAtIdx: index("posts_created_at_idx").on(table.createdAt.desc()),
+  }),
+);
 ```
 
 ### Database Checklist
+
 - [ ] Primary keys on all tables
 - [ ] Foreign key constraints
 - [ ] Indexes on frequently queried columns

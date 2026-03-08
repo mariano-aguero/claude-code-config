@@ -40,7 +40,7 @@ export const auth = betterAuth({
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
-    updateAge: 60 * 60 * 24,      // rotate every 24h
+    updateAge: 60 * 60 * 24, // rotate every 24h
   },
 });
 
@@ -69,13 +69,7 @@ export const authClient = createAuthClient({
 });
 
 // Destructure for convenience
-export const {
-  signIn,
-  signOut,
-  signUp,
-  useSession,
-  getSession,
-} = authClient;
+export const { signIn, signOut, signUp, useSession, getSession } = authClient;
 ```
 
 ## Session in Server Components
@@ -123,7 +117,7 @@ const PROTECTED_ROUTES = ["/dashboard", "/settings", "/api/protected"];
 
 export async function middleware(request: NextRequest) {
   const isProtected = PROTECTED_ROUTES.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
+    request.nextUrl.pathname.startsWith(route),
   );
 
   if (!isProtected) return NextResponse.next();

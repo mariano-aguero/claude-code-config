@@ -46,16 +46,19 @@ export function ${ComponentName}({ className, children }: ${ComponentName}Props)
 ## Examples
 
 ### Basic Component
+
 ```
 /component Button
 ```
 
 ### Form Component
+
 ```
 /component LoginForm --with-form
 ```
 
 ### Component with Data Fetching
+
 ```
 /component UserList --client --with-query
 ```

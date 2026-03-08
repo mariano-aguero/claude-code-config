@@ -33,19 +33,27 @@ import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 function TransferButton() {
   const { writeContract, data: hash, isPending } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   return (
     <button
-      onClick={() => writeContract({
-        address: tokenAddress,
-        abi: erc20Abi,
-        functionName: "transfer",
-        args: [recipient, parseEther("1")],
-      })}
+      onClick={() =>
+        writeContract({
+          address: tokenAddress,
+          abi: erc20Abi,
+          functionName: "transfer",
+          args: [recipient, parseEther("1")],
+        })
+      }
       disabled={isPending || isConfirming}
     >
-      {isPending ? "Confirm in wallet..." : isConfirming ? "Confirming..." : "Transfer"}
+      {isPending
+        ? "Confirm in wallet..."
+        : isConfirming
+          ? "Confirming..."
+          : "Transfer"}
     </button>
   );
 }
@@ -86,7 +94,7 @@ import { useSwitchChain } from "wagmi";
 
 function NetworkSwitcher() {
   const { switchChain, chains } = useSwitchChain();
-  return chains.map(chain => (
+  return chains.map((chain) => (
     <button onClick={() => switchChain({ chainId: chain.id })}>
       {chain.name}
     </button>

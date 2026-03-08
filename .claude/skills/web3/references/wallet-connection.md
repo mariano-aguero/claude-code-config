@@ -57,9 +57,7 @@ const queryClient = new QueryClient();
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
   );
 }
@@ -77,7 +75,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
 ## Custom Connect Button
 
 ```tsx
-import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import {
+  useAppKit,
+  useAppKitAccount,
+  useDisconnect,
+} from "@reown/appkit/react";
 
 export function ConnectButton() {
   const { open } = useAppKit();
@@ -87,7 +89,9 @@ export function ConnectButton() {
   if (isConnected) {
     return (
       <div>
-        <span>{address?.slice(0, 6)}...{address?.slice(-4)}</span>
+        <span>
+          {address?.slice(0, 6)}...{address?.slice(-4)}
+        </span>
         <button onClick={() => disconnect()}>Disconnect</button>
       </div>
     );

@@ -11,26 +11,21 @@ description: Testing patterns for TypeScript applications with Vitest, Testing L
 
 ```typescript
 // vitest.config.ts
-import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   test: {
-    environment: 'jsdom',
+    environment: "jsdom",
     globals: true,
-    setupFiles: ['./tests/setup.ts'],
-    include: ['**/*.{test,spec}.{ts,tsx}'],
+    setupFiles: ["./tests/setup.ts"],
+    include: ["**/*.{test,spec}.{ts,tsx}"],
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'html', 'lcov'],
-      exclude: [
-        'node_modules/',
-        'tests/',
-        '**/*.d.ts',
-        '**/*.config.*',
-      ],
+      provider: "v8",
+      reporter: ["text", "html", "lcov"],
+      exclude: ["node_modules/", "tests/", "**/*.d.ts", "**/*.config.*"],
       thresholds: {
         statements: 80,
         branches: 80,
@@ -46,9 +41,9 @@ export default defineConfig({
 
 ```typescript
 // tests/setup.ts
-import '@testing-library/jest-dom/vitest';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
 
 afterEach(() => {
   cleanup();
@@ -56,13 +51,13 @@ afterEach(() => {
 });
 
 // Mock Next.js router
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
     back: vi.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
 }));
 ```
@@ -72,11 +67,11 @@ vi.mock('next/navigation', () => ({
 ### Function Testing
 
 ```typescript
-import { describe, it, expect } from 'vitest';
-import { calculateTotal, formatCurrency } from './utils';
+import { describe, it, expect } from "vitest";
+import { calculateTotal, formatCurrency } from "./utils";
 
-describe('calculateTotal', () => {
-  it('sums item prices correctly', () => {
+describe("calculateTotal", () => {
+  it("sums item prices correctly", () => {
     const items = [
       { price: 10, quantity: 2 },
       { price: 5, quantity: 3 },
@@ -85,11 +80,11 @@ describe('calculateTotal', () => {
     expect(calculateTotal(items)).toBe(35);
   });
 
-  it('returns 0 for empty array', () => {
+  it("returns 0 for empty array", () => {
     expect(calculateTotal([])).toBe(0);
   });
 
-  it('handles decimal prices', () => {
+  it("handles decimal prices", () => {
     const items = [{ price: 10.5, quantity: 2 }];
 
     expect(calculateTotal(items)).toBeCloseTo(21);
@@ -100,22 +95,22 @@ describe('calculateTotal', () => {
 ### Async Function Testing
 
 ```typescript
-import { describe, it, expect, vi } from 'vitest';
-import { fetchUser } from './api';
+import { describe, it, expect, vi } from "vitest";
+import { fetchUser } from "./api";
 
-describe('fetchUser', () => {
-  it('returns user data on success', async () => {
-    const user = await fetchUser('123');
+describe("fetchUser", () => {
+  it("returns user data on success", async () => {
+    const user = await fetchUser("123");
 
     expect(user).toEqual({
-      id: '123',
+      id: "123",
       name: expect.any(String),
-      email: expect.stringContaining('@'),
+      email: expect.stringContaining("@"),
     });
   });
 
-  it('throws on invalid id', async () => {
-    await expect(fetchUser('')).rejects.toThrow('Invalid user ID');
+  it("throws on invalid id", async () => {
+    await expect(fetchUser("")).rejects.toThrow("Invalid user ID");
   });
 });
 ```
@@ -229,18 +224,18 @@ it('fetches and displays data', async () => {
 ### Module Mocking
 
 ```typescript
-import { vi } from 'vitest';
+import { vi } from "vitest";
 
 // Mock entire module
-vi.mock('./api', () => ({
-  fetchUser: vi.fn().mockResolvedValue({ id: '1', name: 'John' }),
+vi.mock("./api", () => ({
+  fetchUser: vi.fn().mockResolvedValue({ id: "1", name: "John" }),
   updateUser: vi.fn().mockResolvedValue({ success: true }),
 }));
 
 // Mock with factory
-vi.mock('./config', () => ({
+vi.mock("./config", () => ({
   default: {
-    apiUrl: 'http://test-api.com',
+    apiUrl: "http://test-api.com",
     timeout: 1000,
   },
 }));
@@ -249,16 +244,18 @@ vi.mock('./config', () => ({
 ### Spy on Functions
 
 ```typescript
-import { vi, describe, it, expect } from 'vitest';
-import * as api from './api';
+import { vi, describe, it, expect } from "vitest";
+import * as api from "./api";
 
-describe('UserService', () => {
-  it('calls fetchUser with correct id', async () => {
-    const spy = vi.spyOn(api, 'fetchUser').mockResolvedValue({ id: '1', name: 'John' });
+describe("UserService", () => {
+  it("calls fetchUser with correct id", async () => {
+    const spy = vi
+      .spyOn(api, "fetchUser")
+      .mockResolvedValue({ id: "1", name: "John" });
 
-    await userService.getUser('1');
+    await userService.getUser("1");
 
-    expect(spy).toHaveBeenCalledWith('1');
+    expect(spy).toHaveBeenCalledWith("1");
     spy.mockRestore();
   });
 });
@@ -267,7 +264,7 @@ describe('UserService', () => {
 ### Timer Mocking
 
 ```typescript
-import { vi, beforeEach, afterEach, it, expect } from 'vitest';
+import { vi, beforeEach, afterEach, it, expect } from "vitest";
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -277,20 +274,20 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-it('debounces input', async () => {
+it("debounces input", async () => {
   const callback = vi.fn();
   const debounced = debounce(callback, 300);
 
-  debounced('a');
-  debounced('ab');
-  debounced('abc');
+  debounced("a");
+  debounced("ab");
+  debounced("abc");
 
   expect(callback).not.toHaveBeenCalled();
 
   vi.advanceTimersByTime(300);
 
   expect(callback).toHaveBeenCalledOnce();
-  expect(callback).toHaveBeenCalledWith('abc');
+  expect(callback).toHaveBeenCalledWith("abc");
 });
 ```
 
@@ -300,26 +297,26 @@ it('debounces input', async () => {
 
 ```typescript
 // tests/mocks/handlers.ts
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse } from "msw";
 
 export const handlers = [
-  http.get('/api/users', () => {
+  http.get("/api/users", () => {
     return HttpResponse.json([
-      { id: '1', name: 'John' },
-      { id: '2', name: 'Jane' },
+      { id: "1", name: "John" },
+      { id: "2", name: "Jane" },
     ]);
   }),
 
-  http.get('/api/users/:id', ({ params }) => {
-    return HttpResponse.json({ id: params.id, name: 'John' });
+  http.get("/api/users/:id", ({ params }) => {
+    return HttpResponse.json({ id: params.id, name: "John" });
   }),
 
-  http.post('/api/users', async ({ request }) => {
+  http.post("/api/users", async ({ request }) => {
     const body = await request.json();
-    return HttpResponse.json({ id: '3', ...body }, { status: 201 });
+    return HttpResponse.json({ id: "3", ...body }, { status: 201 });
   }),
 
-  http.delete('/api/users/:id', () => {
+  http.delete("/api/users/:id", () => {
     return new HttpResponse(null, { status: 204 });
   }),
 ];
@@ -327,17 +324,17 @@ export const handlers = [
 
 ```typescript
 // tests/mocks/server.ts
-import { setupServer } from 'msw/node';
-import { handlers } from './handlers';
+import { setupServer } from "msw/node";
+import { handlers } from "./handlers";
 
 export const server = setupServer(...handlers);
 ```
 
 ```typescript
 // tests/setup.ts
-import { server } from './mocks/server';
+import { server } from "./mocks/server";
 
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+beforeAll(() => server.listen({ onUnhandledRequest: "error" }));
 afterEach(() => server.resetHandlers());
 afterAll(() => server.close());
 ```
@@ -367,28 +364,28 @@ it('handles server error', async () => {
 
 ```typescript
 // playwright.config.ts
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './e2e',
+  testDir: "./e2e",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [['html'], ['list']],
+  reporter: [["html"], ["list"]],
   use: {
-    baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    { name: "chromium", use: { ...devices["Desktop Chrome"] } },
+    { name: "firefox", use: { ...devices["Desktop Firefox"] } },
+    { name: "webkit", use: { ...devices["Desktop Safari"] } },
   ],
   webServer: {
-    command: 'pnpm dev',
-    url: 'http://localhost:3000',
+    command: "pnpm dev",
+    url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
 });
@@ -397,28 +394,28 @@ export default defineConfig({
 ### E2E Test Examples
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Authentication', () => {
-  test('user can sign in', async ({ page }) => {
-    await page.goto('/login');
+test.describe("Authentication", () => {
+  test("user can sign in", async ({ page }) => {
+    await page.goto("/login");
 
-    await page.getByLabel('Email').fill('user@example.com');
-    await page.getByLabel('Password').fill('password123');
-    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByLabel("Email").fill("user@example.com");
+    await page.getByLabel("Password").fill("password123");
+    await page.getByRole("button", { name: "Sign in" }).click();
 
-    await expect(page).toHaveURL('/dashboard');
-    await expect(page.getByText('Welcome back')).toBeVisible();
+    await expect(page).toHaveURL("/dashboard");
+    await expect(page.getByText("Welcome back")).toBeVisible();
   });
 
-  test('shows error for invalid credentials', async ({ page }) => {
-    await page.goto('/login');
+  test("shows error for invalid credentials", async ({ page }) => {
+    await page.goto("/login");
 
-    await page.getByLabel('Email').fill('wrong@example.com');
-    await page.getByLabel('Password').fill('wrongpassword');
-    await page.getByRole('button', { name: 'Sign in' }).click();
+    await page.getByLabel("Email").fill("wrong@example.com");
+    await page.getByLabel("Password").fill("wrongpassword");
+    await page.getByRole("button", { name: "Sign in" }).click();
 
-    await expect(page.getByText('Invalid credentials')).toBeVisible();
+    await expect(page.getByText("Invalid credentials")).toBeVisible();
   });
 });
 ```
@@ -427,7 +424,7 @@ test.describe('Authentication', () => {
 
 ```typescript
 // e2e/pages/login.page.ts
-import { Page, Locator } from '@playwright/test';
+import { Page, Locator } from "@playwright/test";
 
 export class LoginPage {
   readonly page: Page;
@@ -438,14 +435,14 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.emailInput = page.getByLabel('Email');
-    this.passwordInput = page.getByLabel('Password');
-    this.submitButton = page.getByRole('button', { name: 'Sign in' });
-    this.errorMessage = page.getByRole('alert');
+    this.emailInput = page.getByLabel("Email");
+    this.passwordInput = page.getByLabel("Password");
+    this.submitButton = page.getByRole("button", { name: "Sign in" });
+    this.errorMessage = page.getByRole("alert");
   }
 
   async goto() {
-    await this.page.goto('/login');
+    await this.page.goto("/login");
   }
 
   async login(email: string, password: string) {
@@ -456,12 +453,12 @@ export class LoginPage {
 }
 
 // Usage in test
-test('user can sign in', async ({ page }) => {
+test("user can sign in", async ({ page }) => {
   const loginPage = new LoginPage(page);
   await loginPage.goto();
-  await loginPage.login('user@example.com', 'password123');
+  await loginPage.login("user@example.com", "password123");
 
-  await expect(page).toHaveURL('/dashboard');
+  await expect(page).toHaveURL("/dashboard");
 });
 ```
 
@@ -469,13 +466,13 @@ test('user can sign in', async ({ page }) => {
 
 ```typescript
 // tests/factories/user.factory.ts
-import { faker } from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'user';
+  role: "admin" | "user";
   createdAt: Date;
 }
 
@@ -484,18 +481,21 @@ export function createUser(overrides: Partial<User> = {}): User {
     id: faker.string.uuid(),
     email: faker.internet.email(),
     name: faker.person.fullName(),
-    role: 'user',
+    role: "user",
     createdAt: faker.date.past(),
     ...overrides,
   };
 }
 
-export function createUsers(count: number, overrides: Partial<User> = {}): User[] {
+export function createUsers(
+  count: number,
+  overrides: Partial<User> = {},
+): User[] {
   return Array.from({ length: count }, () => createUser(overrides));
 }
 
 // Usage
-const admin = createUser({ role: 'admin' });
+const admin = createUser({ role: "admin" });
 const users = createUsers(5);
 ```
 

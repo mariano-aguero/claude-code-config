@@ -27,25 +27,49 @@ if (input.stop_hook_active) process.exit(0);
 const timestamp = new Date().toISOString();
 const time = new Date().toTimeString().slice(0, 5);
 
-const isGitRepo = spawnSync("git", ["rev-parse", "--git-dir"], { encoding: "utf-8" }).status === 0;
+const isGitRepo =
+  spawnSync("git", ["rev-parse", "--git-dir"], { encoding: "utf-8" }).status ===
+  0;
 
-const branch = isGitRepo ? spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
-const statusOut = isGitRepo ? spawnSync("git", ["status", "--porcelain"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
+const branch = isGitRepo
+  ? (spawnSync("git", ["branch", "--show-current"], {
+      encoding: "utf-8",
+    }).stdout?.trim() ?? "")
+  : "";
+const statusOut = isGitRepo
+  ? (spawnSync("git", ["status", "--porcelain"], {
+      encoding: "utf-8",
+    }).stdout?.trim() ?? "")
+  : "";
 const modified = statusOut.split("\n").filter(Boolean).slice(0, 10);
-const logOut = isGitRepo ? spawnSync("git", ["log", "--oneline", "-3"], { encoding: "utf-8" }).stdout?.trim() ?? "" : "";
 
 // Recent commits: hash + message for dedup check
 const recentCommits = isGitRepo
-  ? spawnSync("git", ["log", "--format=%H %s", "-5"], { encoding: "utf-8" }).stdout?.trim().split("\n").filter(Boolean) ?? []
+  ? (spawnSync("git", ["log", "--format=%H %s", "-5"], { encoding: "utf-8" })
+      .stdout?.trim()
+      .split("\n")
+      .filter(Boolean) ?? [])
   : [];
 
-const notesPath = path.join(".claude", "session-notes.md");
+// Derive --oneline display from recentCommits (avoids a second git log call)
+const logOut = recentCommits
+  .slice(0, 3)
+  .map((c) => {
+    const [hash, ...rest] = c.split(" ");
+    return `${hash.slice(0, 7)} ${rest.join(" ")}`;
+  })
+  .join("\n");
+
+const notesPath = path.join(process.cwd(), ".claude", "session-notes.md");
 
 // Work log
 const worklogPath = path.join(os.homedir(), ".daily-worklog", "current.md");
 let worklogLines = [];
 try {
-  worklogLines = fs.readFileSync(worklogPath, "utf-8").split("\n").filter(Boolean);
+  worklogLines = fs
+    .readFileSync(worklogPath, "utf-8")
+    .split("\n")
+    .filter(Boolean);
 } catch {}
 
 // Auto-stop log entry — skip if commits already appear in the last 40 work log lines
@@ -65,8 +89,10 @@ if (!alreadyLogged && branch) {
     .filter(Boolean);
   const modifiedCount = modified.length;
   const parts = [`branch: ${branch}${topHash ? ` (${topHash})` : ""}`];
-  if (commitMessages.length) parts.push(`commits: "${commitMessages.join('", "')}"`);
-  if (modifiedCount) parts.push(`${modifiedCount} file${modifiedCount > 1 ? "s" : ""} modified`);
+  if (commitMessages.length)
+    parts.push(`commits: "${commitMessages.join('", "')}"`);
+  if (modifiedCount)
+    parts.push(`${modifiedCount} file${modifiedCount > 1 ? "s" : ""} modified`);
   const entry = `- [${time}] [AUTO-STOP] ${parts.join(" — ")}`;
   try {
     fs.appendFileSync(worklogPath, `${entry}\n`);
@@ -83,15 +109,17 @@ let manualSection = "";
 try {
   const existing = fs.readFileSync(notesPath, "utf-8");
   const autoMarkerIdx = existing.indexOf("<!-- auto-snapshot -->");
-  const rawManual = autoMarkerIdx !== -1
-    ? existing.slice(0, autoMarkerIdx).trimEnd()
-    : existing.trimEnd();
+  const rawManual =
+    autoMarkerIdx !== -1
+      ? existing.slice(0, autoMarkerIdx).trimEnd()
+      : existing.trimEnd();
 
   // Strip the previously auto-generated last-task block (identified by <!-- last-task -->)
   const lastTaskMarkerIdx = rawManual.indexOf("<!-- last-task -->");
-  manualSection = lastTaskMarkerIdx !== -1
-    ? rawManual.slice(0, lastTaskMarkerIdx).trimEnd()
-    : rawManual;
+  manualSection =
+    lastTaskMarkerIdx !== -1
+      ? rawManual.slice(0, lastTaskMarkerIdx).trimEnd()
+      : rawManual;
 } catch {}
 
 // Build last-task block from work log entries
@@ -119,8 +147,13 @@ sections.push(
     `**Branch:** ${branch || "(none)"}`,
     `**Modified files:** ${modified.length ? modified.join(", ") : "none"}`,
     `**Recent commits:**`,
-    logOut ? logOut.split("\n").map((l) => `- ${l}`).join("\n") : "- (none)",
-  ].join("\n")
+    logOut
+      ? logOut
+          .split("\n")
+          .map((l) => `- ${l}`)
+          .join("\n")
+      : "- (none)",
+  ].join("\n"),
 );
 
 try {

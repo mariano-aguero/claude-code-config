@@ -15,7 +15,7 @@ description: Application security patterns including OWASP prevention, authentic
 const bad = db.execute(`SELECT * FROM users WHERE id = '${userId}'`);
 
 // GOOD - Parameterized query
-import { eq } from 'drizzle-orm';
+import { eq } from "drizzle-orm";
 const good = await db.select().from(users).where(eq(users.id, userId));
 
 // Command Injection - Avoid shell commands with user input
@@ -23,22 +23,22 @@ const good = await db.select().from(users).where(eq(users.id, userId));
 exec(`convert ${userFilename} output.png`);
 
 // GOOD - Use libraries, validate input
-import sharp from 'sharp';
-await sharp(validatedPath).png().toFile('output.png');
+import sharp from "sharp";
+await sharp(validatedPath).png().toFile("output.png");
 
 // NoSQL Injection - Validate and sanitize
 // BAD
-db.collection('users').find({ $where: `this.name == '${name}'` });
+db.collection("users").find({ $where: `this.name == '${name}'` });
 
 // GOOD
-db.collection('users').find({ name: sanitizedName });
+db.collection("users").find({ name: sanitizedName });
 ```
 
 ### 2. Broken Authentication Prevention
 
 ```typescript
 // Password hashing with Argon2
-import { hash, verify } from '@node-rs/argon2';
+import { hash, verify } from "@node-rs/argon2";
 
 async function hashPassword(password: string): Promise<string> {
   return hash(password, {
@@ -49,7 +49,10 @@ async function hashPassword(password: string): Promise<string> {
   });
 }
 
-async function verifyPassword(password: string, hash: string): Promise<boolean> {
+async function verifyPassword(
+  password: string,
+  hash: string,
+): Promise<boolean> {
   return verify(hash, password);
 }
 
@@ -62,10 +65,10 @@ async function checkLoginAttempts(userId: string): Promise<boolean> {
   const lockoutUntil = await redis.get(`lockout:${userId}`);
 
   if (lockoutUntil && Date.now() < parseInt(lockoutUntil)) {
-    throw new Error('Account temporarily locked');
+    throw new Error("Account temporarily locked");
   }
 
-  return parseInt(attempts || '0') < MAX_ATTEMPTS;
+  return parseInt(attempts || "0") < MAX_ATTEMPTS;
 }
 
 async function recordFailedAttempt(userId: string): Promise<void> {
@@ -121,27 +124,24 @@ function isSafeUrl(url: string): boolean {
 ```typescript
 // Always verify ownership/authorization
 // BAD - Just checks if resource exists
-app.get('/api/documents/:id', async (c) => {
+app.get("/api/documents/:id", async (c) => {
   const doc = await db.query.documents.findFirst({
-    where: eq(documents.id, c.req.param('id')),
+    where: eq(documents.id, c.req.param("id")),
   });
   return c.json(doc);
 });
 
 // GOOD - Checks ownership
-app.get('/api/documents/:id', authMiddleware, async (c) => {
-  const userId = c.get('user').id;
-  const docId = c.req.param('id');
+app.get("/api/documents/:id", authMiddleware, async (c) => {
+  const userId = c.get("user").id;
+  const docId = c.req.param("id");
 
   const doc = await db.query.documents.findFirst({
-    where: and(
-      eq(documents.id, docId),
-      eq(documents.ownerId, userId)
-    ),
+    where: and(eq(documents.id, docId), eq(documents.ownerId, userId)),
   });
 
   if (!doc) {
-    return c.json({ error: 'Not found' }, 404);
+    return c.json({ error: "Not found" }, 404);
   }
 
   return c.json(doc);
@@ -152,19 +152,22 @@ app.get('/api/documents/:id', authMiddleware, async (c) => {
 
 ```typescript
 // For traditional forms - use CSRF tokens
-import { csrf } from 'hono/csrf';
+import { csrf } from "hono/csrf";
 
-app.use('*', csrf({
-  origin: ['https://myapp.com'],
-}));
+app.use(
+  "*",
+  csrf({
+    origin: ["https://myapp.com"],
+  }),
+);
 
 // For APIs - use SameSite cookies + check Origin header
 function csrfMiddleware(c, next) {
-  const origin = c.req.header('Origin');
+  const origin = c.req.header("Origin");
   const allowedOrigins = [process.env.FRONTEND_URL];
 
-  if (c.req.method !== 'GET' && !allowedOrigins.includes(origin)) {
-    return c.json({ error: 'CSRF check failed' }, 403);
+  if (c.req.method !== "GET" && !allowedOrigins.includes(origin)) {
+    return c.json({ error: "CSRF check failed" }, 403);
   }
 
   return next();
@@ -174,37 +177,41 @@ function csrfMiddleware(c, next) {
 const cookieOptions = {
   httpOnly: true,
   secure: true,
-  sameSite: 'strict' as const,
-  path: '/',
+  sameSite: "strict" as const,
+  path: "/",
 };
 ```
 
 ### 6. SSRF Prevention
 
 ```typescript
-import { isPrivateIP } from 'is-ip';
+import { isPrivateIP } from "is-ip";
 
 async function safeFetch(url: string): Promise<Response> {
   const parsed = new URL(url);
 
   // Block private IPs
   const hostname = parsed.hostname;
-  if (isPrivateIP(hostname) || hostname === 'localhost' || hostname === '127.0.0.1') {
-    throw new Error('Private IPs not allowed');
+  if (
+    isPrivateIP(hostname) ||
+    hostname === "localhost" ||
+    hostname === "127.0.0.1"
+  ) {
+    throw new Error("Private IPs not allowed");
   }
 
   // Block dangerous protocols
-  if (!['http:', 'https:'].includes(parsed.protocol)) {
-    throw new Error('Invalid protocol');
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Invalid protocol");
   }
 
   // Block internal metadata endpoints (cloud)
-  if (hostname === '169.254.169.254') {
-    throw new Error('Metadata endpoint blocked');
+  if (hostname === "169.254.169.254") {
+    throw new Error("Metadata endpoint blocked");
   }
 
   return fetch(url, {
-    redirect: 'error', // Don't follow redirects to private IPs
+    redirect: "error", // Don't follow redirects to private IPs
   });
 }
 ```
@@ -214,7 +221,7 @@ async function safeFetch(url: string): Promise<Response> {
 ### JWT Implementation
 
 ```typescript
-import { sign, verify } from 'hono/jwt';
+import { sign, verify } from "hono/jwt";
 
 const ACCESS_TOKEN_EXPIRY = 15 * 60; // 15 minutes
 const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
@@ -225,7 +232,11 @@ interface TokenPayload {
   role: string;
 }
 
-async function generateTokens(user: { id: string; email: string; role: string }) {
+async function generateTokens(user: {
+  id: string;
+  email: string;
+  role: string;
+}) {
   const now = Math.floor(Date.now() / 1000);
 
   const accessToken = await sign(
@@ -236,17 +247,17 @@ async function generateTokens(user: { id: string; email: string; role: string })
       iat: now,
       exp: now + ACCESS_TOKEN_EXPIRY,
     },
-    process.env.JWT_SECRET!
+    process.env.JWT_SECRET!,
   );
 
   const refreshToken = await sign(
     {
       sub: user.id,
-      type: 'refresh',
+      type: "refresh",
       iat: now,
       exp: now + REFRESH_TOKEN_EXPIRY,
     },
-    process.env.JWT_REFRESH_SECRET!
+    process.env.JWT_REFRESH_SECRET!,
   );
 
   // Store refresh token hash in database for revocation
@@ -269,7 +280,7 @@ async function refreshAccessToken(refreshToken: string) {
 
   // Compare plaintext token against stored hash (argon2 verify: hash first, then plaintext)
   if (!stored || !(await verify(stored.tokenHash, refreshToken))) {
-    throw new Error('Invalid refresh token');
+    throw new Error("Invalid refresh token");
   }
 
   // Rotate: invalidate old token before issuing new one (prevents replay if token leaks)
@@ -292,40 +303,40 @@ async function revokeRefreshToken(userId: string) {
 
 ```typescript
 // Using Arctic for OAuth
-import { GitHub, Google } from 'arctic';
+import { GitHub, Google } from "arctic";
 
 const github = new GitHub(
   process.env.GITHUB_CLIENT_ID!,
-  process.env.GITHUB_CLIENT_SECRET!
+  process.env.GITHUB_CLIENT_SECRET!,
 );
 
 const google = new Google(
   process.env.GOOGLE_CLIENT_ID!,
   process.env.GOOGLE_CLIENT_SECRET!,
-  process.env.GOOGLE_REDIRECT_URI!
+  process.env.GOOGLE_REDIRECT_URI!,
 );
 
 // Generate authorization URL with state
-app.get('/auth/github', async (c) => {
+app.get("/auth/github", async (c) => {
   const state = crypto.randomUUID();
-  await redis.set(`oauth_state:${state}`, '1', 'EX', 600);
+  await redis.set(`oauth_state:${state}`, "1", "EX", 600);
 
   const url = await github.createAuthorizationURL(state, {
-    scopes: ['user:email'],
+    scopes: ["user:email"],
   });
 
   return c.redirect(url.toString());
 });
 
 // Callback handler
-app.get('/auth/github/callback', async (c) => {
-  const code = c.req.query('code');
-  const state = c.req.query('state');
+app.get("/auth/github/callback", async (c) => {
+  const code = c.req.query("code");
+  const state = c.req.query("state");
 
   // Verify state
   const storedState = await redis.get(`oauth_state:${state}`);
   if (!storedState) {
-    return c.json({ error: 'Invalid state' }, 400);
+    return c.json({ error: "Invalid state" }, 400);
   }
   await redis.del(`oauth_state:${state}`);
 
@@ -333,7 +344,7 @@ app.get('/auth/github/callback', async (c) => {
   const tokens = await github.validateAuthorizationCode(code);
 
   // Get user info
-  const userResponse = await fetch('https://api.github.com/user', {
+  const userResponse = await fetch("https://api.github.com/user", {
     headers: { Authorization: `Bearer ${tokens.accessToken}` },
   });
   const githubUser = await userResponse.json();
@@ -341,14 +352,14 @@ app.get('/auth/github/callback', async (c) => {
   // Create or update user in database
   // ...
 
-  return c.redirect('/dashboard');
+  return c.redirect("/dashboard");
 });
 ```
 
 ### Password Reset Flow
 
 ```typescript
-import { createHash, randomBytes } from 'crypto';
+import { createHash, randomBytes } from "crypto";
 
 // Generate secure reset token
 async function createPasswordResetToken(email: string) {
@@ -359,8 +370,8 @@ async function createPasswordResetToken(email: string) {
   // Always return success to prevent email enumeration
   if (!user) return;
 
-  const token = randomBytes(32).toString('hex');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const token = randomBytes(32).toString("hex");
+  const tokenHash = createHash("sha256").update(token).digest("hex");
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
   await db.insert(passwordResets).values({
@@ -372,39 +383,42 @@ async function createPasswordResetToken(email: string) {
   // Send email with reset link
   await sendEmail({
     to: email,
-    subject: 'Password Reset',
+    subject: "Password Reset",
     html: `<a href="${process.env.APP_URL}/reset-password?token=${token}">Reset Password</a>`,
   });
 }
 
 // Verify and use reset token
 async function resetPassword(token: string, newPassword: string) {
-  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const tokenHash = createHash("sha256").update(token).digest("hex");
 
   const reset = await db.query.passwordResets.findFirst({
     where: and(
       eq(passwordResets.tokenHash, tokenHash),
-      gt(passwordResets.expiresAt, new Date())
+      gt(passwordResets.expiresAt, new Date()),
     ),
   });
 
   if (!reset) {
-    throw new Error('Invalid or expired token');
+    throw new Error("Invalid or expired token");
   }
 
   // Update password and delete token
   const hashedPassword = await hashPassword(newPassword);
 
   await db.transaction(async (tx) => {
-    await tx.update(users)
+    await tx
+      .update(users)
       .set({ password: hashedPassword })
       .where(eq(users.id, reset.userId));
 
-    await tx.delete(passwordResets)
+    await tx
+      .delete(passwordResets)
       .where(eq(passwordResets.userId, reset.userId));
 
     // Revoke all sessions
-    await tx.delete(refreshTokens)
+    await tx
+      .delete(refreshTokens)
       .where(eq(refreshTokens.userId, reset.userId));
   });
 }
@@ -415,18 +429,18 @@ async function resetPassword(token: string, newPassword: string) {
 ```typescript
 // Define permissions
 const PERMISSIONS = {
-  'users:read': ['admin', 'manager', 'user'],
-  'users:write': ['admin', 'manager'],
-  'users:delete': ['admin'],
-  'posts:read': ['admin', 'manager', 'user', 'guest'],
-  'posts:write': ['admin', 'manager', 'user'],
-  'posts:delete': ['admin', 'manager'],
-  'settings:read': ['admin'],
-  'settings:write': ['admin'],
+  "users:read": ["admin", "manager", "user"],
+  "users:write": ["admin", "manager"],
+  "users:delete": ["admin"],
+  "posts:read": ["admin", "manager", "user", "guest"],
+  "posts:write": ["admin", "manager", "user"],
+  "posts:delete": ["admin", "manager"],
+  "settings:read": ["admin"],
+  "settings:write": ["admin"],
 } as const;
 
 type Permission = keyof typeof PERMISSIONS;
-type Role = 'admin' | 'manager' | 'user' | 'guest';
+type Role = "admin" | "manager" | "user" | "guest";
 
 function hasPermission(role: Role, permission: Permission): boolean {
   return PERMISSIONS[permission]?.includes(role) ?? false;
@@ -435,14 +449,14 @@ function hasPermission(role: Role, permission: Permission): boolean {
 // Authorization middleware
 function requirePermission(permission: Permission) {
   return createMiddleware(async (c, next) => {
-    const user = c.get('user');
+    const user = c.get("user");
 
     if (!user) {
-      return c.json({ error: 'Unauthorized' }, 401);
+      return c.json({ error: "Unauthorized" }, 401);
     }
 
     if (!hasPermission(user.role, permission)) {
-      return c.json({ error: 'Forbidden' }, 403);
+      return c.json({ error: "Forbidden" }, 403);
     }
 
     await next();
@@ -450,13 +464,13 @@ function requirePermission(permission: Permission) {
 }
 
 // Usage
-app.get('/api/users', requirePermission('users:read'), async (c) => {
+app.get("/api/users", requirePermission("users:read"), async (c) => {
   const users = await userService.findAll();
   return c.json(users);
 });
 
-app.delete('/api/users/:id', requirePermission('users:delete'), async (c) => {
-  await userService.delete(c.req.param('id'));
+app.delete("/api/users/:id", requirePermission("users:delete"), async (c) => {
+  await userService.delete(c.req.param("id"));
   return c.json({ success: true });
 });
 ```
@@ -481,36 +495,36 @@ const ContentSecurityPolicy = `
   form-action 'self';
   frame-ancestors 'none';
   upgrade-insecure-requests;
-`.replace(/\n/g, '');
+`.replace(/\n/g, "");
 
 const securityHeaders = [
   {
-    key: 'Content-Security-Policy',
+    key: "Content-Security-Policy",
     value: ContentSecurityPolicy,
   },
   {
-    key: 'Strict-Transport-Security',
-    value: 'max-age=63072000; includeSubDomains; preload',
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains; preload",
   },
   {
-    key: 'X-Frame-Options',
-    value: 'DENY',
+    key: "X-Frame-Options",
+    value: "DENY",
   },
   {
-    key: 'X-Content-Type-Options',
-    value: 'nosniff',
+    key: "X-Content-Type-Options",
+    value: "nosniff",
   },
   {
-    key: 'X-DNS-Prefetch-Control',
-    value: 'on',
+    key: "X-DNS-Prefetch-Control",
+    value: "on",
   },
   {
-    key: 'Referrer-Policy',
-    value: 'strict-origin-when-cross-origin',
+    key: "Referrer-Policy",
+    value: "strict-origin-when-cross-origin",
   },
   {
-    key: 'Permissions-Policy',
-    value: 'camera=(), microphone=(), geolocation=()',
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=()",
   },
 ];
 
@@ -518,7 +532,7 @@ module.exports = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        source: "/(.*)",
         headers: securityHeaders,
       },
     ];
@@ -529,19 +543,22 @@ module.exports = {
 ### Hono/API Headers
 
 ```typescript
-import { secureHeaders } from 'hono/secure-headers';
+import { secureHeaders } from "hono/secure-headers";
 
-app.use('*', secureHeaders({
-  strictTransportSecurity: 'max-age=63072000; includeSubDomains; preload',
-  xFrameOptions: 'DENY',
-  xContentTypeOptions: 'nosniff',
-  referrerPolicy: 'strict-origin-when-cross-origin',
-  permissionsPolicy: {
-    camera: [],
-    microphone: [],
-    geolocation: [],
-  },
-}));
+app.use(
+  "*",
+  secureHeaders({
+    strictTransportSecurity: "max-age=63072000; includeSubDomains; preload",
+    xFrameOptions: "DENY",
+    xContentTypeOptions: "nosniff",
+    referrerPolicy: "strict-origin-when-cross-origin",
+    permissionsPolicy: {
+      camera: [],
+      microphone: [],
+      geolocation: [],
+    },
+  }),
+);
 ```
 
 ## Input Validation
@@ -549,31 +566,36 @@ app.use('*', secureHeaders({
 ### Zod Schemas
 
 ```typescript
-import { z } from 'zod';
+import { z } from "zod";
 
 // Email
 const emailSchema = z.string().email().max(255).toLowerCase();
 
 // Password with requirements
-const passwordSchema = z.string()
-  .min(12, 'Minimum 12 characters')
-  .max(128, 'Maximum 128 characters')
-  .regex(/[A-Z]/, 'Must contain uppercase letter')
-  .regex(/[a-z]/, 'Must contain lowercase letter')
-  .regex(/[0-9]/, 'Must contain number')
-  .regex(/[^A-Za-z0-9]/, 'Must contain special character');
+const passwordSchema = z
+  .string()
+  .min(12, "Minimum 12 characters")
+  .max(128, "Maximum 128 characters")
+  .regex(/[A-Z]/, "Must contain uppercase letter")
+  .regex(/[a-z]/, "Must contain lowercase letter")
+  .regex(/[0-9]/, "Must contain number")
+  .regex(/[^A-Za-z0-9]/, "Must contain special character");
 
 // Username (alphanumeric, no spaces)
-const usernameSchema = z.string()
+const usernameSchema = z
+  .string()
   .min(3)
   .max(30)
-  .regex(/^[a-zA-Z0-9_]+$/, 'Only letters, numbers, and underscores');
+  .regex(/^[a-zA-Z0-9_]+$/, "Only letters, numbers, and underscores");
 
 // URL
-const urlSchema = z.string().url().refine(
-  (url) => ['http:', 'https:'].includes(new URL(url).protocol),
-  'Must be HTTP or HTTPS'
-);
+const urlSchema = z
+  .string()
+  .url()
+  .refine(
+    (url) => ["http:", "https:"].includes(new URL(url).protocol),
+    "Must be HTTP or HTTPS",
+  );
 
 // UUID
 const uuidSchema = z.string().uuid();
@@ -587,7 +609,7 @@ const paginationSchema = z.object({
 // File upload
 const fileSchema = z.object({
   name: z.string().max(255),
-  type: z.enum(['image/jpeg', 'image/png', 'image/webp', 'application/pdf']),
+  type: z.enum(["image/jpeg", "image/png", "image/webp", "application/pdf"]),
   size: z.number().max(10 * 1024 * 1024), // 10MB
 });
 ```
@@ -598,10 +620,10 @@ const fileSchema = z.object({
 
 ```typescript
 // env.ts - Validate all env vars at startup
-import { z } from 'zod';
+import { z } from "zod";
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(['development', 'production', 'test']),
+  NODE_ENV: z.enum(["development", "production", "test"]),
   PORT: z.coerce.number().default(3000),
 
   // Database
@@ -658,15 +680,15 @@ GITHUB_CLIENT_SECRET=
 ## Rate Limiting
 
 ```typescript
-import { rateLimiter } from 'hono-rate-limiter';
+import { rateLimiter } from "hono-rate-limiter";
 
 // General API rate limit
 const apiLimiter = rateLimiter({
   windowMs: 15 * 60 * 1000, // 15 minutes
   limit: 100, // 100 requests per window
-  standardHeaders: 'draft-6',
+  standardHeaders: "draft-6",
   keyGenerator: (c) => {
-    return c.get('user')?.id ?? c.req.header('x-forwarded-for') ?? 'anonymous';
+    return c.get("user")?.id ?? c.req.header("x-forwarded-for") ?? "anonymous";
   },
 });
 
@@ -674,30 +696,38 @@ const apiLimiter = rateLimiter({
 const authLimiter = rateLimiter({
   windowMs: 60 * 1000, // 1 minute
   limit: 5, // 5 requests per minute
-  message: { error: 'Too many attempts, please try again later' },
+  message: { error: "Too many attempts, please try again later" },
 });
 
 // Apply
-app.use('/api/*', apiLimiter);
-app.use('/api/auth/*', authLimiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-app.use('/api/auth/reset-password', authLimiter);
+app.use("/api/*", apiLimiter);
+app.use("/api/auth/*", authLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/reset-password", authLimiter);
 ```
 
 ## Logging (Without Sensitive Data)
 
 ```typescript
 // Redact sensitive fields
-const SENSITIVE_FIELDS = ['password', 'token', 'secret', 'authorization', 'cookie'];
+const SENSITIVE_FIELDS = [
+  "password",
+  "token",
+  "secret",
+  "authorization",
+  "cookie",
+];
 
-function redactSensitive(obj: Record<string, unknown>): Record<string, unknown> {
+function redactSensitive(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
   const redacted = { ...obj };
 
   for (const key of Object.keys(redacted)) {
-    if (SENSITIVE_FIELDS.some(field => key.toLowerCase().includes(field))) {
-      redacted[key] = '[REDACTED]';
-    } else if (typeof redacted[key] === 'object' && redacted[key] !== null) {
+    if (SENSITIVE_FIELDS.some((field) => key.toLowerCase().includes(field))) {
+      redacted[key] = "[REDACTED]";
+    } else if (typeof redacted[key] === "object" && redacted[key] !== null) {
       redacted[key] = redactSensitive(redacted[key]);
     }
   }
@@ -706,7 +736,7 @@ function redactSensitive(obj: Record<string, unknown>): Record<string, unknown> 
 }
 
 // Usage in logging middleware
-app.use('*', async (c, next) => {
+app.use("*", async (c, next) => {
   const start = Date.now();
 
   await next();
@@ -716,7 +746,7 @@ app.use('*', async (c, next) => {
     path: c.req.path,
     status: c.res.status,
     duration: Date.now() - start,
-    userId: c.get('user')?.id,
+    userId: c.get("user")?.id,
     // Never log: body, headers with auth, query params with tokens
   };
 
@@ -727,6 +757,7 @@ app.use('*', async (c, next) => {
 ## Security Checklist
 
 ### Authentication
+
 - [ ] Passwords hashed with Argon2 or bcrypt
 - [ ] JWT with short expiry (15min) + refresh tokens
 - [ ] Refresh tokens stored hashed in database
@@ -735,34 +766,40 @@ app.use('*', async (c, next) => {
 - [ ] Session invalidation on password change
 
 ### Authorization
+
 - [ ] RBAC or ABAC implemented
 - [ ] Resource ownership verified (IDOR prevention)
 - [ ] Principle of least privilege applied
 
 ### Input/Output
+
 - [ ] All input validated with Zod
 - [ ] Output encoded for context (HTML, JS, URL)
 - [ ] File uploads validated (type, size)
 - [ ] SQL injection prevented (parameterized queries)
 
 ### Transport
+
 - [ ] HTTPS only (HSTS enabled)
 - [ ] Secure cookie attributes (HttpOnly, Secure, SameSite)
 - [ ] CORS properly configured
 
 ### Headers
+
 - [ ] Content-Security-Policy
 - [ ] X-Frame-Options: DENY
 - [ ] X-Content-Type-Options: nosniff
 - [ ] Referrer-Policy
 
 ### Secrets
+
 - [ ] Secrets in environment variables
 - [ ] .env not committed to git
 - [ ] Secrets rotated periodically
 - [ ] No secrets in logs or error messages
 
 ### Dependencies
+
 - [ ] Dependencies scanned for vulnerabilities
 - [ ] Lockfile committed
 - [ ] Regular updates applied

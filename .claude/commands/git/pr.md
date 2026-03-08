@@ -57,7 +57,7 @@ Brief description of what this PR does and why.
 ## Screenshots (if applicable)
 
 | Before | After |
-|--------|-------|
+| ------ | ----- |
 | image  | image |
 
 ## Checklist
@@ -78,6 +78,7 @@ Closes #<issue_number>
 ## Commands
 
 ### Create PR
+
 ```bash
 # Interactive
 gh pr create
@@ -96,6 +97,7 @@ gh pr create --base develop
 ```
 
 ### View/Manage PRs
+
 ```bash
 # List PRs
 gh pr list
@@ -122,17 +124,18 @@ Follow Conventional Commits format:
 ```
 
 Examples:
+
 - `feat(auth): implement OAuth login`
 - `fix(api): handle rate limiting errors`
 - `docs: update API documentation`
 
 ## Branch to Title Mapping
 
-| Branch Pattern | PR Title |
-|---------------|----------|
+| Branch Pattern              | PR Title                            |
+| --------------------------- | ----------------------------------- |
 | `feat/AUTH-123-oauth-login` | `feat(auth): implement oauth login` |
-| `fix/BUG-456-null-error` | `fix: handle null error` |
-| `chore/update-deps` | `chore(deps): update dependencies` |
+| `fix/BUG-456-null-error`    | `fix: handle null error`            |
+| `chore/update-deps`         | `chore(deps): update dependencies`  |
 
 ## Automation
 

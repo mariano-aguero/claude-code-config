@@ -19,19 +19,23 @@ import {
   boolean,
   integer,
   pgEnum,
-} from 'drizzle-orm/pg-core';
+} from "drizzle-orm/pg-core";
 
-export const roleEnum = pgEnum('role', ['admin', 'user', 'guest']);
+export const roleEnum = pgEnum("role", ["admin", "user", "guest"]);
 
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  email: text('email').notNull().unique(),
-  name: text('name').notNull(),
-  role: roleEnum('role').notNull().default('user'),
-  isActive: boolean('is_active').notNull().default(true),
-  loginCount: integer('login_count').notNull().default(0),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  role: roleEnum("role").notNull().default("user"),
+  isActive: boolean("is_active").notNull().default(true),
+  loginCount: integer("login_count").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 // Infer types from schema
@@ -43,21 +47,25 @@ export type NewUser = typeof users.$inferInsert;
 
 ```typescript
 // src/db/schema/posts.ts
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
-import { users } from './users';
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { users } from "./users";
 
-export const posts = pgTable('posts', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  content: text('content'),
-  slug: text('slug').notNull().unique(),
-  authorId: uuid('author_id')
+export const posts = pgTable("posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  content: text("content"),
+  slug: text("slug").notNull().unique(),
+  authorId: uuid("author_id")
     .notNull()
-    .references(() => users.id, { onDelete: 'cascade' }),
-  publishedAt: timestamp('published_at', { withTimezone: true }),
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+    .references(() => users.id, { onDelete: "cascade" }),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
 export const postsRelations = relations(posts, ({ one, many }) => ({
@@ -79,25 +87,29 @@ export const usersRelations = relations(users, ({ many }) => ({
 
 ```typescript
 // src/db/schema/tags.ts
-import { pgTable, text, uuid, primaryKey } from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+import { pgTable, text, uuid, primaryKey } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
 
-export const tags = pgTable('tags', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull().unique(),
-  slug: text('slug').notNull().unique(),
+export const tags = pgTable("tags", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull().unique(),
+  slug: text("slug").notNull().unique(),
 });
 
-export const postTags = pgTable('post_tags', {
-  postId: uuid('post_id')
-    .notNull()
-    .references(() => posts.id, { onDelete: 'cascade' }),
-  tagId: uuid('tag_id')
-    .notNull()
-    .references(() => tags.id, { onDelete: 'cascade' }),
-}, (table) => ({
-  pk: primaryKey({ columns: [table.postId, table.tagId] }),
-}));
+export const postTags = pgTable(
+  "post_tags",
+  {
+    postId: uuid("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => ({
+    pk: primaryKey({ columns: [table.postId, table.tagId] }),
+  }),
+);
 
 export const tagsRelations = relations(tags, ({ many }) => ({
   posts: many(postTags),
@@ -112,24 +124,31 @@ export const postTagsRelations = relations(postTags, ({ one }) => ({
 ### Indexes
 
 ```typescript
-import { pgTable, text, uuid, index, uniqueIndex } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid, index, uniqueIndex } from "drizzle-orm/pg-core";
 
-export const posts = pgTable('posts', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  title: text('title').notNull(),
-  slug: text('slug').notNull(),
-  authorId: uuid('author_id').notNull(),
-  createdAt: timestamp('created_at').notNull().defaultNow(),
-}, (table) => ({
-  // Single column index
-  authorIdx: index('posts_author_idx').on(table.authorId),
-  // Descending index for sorting
-  createdAtIdx: index('posts_created_at_idx').on(table.createdAt.desc()),
-  // Unique index
-  slugIdx: uniqueIndex('posts_slug_idx').on(table.slug),
-  // Composite index
-  authorCreatedIdx: index('posts_author_created_idx').on(table.authorId, table.createdAt),
-}));
+export const posts = pgTable(
+  "posts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull(),
+    slug: text("slug").notNull(),
+    authorId: uuid("author_id").notNull(),
+    createdAt: timestamp("created_at").notNull().defaultNow(),
+  },
+  (table) => ({
+    // Single column index
+    authorIdx: index("posts_author_idx").on(table.authorId),
+    // Descending index for sorting
+    createdAtIdx: index("posts_created_at_idx").on(table.createdAt.desc()),
+    // Unique index
+    slugIdx: uniqueIndex("posts_slug_idx").on(table.slug),
+    // Composite index
+    authorCreatedIdx: index("posts_author_created_idx").on(
+      table.authorId,
+      table.createdAt,
+    ),
+  }),
+);
 ```
 
 ## Database Client
@@ -138,9 +157,9 @@ export const posts = pgTable('posts', {
 
 ```typescript
 // src/db/index.ts
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { Pool } from 'pg';
-import * as schema from './schema';
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as schema from "./schema";
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -157,9 +176,9 @@ export type Database = typeof db;
 
 ```typescript
 // src/db/index.ts
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import * as schema from './schema';
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
+import * as schema from "./schema";
 
 const sql = neon(process.env.DATABASE_URL!);
 export const db = drizzle(sql, { schema });
@@ -170,9 +189,9 @@ export const db = drizzle(sql, { schema });
 ### Basic CRUD
 
 ```typescript
-import { eq, and, or, like, desc, asc, sql } from 'drizzle-orm';
-import { db } from './db';
-import { users, posts } from './db/schema';
+import { eq, and, or, like, desc, asc, sql } from "drizzle-orm";
+import { db } from "./db";
+import { users, posts } from "./db/schema";
 
 // Select all
 const allUsers = await db.select().from(users);
@@ -191,19 +210,19 @@ const userEmails = await db
 // Insert
 const [newUser] = await db
   .insert(users)
-  .values({ email: 'john@example.com', name: 'John' })
+  .values({ email: "john@example.com", name: "John" })
   .returning();
 
 // Insert multiple
 await db.insert(users).values([
-  { email: 'a@example.com', name: 'A' },
-  { email: 'b@example.com', name: 'B' },
+  { email: "a@example.com", name: "A" },
+  { email: "b@example.com", name: "B" },
 ]);
 
 // Update
 await db
   .update(users)
-  .set({ name: 'John Doe', updatedAt: new Date() })
+  .set({ name: "John Doe", updatedAt: new Date() })
   .where(eq(users.id, userId));
 
 // Delete
@@ -244,58 +263,50 @@ const postsWithDetails = await db.query.posts.findMany({
 ### Complex Where Clauses
 
 ```typescript
-import { eq, and, or, like, gte, lte, inArray, isNull, isNotNull } from 'drizzle-orm';
+import {
+  eq,
+  and,
+  or,
+  like,
+  gte,
+  lte,
+  inArray,
+  isNull,
+  isNotNull,
+} from "drizzle-orm";
 
 // AND conditions
 const results = await db
   .select()
   .from(users)
-  .where(
-    and(
-      eq(users.isActive, true),
-      eq(users.role, 'admin')
-    )
-  );
+  .where(and(eq(users.isActive, true), eq(users.role, "admin")));
 
 // OR conditions
 const results = await db
   .select()
   .from(users)
-  .where(
-    or(
-      eq(users.role, 'admin'),
-      eq(users.role, 'user')
-    )
-  );
+  .where(or(eq(users.role, "admin"), eq(users.role, "user")));
 
 // LIKE (pattern matching)
 const results = await db
   .select()
   .from(users)
-  .where(like(users.email, '%@gmail.com'));
+  .where(like(users.email, "%@gmail.com"));
 
 // IN array
 const results = await db
   .select()
   .from(users)
-  .where(inArray(users.id, ['id1', 'id2', 'id3']));
+  .where(inArray(users.id, ["id1", "id2", "id3"]));
 
 // Date range
 const results = await db
   .select()
   .from(posts)
-  .where(
-    and(
-      gte(posts.createdAt, startDate),
-      lte(posts.createdAt, endDate)
-    )
-  );
+  .where(and(gte(posts.createdAt, startDate), lte(posts.createdAt, endDate)));
 
 // NULL checks
-const drafts = await db
-  .select()
-  .from(posts)
-  .where(isNull(posts.publishedAt));
+const drafts = await db.select().from(posts).where(isNull(posts.publishedAt));
 ```
 
 ### Pagination
@@ -328,15 +339,15 @@ async function getPostsCursor(cursor?: string, limit = 20) {
     .limit(limit + 1);
 
   if (cursor) {
-    const [cursorDate, cursorId] = cursor.split('_');
+    const [cursorDate, cursorId] = cursor.split("_");
     query.where(
       or(
         sql`${posts.createdAt} < ${cursorDate}`,
         and(
           eq(posts.createdAt, new Date(cursorDate)),
-          sql`${posts.id} < ${cursorId}`
-        )
-      )
+          sql`${posts.id} < ${cursorId}`,
+        ),
+      ),
     );
   }
 
@@ -356,18 +367,13 @@ async function getPostsCursor(cursor?: string, limit = 20) {
 ### Transactions
 
 ```typescript
-import { db } from './db';
+import { db } from "./db";
 
 // Basic transaction
 const result = await db.transaction(async (tx) => {
-  const [user] = await tx
-    .insert(users)
-    .values({ email, name })
-    .returning();
+  const [user] = await tx.insert(users).values({ email, name }).returning();
 
-  await tx
-    .insert(posts)
-    .values({ title: 'First Post', authorId: user.id });
+  await tx.insert(posts).values({ title: "First Post", authorId: user.id });
 
   return user;
 });
@@ -375,30 +381,37 @@ const result = await db.transaction(async (tx) => {
 // Transaction with rollback
 try {
   await db.transaction(async (tx) => {
-    await tx.update(accounts).set({ balance: sql`balance - 100` }).where(eq(accounts.id, fromId));
-    await tx.update(accounts).set({ balance: sql`balance + 100` }).where(eq(accounts.id, toId));
+    await tx
+      .update(accounts)
+      .set({ balance: sql`balance - 100` })
+      .where(eq(accounts.id, fromId));
+    await tx
+      .update(accounts)
+      .set({ balance: sql`balance + 100` })
+      .where(eq(accounts.id, toId));
 
     // Verify balance didn't go negative
-    const [from] = await tx.select().from(accounts).where(eq(accounts.id, fromId));
+    const [from] = await tx
+      .select()
+      .from(accounts)
+      .where(eq(accounts.id, fromId));
     if (from.balance < 0) {
-      throw new Error('Insufficient balance');
+      throw new Error("Insufficient balance");
     }
   });
 } catch (error) {
   // Transaction automatically rolled back
-  console.error('Transfer failed:', error);
+  console.error("Transfer failed:", error);
 }
 ```
 
 ### Aggregations
 
 ```typescript
-import { sql, count, sum, avg, min, max } from 'drizzle-orm';
+import { sql, count, sum, avg, min, max } from "drizzle-orm";
 
 // Count
-const [{ total }] = await db
-  .select({ total: count() })
-  .from(users);
+const [{ total }] = await db.select({ total: count() }).from(users);
 
 // Count with condition
 const [{ activeCount }] = await db
@@ -431,12 +444,12 @@ const prolificAuthors = await db
 ### drizzle.config.ts
 
 ```typescript
-import type { Config } from 'drizzle-kit';
+import type { Config } from "drizzle-kit";
 
 export default {
-  schema: './src/db/schema/*',
-  out: './drizzle',
-  dialect: 'postgresql',
+  schema: "./src/db/schema/*",
+  out: "./drizzle",
+  dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
@@ -486,18 +499,15 @@ CREATE INDEX CONCURRENTLY idx_users_email ON users(email);
 
 ```typescript
 // src/repositories/user.repository.ts
-import { eq } from 'drizzle-orm';
-import { db, Database } from '@/db';
-import { users, User, NewUser } from '@/db/schema';
+import { eq } from "drizzle-orm";
+import { db, Database } from "@/db";
+import { users, User, NewUser } from "@/db/schema";
 
 export class UserRepository {
   constructor(private db: Database = db) {}
 
   async findById(id: string): Promise<User | null> {
-    const [user] = await this.db
-      .select()
-      .from(users)
-      .where(eq(users.id, id));
+    const [user] = await this.db.select().from(users).where(eq(users.id, id));
     return user ?? null;
   }
 
@@ -510,10 +520,7 @@ export class UserRepository {
   }
 
   async create(data: NewUser): Promise<User> {
-    const [user] = await this.db
-      .insert(users)
-      .values(data)
-      .returning();
+    const [user] = await this.db.insert(users).values(data).returning();
     return user;
   }
 
@@ -542,11 +549,11 @@ export const userRepository = new UserRepository();
 
 ```typescript
 // Schema with soft delete
-export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  email: text('email').notNull(),
-  name: text('name').notNull(),
-  deletedAt: timestamp('deleted_at', { withTimezone: true }),
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull(),
+  name: text("name").notNull(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
   // ... other fields
 });
 
@@ -554,10 +561,7 @@ export const users = pgTable('users', {
 export const isNotDeleted = isNull(users.deletedAt);
 
 // Usage
-const activeUsers = await db
-  .select()
-  .from(users)
-  .where(isNotDeleted);
+const activeUsers = await db.select().from(users).where(isNotDeleted);
 
 // Soft delete
 await db
@@ -566,8 +570,5 @@ await db
   .where(eq(users.id, userId));
 
 // Restore
-await db
-  .update(users)
-  .set({ deletedAt: null })
-  .where(eq(users.id, userId));
+await db.update(users).set({ deletedAt: null }).where(eq(users.id, userId));
 ```

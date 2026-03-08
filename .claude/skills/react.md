@@ -7,12 +7,12 @@ description: React 19, TanStack Query v5, and TanStack Form v1 patterns for buil
 
 ## TanStack Ecosystem
 
-| Task | Library |
-|------|---------|
-| Server state (API data) | **TanStack Query** (not fetch/axios) |
-| Forms & validation | **TanStack Form** (not React Hook Form) |
-| Client state | **Zustand** or Context |
-| Tables | **TanStack Table** |
+| Task                    | Library                                 |
+| ----------------------- | --------------------------------------- |
+| Server state (API data) | **TanStack Query** (not fetch/axios)    |
+| Forms & validation      | **TanStack Form** (not React Hook Form) |
+| Client state            | **Zustand** or Context                  |
+| Tables                  | **TanStack Table**                      |
 
 ## Component Patterns
 
@@ -54,7 +54,13 @@ interface TabsContextType {
 
 const TabsContext = createContext<TabsContextType | null>(null);
 
-function Tabs({ children, defaultTab }: { children: React.ReactNode; defaultTab: string }) {
+function Tabs({
+  children,
+  defaultTab,
+}: {
+  children: React.ReactNode;
+  defaultTab: string;
+}) {
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   return (
@@ -101,7 +107,7 @@ Tabs.Panel = TabPanel;
   </Tabs.List>
   <Tabs.Panel id="tab1">Content 1</Tabs.Panel>
   <Tabs.Panel id="tab2">Content 2</Tabs.Panel>
-</Tabs>
+</Tabs>;
 ```
 
 ### Render Props
@@ -132,8 +138,12 @@ function MouseTracker({ children }: MouseTrackerProps) {
 
 // Usage
 <MouseTracker>
-  {({ x, y }) => <div>Mouse: {x}, {y}</div>}
-</MouseTracker>
+  {({ x, y }) => (
+    <div>
+      Mouse: {x}, {y}
+    </div>
+  )}
+</MouseTracker>;
 ```
 
 ## Hooks
@@ -182,9 +192,12 @@ function useDebounce<T>(value: T, delay: number): T {
 
 ```tsx
 // useCallback - memoize functions
-const handleSubmit = useCallback((data: FormData) => {
-  onSubmit(data);
-}, [onSubmit]); // Only recreate if onSubmit changes
+const handleSubmit = useCallback(
+  (data: FormData) => {
+    onSubmit(data);
+  },
+  [onSubmit],
+); // Only recreate if onSubmit changes
 
 // useMemo - memoize expensive calculations
 const sortedItems = useMemo(() => {
@@ -223,7 +236,10 @@ function reducer(state: State, action: Action): State {
     case "ADD_ITEM":
       return { ...state, items: [...state.items, action.payload] };
     case "REMOVE_ITEM":
-      return { ...state, items: state.items.filter(i => i.id !== action.payload) };
+      return {
+        ...state,
+        items: state.items.filter((i) => i.id !== action.payload),
+      };
     default:
       return state;
   }
@@ -255,7 +271,7 @@ const ListItem = memo(
   function ListItem({ item }: { item: Item }) {
     return <div>{item.name}</div>;
   },
-  (prevProps, nextProps) => prevProps.item.id === nextProps.item.id
+  (prevProps, nextProps) => prevProps.item.id === nextProps.item.id,
 );
 ```
 
@@ -291,7 +307,12 @@ function VirtualList({ items }: { items: Item[] }) {
 
   return (
     <div ref={parentRef} style={{ height: "400px", overflow: "auto" }}>
-      <div style={{ height: `${virtualizer.getTotalSize()}px`, position: "relative" }}>
+      <div
+        style={{
+          height: `${virtualizer.getTotalSize()}px`,
+          position: "relative",
+        }}
+      >
         {virtualizer.getVirtualItems().map((virtualItem) => (
           <div
             key={virtualItem.key}
@@ -402,7 +423,7 @@ class ErrorBoundary extends Component<
 // Usage
 <ErrorBoundary fallback={<ErrorPage />}>
   <App />
-</ErrorBoundary>
+</ErrorBoundary>;
 ```
 
 ## Data Fetching: TanStack Query
@@ -420,7 +441,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 30,   // 30 minutes (formerly cacheTime)
+      gcTime: 1000 * 60 * 30, // 30 minutes (formerly cacheTime)
       retry: 3,
       refetchOnWindowFocus: false,
     },
@@ -571,20 +592,16 @@ interface PostsPage {
 }
 
 function PostList() {
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: async ({ pageParam }) => {
-      const res = await fetch(`/api/posts?cursor=${pageParam}`);
-      return res.json() as Promise<PostsPage>;
-    },
-    initialPageParam: "",
-    getNextPageParam: (lastPage) => lastPage.nextCursor,
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+    useInfiniteQuery({
+      queryKey: ["posts"],
+      queryFn: async ({ pageParam }) => {
+        const res = await fetch(`/api/posts?cursor=${pageParam}`);
+        return res.json() as Promise<PostsPage>;
+      },
+      initialPageParam: "",
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    });
 
   const allPosts = data?.pages.flatMap((page) => page.posts) ?? [];
 
@@ -672,7 +689,10 @@ const userKeys = {
 };
 
 // Usage
-useQuery({ queryKey: userKeys.detail(userId), queryFn: () => fetchUser(userId) });
+useQuery({
+  queryKey: userKeys.detail(userId),
+  queryFn: () => fetchUser(userId),
+});
 
 // Invalidate all user queries
 queryClient.invalidateQueries({ queryKey: userKeys.all });

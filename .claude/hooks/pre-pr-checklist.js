@@ -25,40 +25,61 @@ if (input.stop_hook_active) process.exit(0);
 const aheadResult = spawnSync(
   "git",
   ["log", "origin/HEAD..HEAD", "--oneline"],
-  { encoding: "utf-8" }
+  { encoding: "utf-8" },
 );
 // If git fails (no remote, detached HEAD, etc.) exit — but hint when remote ref is missing
 if (aheadResult.status !== 0) {
   const stderr = aheadResult.stderr ?? "";
-  if (stderr.includes("unknown revision") || stderr.includes("no remote") || stderr.includes("not found")) {
-    process.stderr.write("📋 PR checklist skipped: no remote tracking branch found (run `git fetch` first)\n");
+  if (
+    stderr.includes("unknown revision") ||
+    stderr.includes("no remote") ||
+    stderr.includes("not found")
+  ) {
+    process.stderr.write(
+      "📋 PR checklist skipped: no remote tracking branch found (run `git fetch` first)\n",
+    );
   }
   process.exit(0);
 }
 
-const commitsAhead = (aheadResult.stdout ?? "").trim().split("\n").filter(Boolean);
+const commitsAhead = (aheadResult.stdout ?? "")
+  .trim()
+  .split("\n")
+  .filter(Boolean);
 if (commitsAhead.length === 0) process.exit(0);
 
 // Get current branch
-const branch = spawnSync("git", ["branch", "--show-current"], { encoding: "utf-8" }).stdout?.trim() ?? "";
+const branch =
+  spawnSync("git", ["branch", "--show-current"], {
+    encoding: "utf-8",
+  }).stdout?.trim() ?? "";
 
 // Diff stat vs remote
-const diffResult = spawnSync("git", ["diff", "origin/HEAD...HEAD", "--stat"], { encoding: "utf-8" });
+const diffResult = spawnSync("git", ["diff", "origin/HEAD...HEAD", "--stat"], {
+  encoding: "utf-8",
+});
 const diffStat = (diffResult.stdout ?? "").trim();
 
 // Changed files list
-const changedFilesResult = spawnSync("git", ["diff", "origin/HEAD...HEAD", "--name-only"], { encoding: "utf-8" });
-const changedFiles = (changedFilesResult.stdout ?? "").trim().split("\n").filter(Boolean);
+const changedFilesResult = spawnSync(
+  "git",
+  ["diff", "origin/HEAD...HEAD", "--name-only"],
+  { encoding: "utf-8" },
+);
+const changedFiles = (changedFilesResult.stdout ?? "")
+  .trim()
+  .split("\n")
+  .filter(Boolean);
 
 // Read open tech debt items for this PR's changed files
-const debtPath = path.join(".claude", "tech-debt.md");
+const debtPath = path.join(process.cwd(), ".claude", "tech-debt.md");
 let relevantDebt = [];
 try {
   const debt = fs.readFileSync(debtPath, "utf-8");
   const openItems = debt.split("\n").filter((l) => l.startsWith("- [ ]"));
   // Only show debt items from files changed in this PR
   relevantDebt = openItems.filter((item) =>
-    changedFiles.some((f) => item.includes(path.basename(f, path.extname(f))))
+    changedFiles.some((f) => item.includes(path.basename(f, path.extname(f)))),
   );
   // Fall back to all open debt if nothing matches
   if (relevantDebt.length === 0) relevantDebt = openItems.slice(0, 8);
@@ -68,14 +89,24 @@ try {
 const todoResult = spawnSync(
   "git",
   ["diff", "origin/HEAD...HEAD", "-G", "TODO|FIXME|HACK", "--name-only"],
-  { encoding: "utf-8" }
+  { encoding: "utf-8" },
 );
-const filesWithTodos = (todoResult.stdout ?? "").trim().split("\n").filter(Boolean);
+const filesWithTodos = (todoResult.stdout ?? "")
+  .trim()
+  .split("\n")
+  .filter(Boolean);
 
 // Detect test files in the changed set
-const sourceFiles = changedFiles.filter((f) => /\.[jt]sx?$/.test(f) && !/\.(test|spec)/.test(f));
+const sourceFiles = changedFiles.filter(
+  (f) => /\.[jt]sx?$/.test(f) && !/\.(test|spec)/.test(f),
+);
 const untested = sourceFiles.filter(
-  (f) => !changedFiles.some((t) => t.includes(path.basename(f, path.extname(f))) && /\.(test|spec)/.test(t))
+  (f) =>
+    !changedFiles.some(
+      (t) =>
+        t.includes(path.basename(f, path.extname(f))) &&
+        /\.(test|spec)/.test(t),
+    ),
 );
 
 // Build checklist
@@ -101,7 +132,7 @@ if (filesWithTodos.length > 0) {
   sections.push(
     ``,
     `## ⚠️ Files with TODO/FIXME`,
-    filesWithTodos.map((f) => `- \`${f}\``).join("\n")
+    filesWithTodos.map((f) => `- \`${f}\``).join("\n"),
   );
 }
 
@@ -127,5 +158,5 @@ const checklistPath = path.join(".claude", "pr-checklist.md");
 fs.writeFileSync(checklistPath, output, "utf-8");
 process.stderr.write(
   `📋 PR checklist → .claude/pr-checklist.md` +
-    `  (${commitsAhead.length} commit(s) ahead on '${branch}')\n`
+    `  (${commitsAhead.length} commit(s) ahead on '${branch}')\n`,
 );

@@ -9,12 +9,12 @@ Modern Web3 frontend development with Viem, Wagmi, and Reown AppKit.
 
 ## Quick Reference
 
-| Task | Reference |
-|------|-----------|
-| Viem clients, read/write contracts, events | [references/viem.md](references/viem.md) |
-| Wagmi hooks, useReadContract, useWriteContract | [references/wagmi.md](references/wagmi.md) |
-| Reown AppKit setup, wallet connection | [references/wallet-connection.md](references/wallet-connection.md) |
-| Transaction states, optimistic UI, toasts | [references/ux-patterns.md](references/ux-patterns.md) |
+| Task                                           | Reference                                                          |
+| ---------------------------------------------- | ------------------------------------------------------------------ |
+| Viem clients, read/write contracts, events     | [references/viem.md](references/viem.md)                           |
+| Wagmi hooks, useReadContract, useWriteContract | [references/wagmi.md](references/wagmi.md)                         |
+| Reown AppKit setup, wallet connection          | [references/wallet-connection.md](references/wallet-connection.md) |
+| Transaction states, optimistic UI, toasts      | [references/ux-patterns.md](references/ux-patterns.md)             |
 
 ## Installation
 
@@ -53,7 +53,11 @@ const receipt = await publicClient.waitForTransactionReceipt({ hash });
 ## Wagmi Hooks
 
 ```tsx
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
 
 // Read
 const { data } = useReadContract({ address, abi, functionName, args });

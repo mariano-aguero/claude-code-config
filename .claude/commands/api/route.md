@@ -95,16 +95,19 @@ export default app;
 ## Examples
 
 ### Basic CRUD
+
 ```
 /api/route users --crud
 ```
 
 ### Authenticated Route
+
 ```
 /api/route posts --crud --with-auth
 ```
 
 ### List with Pagination
+
 ```
 /api/route products --method=GET --with-pagination
 ```

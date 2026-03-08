@@ -18,7 +18,18 @@ const ext = path.extname(filePath);
 const basename = path.basename(filePath);
 
 // ── Fast exit for files that don't need any of these checks ─────────────────
-const BINARY_SKIP = new Set([".png", ".jpg", ".jpeg", ".svg", ".ico", ".woff", ".woff2", ".ttf", ".lock", ".map"]);
+const BINARY_SKIP = new Set([
+  ".png",
+  ".jpg",
+  ".jpeg",
+  ".svg",
+  ".ico",
+  ".woff",
+  ".woff2",
+  ".ttf",
+  ".lock",
+  ".map",
+]);
 const ENV_SKIP = new Set([".env", ".env.local", ".env.example"]);
 const SOURCE_EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 
@@ -30,8 +41,11 @@ const skipAdvisory = process.env.CLAUDE_ANALYSIS === "0";
 
 // Secrets check runs on all text files; rest only on source files
 const isSource = SOURCE_EXTS.has(ext);
-const isTestFile = /\.(test|spec)\.[jt]sx?$/.test(filePath) || filePath.includes("__tests__");
-const isConfigFile = /\.(config|d)\.[jt]sx?$/.test(filePath) || /\.(stories)\.[jt]sx?$/.test(filePath);
+const isTestFile =
+  /\.(test|spec)\.[jt]sx?$/.test(filePath) || filePath.includes("__tests__");
+const isConfigFile =
+  /\.(config|d)\.[jt]sx?$/.test(filePath) ||
+  /\.(stories)\.[jt]sx?$/.test(filePath);
 
 let content;
 try {
@@ -45,21 +59,49 @@ let hasSecurityIssue = false;
 
 // ── 1. Detect Secrets ────────────────────────────────────────────────────────
 const SECRET_PATTERNS = [
-  { name: "Private key",       regex: /-----BEGIN\s+(RSA|EC|DSA|OPENSSH)\s+PRIVATE KEY-----/ },
-  { name: "AWS Access Key",    regex: /AKIA[0-9A-Z]{16}/ },
-  { name: "GitHub token",      regex: /ghp_[a-zA-Z0-9]{36}/ },
+  {
+    name: "Private key",
+    regex: /-----BEGIN\s+(RSA|EC|DSA|OPENSSH)\s+PRIVATE KEY-----/,
+  },
+  { name: "AWS Access Key", regex: /AKIA[0-9A-Z]{16}/ },
+  { name: "GitHub token", regex: /ghp_[a-zA-Z0-9]{36}/ },
   { name: "Anthropic API key", regex: /sk-ant-[a-zA-Z0-9\-]{20,}/ },
-  { name: "OpenAI API key",    regex: /sk-(?:proj-|[a-zA-Z0-9]{20,}T3BlbkFJ)[a-zA-Z0-9\-_]{20,}/ },
-  { name: "Hardcoded password",regex: /password\s*[:=]\s*["'][^"']{8,}["']/i },
-  { name: "Bearer token",      regex: /Bearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
-  { name: "Generic secret",    regex: /(?:secret|token|api_key)\s*[:=]\s*["'][a-zA-Z0-9\-_]{16,}["']/i },
+  {
+    name: "OpenAI API key",
+    regex: /sk-(?:proj-|[a-zA-Z0-9]{20,}T3BlbkFJ)[a-zA-Z0-9\-_]{20,}/,
+  },
+  // Exclude common placeholder values (your*, placeholder, example, test*, changeme, etc.)
+  {
+    name: "Hardcoded password",
+    regex:
+      /password\s*[:=]\s*["'](?!your|placeholder|example|test|dummy|changeme|xxx|sample)[^"']{8,}["']/i,
+  },
+  { name: "Bearer token", regex: /Bearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
+  {
+    name: "Generic secret",
+    regex: /(?:secret|token|api_key)\s*[:=]\s*["'][a-zA-Z0-9\-_]{16,}["']/i,
+  },
 ];
 
-const secretsFound = SECRET_PATTERNS.filter((p) => p.regex.test(content));
+// Bearer token and generic secret patterns produce false positives in test files
+// (mock tokens, fixture data). High-confidence patterns always run.
+const HIGH_CONFIDENCE_NAMES = new Set([
+  "Private key",
+  "AWS Access Key",
+  "GitHub token",
+  "Anthropic API key",
+  "OpenAI API key",
+  "Hardcoded password",
+]);
+const patternsToRun = isTestFile
+  ? SECRET_PATTERNS.filter((p) => HIGH_CONFIDENCE_NAMES.has(p.name))
+  : SECRET_PATTERNS;
+
+const secretsFound = patternsToRun.filter((p) => p.regex.test(content));
 if (secretsFound.length > 0) {
   const list = secretsFound.map((p) => `  - ${p.name}`).join("\n");
   process.stderr.write(
-    `🔐 Potential secrets detected in ${basename}:\n${list}\n\nRemove hardcoded secrets and use environment variables instead.\n`
+    `🔐 Potential secrets detected in ${basename}:\n${list}\n\nRemove hardcoded secrets and use environment variables instead.\n`,
   );
   hasSecurityIssue = true;
 }
@@ -71,7 +113,7 @@ if (!skipAdvisory && isSource && !isTestFile && !isConfigFile) {
   const namedExports = new Set(
     [...content.matchAll(EXPORT_PATTERN)]
       .map((m) => m[1] ?? m[2])
-      .filter((n) => n && n.length > 2)
+      .filter((n) => n && n.length > 2),
   );
 
   if (namedExports.size > 0) {
@@ -91,18 +133,22 @@ if (!skipAdvisory && isSource && !isTestFile && !isConfigFile) {
       warnings.push(
         `⚠️  No test file found for ${basename}.\n` +
           `Expected: ${candidates[0]}\n` +
-          `Exports without tests: ${[...namedExports].join(", ")}`
+          `Exports without tests: ${[...namedExports].join(", ")}`,
       );
     } else {
       try {
         const testContent = fs.readFileSync(testFile, "utf-8");
-        const uncovered = [...namedExports].filter((n) => !testContent.includes(n));
+        const uncovered = [...namedExports].filter(
+          (n) => !testContent.includes(n),
+        );
         if (uncovered.length > 0) {
           warnings.push(
-            `⚠️  ${path.basename(testFile)} doesn't cover: ${uncovered.join(", ")}`
+            `⚠️  ${path.basename(testFile)} doesn't cover: ${uncovered.join(", ")}`,
           );
         }
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     }
   }
 }
@@ -131,34 +177,50 @@ if (!skipAdvisory && isSource && !isTestFile) {
       const bodyStart = i;
       while (i < content.length) {
         if (content[i] === "{") depth++;
-        else if (content[i] === "}") { depth--; if (depth === 0) break; }
+        else if (content[i] === "}") {
+          depth--;
+          if (depth === 0) break;
+        }
         i++;
       }
 
       const body = content.slice(bodyStart, i + 1);
       const lineCount = body.split("\n").length;
       const complexity =
-        1 + (body.match(/\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\||\?\./g) ?? []).length;
+        1 +
+        (
+          body.match(
+            /\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\||\?\./g,
+          ) ?? []
+        ).length;
 
-      let nestingDepth = 0, maxNest = 0;
+      let nestingDepth = 0,
+        maxNest = 0;
       for (const ch of body) {
-        if (ch === "{") { nestingDepth++; if (nestingDepth > maxNest) maxNest = nestingDepth; }
-        else if (ch === "}") nestingDepth--;
+        if (ch === "{") {
+          nestingDepth++;
+          if (nestingDepth > maxNest) maxNest = nestingDepth;
+        } else if (ch === "}") nestingDepth--;
       }
 
       const problems = [];
-      if (complexity > MAX_COMPLEXITY) problems.push(`complexity ${complexity} (max ${MAX_COMPLEXITY})`);
-      if (maxNest > MAX_NESTING) problems.push(`nesting depth ${maxNest} (max ${MAX_NESTING})`);
-      if (lineCount > MAX_LINES) problems.push(`${lineCount} lines (max ${MAX_LINES})`);
+      if (complexity > MAX_COMPLEXITY)
+        problems.push(`complexity ${complexity} (max ${MAX_COMPLEXITY})`);
+      if (maxNest > MAX_NESTING)
+        problems.push(`nesting depth ${maxNest} (max ${MAX_NESTING})`);
+      if (lineCount > MAX_LINES)
+        problems.push(`${lineCount} lines (max ${MAX_LINES})`);
 
       if (problems.length > 0) {
-        complexIssues.push(`  - ${name}() at line ${startLine}: ${problems.join(", ")}`);
+        complexIssues.push(
+          `  - ${name}() at line ${startLine}: ${problems.join(", ")}`,
+        );
       }
     }
 
     if (complexIssues.length > 0) {
       warnings.push(
-        `⚠️  Complex functions in ${basename}:\n${complexIssues.join("\n")}\nConsider breaking these into smaller functions.`
+        `⚠️  Complex functions in ${basename}:\n${complexIssues.join("\n")}\nConsider breaking these into smaller functions.`,
       );
     }
   }

@@ -23,12 +23,13 @@ spawnSync("pnpm", ["eslint", "--fix", filePath], { stdio: "ignore" });
 // Step 2: check for remaining unfixable issues
 const result = spawnSync("pnpm", ["eslint", filePath], { encoding: "utf-8" });
 
+// status is null when the process couldn't be spawned (pnpm/eslint not in PATH)
+if (result.status === null) process.exit(0);
+
 if (result.status !== 0) {
-  const output = [(result.stdout ?? ""), (result.stderr ?? "")]
-    .join("")
-    .trim();
+  const output = [result.stdout ?? "", result.stderr ?? ""].join("").trim();
   process.stderr.write(
-    `⚠️  ESLint errors remain in ${path.basename(filePath)} (after auto-fix):\n\n${output}\n\nFix these manually before proceeding.\n`
+    `⚠️  ESLint errors remain in ${path.basename(filePath)} (after auto-fix):\n\n${output}\n\nFix these manually before proceeding.\n`,
   );
   process.exit(2);
 }

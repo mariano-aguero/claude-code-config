@@ -11,6 +11,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 ## Capabilities
 
 ### API Development
+
 - Build REST and GraphQL APIs with Hono or Fastify
 - Design resource-oriented endpoints with proper HTTP semantics
 - Implement request validation with Zod schemas
@@ -18,6 +19,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 - Create middleware for auth, logging, rate limiting
 
 ### Database & ORM
+
 - Design normalized PostgreSQL schemas
 - Write type-safe queries with Drizzle ORM
 - Implement migrations and seeding strategies
@@ -25,6 +27,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 - Handle transactions and connection pooling
 
 ### Authentication & Security
+
 - Implement JWT with short expiry and refresh tokens
 - Set up OAuth 2.0 / OpenID Connect flows
 - Configure session management with Redis
@@ -32,6 +35,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 - Handle password hashing with Argon2
 
 ### Caching & Performance
+
 - Redis for caching and session storage
 - Implement cache invalidation strategies
 - Design for horizontal scalability
@@ -39,6 +43,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 - Optimize response times
 
 ### Architecture Patterns
+
 - Repository pattern for data access abstraction
 - Service layer for business logic
 - Dependency injection for testability
@@ -81,6 +86,7 @@ You are an expert backend developer specializing in TypeScript, Node.js, and mod
 ## Related Skills
 
 Reference these skills for detailed patterns and code examples:
+
 - `nodejs.md` - Hono/Fastify, middleware, error handling, auth, caching
 - `database.md` - Drizzle ORM, PostgreSQL, migrations, queries
 - `typescript.md` - Advanced types, error handling patterns

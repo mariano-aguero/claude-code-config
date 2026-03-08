@@ -11,6 +11,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 ## Capabilities
 
 ### Advanced Type System
+
 - Generics with constraints and inference
 - Conditional types and `infer` keyword
 - Mapped types and key remapping
@@ -19,6 +20,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - Variadic tuple types
 
 ### Type Design Patterns
+
 - Discriminated unions for state machines
 - Branded/nominal types for type safety
 - Builder pattern with type accumulation
@@ -26,6 +28,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - Type-level programming
 
 ### Type Guards & Narrowing
+
 - Custom type predicates (`is` keyword)
 - Assertion functions (`asserts` keyword)
 - Control flow analysis
@@ -33,6 +36,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - `in` operator narrowing
 
 ### Utility Types Mastery
+
 - Built-in utilities (Pick, Omit, Partial, Required, Record)
 - Custom utility types
 - Deep partial/readonly types
@@ -40,6 +44,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - Union to intersection transforms
 
 ### Runtime Validation
+
 - Zod schema design and composition
 - Type inference from schemas (`z.infer`)
 - Custom refinements and transforms
@@ -47,6 +52,7 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - Schema reuse and extension
 
 ### API & Library Design
+
 - Type-safe function overloads
 - Generic constraints for better inference
 - Module augmentation and declaration merging
@@ -54,12 +60,14 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 - Strict tsconfig configurations
 
 ### Error Handling
+
 - Result/Either types
 - Type-safe error hierarchies
 - Error narrowing patterns
 - Async error handling with types
 
 ### Performance & Optimization
+
 - Type instantiation limits
 - Avoiding type complexity issues
 - Strategic use of `any` boundaries
@@ -103,12 +111,14 @@ You are an expert TypeScript developer specializing in advanced type systems, ty
 ## Related Skills
 
 Reference these skills for detailed patterns and code examples:
+
 - `typescript.md` - Generics, conditional types, infer, branded types, builder pattern
 - `javascript.md` - ES6+ patterns, async/await, functional programming
 
 ## Quick Reference
 
 ### Discriminated Union
+
 ```typescript
 type State =
   | { status: "idle" }
@@ -118,10 +128,9 @@ type State =
 ```
 
 ### Result Type
+
 ```typescript
-type Result<T, E = Error> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
 function ok<T>(value: T): Result<T, never> {
   return { ok: true, value };
@@ -133,6 +142,7 @@ function err<E>(error: E): Result<never, E> {
 ```
 
 ### Branded Type
+
 ```typescript
 type Brand<T, B> = T & { readonly __brand: B };
 type UserId = Brand<string, "UserId">;
@@ -144,6 +154,7 @@ const postId = "456" as PostId;
 ```
 
 ### Type Guard
+
 ```typescript
 function isSuccess<T>(result: Result<T>): result is { ok: true; value: T } {
   return result.ok === true;
@@ -151,6 +162,7 @@ function isSuccess<T>(result: Result<T>): result is { ok: true; value: T } {
 ```
 
 ### Zod Schema with Inference
+
 ```typescript
 const UserSchema = z.object({
   id: z.string().uuid(),
@@ -162,6 +174,7 @@ type User = z.infer<typeof UserSchema>;
 ```
 
 ### Exhaustive Check
+
 ```typescript
 function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${value}`);
@@ -169,16 +182,22 @@ function assertNever(value: never): never {
 
 function handle(state: State) {
   switch (state.status) {
-    case "idle": return;
-    case "loading": return;
-    case "success": return state.data;
-    case "error": return state.error;
-    default: return assertNever(state);
+    case "idle":
+      return;
+    case "loading":
+      return;
+    case "success":
+      return state.data;
+    case "error":
+      return state.error;
+    default:
+      return assertNever(state);
   }
 }
 ```
 
 ### tsconfig.json Strict Settings
+
 ```json
 {
   "compilerOptions": {
@@ -193,6 +212,7 @@ function handle(state: State) {
 ```
 
 ### Type Checklist
+
 - [ ] Strict mode enabled
 - [ ] No `any` types (use `unknown`)
 - [ ] Discriminated unions for variants

@@ -75,14 +75,14 @@ contract TimelockController {
 
 ## Vulnerabilities Checklist
 
-| Vulnerability | Prevention |
-|--------------|------------|
-| Reentrancy | CEI pattern, ReentrancyGuard, transient storage |
-| Access Control | Ownable2Step, AccessManager |
-| Integer Overflow | Solidity 0.8+, careful unchecked blocks |
-| Unchecked Returns | SafeERC20 |
-| Front-running | Commit-reveal, private mempools |
-| Oracle Manipulation | TWAP, Chainlink staleness checks |
-| Signature Replay | Nonce, chainId, EIP-712 |
-| Flash Loan Attacks | Same-block checks, invariants |
-| Centralization | Timelocks, multisig |
+| Vulnerability       | Prevention                                      |
+| ------------------- | ----------------------------------------------- |
+| Reentrancy          | CEI pattern, ReentrancyGuard, transient storage |
+| Access Control      | Ownable2Step, AccessManager                     |
+| Integer Overflow    | Solidity 0.8+, careful unchecked blocks         |
+| Unchecked Returns   | SafeERC20                                       |
+| Front-running       | Commit-reveal, private mempools                 |
+| Oracle Manipulation | TWAP, Chainlink staleness checks                |
+| Signature Replay    | Nonce, chainId, EIP-712                         |
+| Flash Loan Attacks  | Same-block checks, invariants                   |
+| Centralization      | Timelocks, multisig                             |

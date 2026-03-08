@@ -59,21 +59,25 @@ export const ${tableName}Relations = relations(${tableName}, ({ one, many }) => 
 ## Examples
 
 ### Basic Table
+
 ```
 /db/schema products
 ```
 
 ### With Relations
+
 ```
 /db/schema posts --belongs-to=users --has-many=comments
 ```
 
 ### With Enum
+
 ```
 /db/schema orders --with-enum=status:pending,processing,shipped,delivered
 ```
 
 ### With Soft Delete
+
 ```
 /db/schema users --with-soft-delete
 ```

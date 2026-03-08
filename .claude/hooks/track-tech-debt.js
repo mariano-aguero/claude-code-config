@@ -44,27 +44,30 @@ for (let i = 0; i < lines.length; i++) {
 if (found.length === 0) process.exit(0);
 
 // Load or init tech-debt.md
-const debtPath = path.join(".claude", "tech-debt.md");
+const debtPath = path.join(process.cwd(), ".claude", "tech-debt.md");
 let existing = "";
 try {
   existing = fs.readFileSync(debtPath, "utf-8");
 } catch {
-  existing = "# Tech Debt\n\nTracked automatically by Claude Code hooks.\nMark items as `[x]` when resolved.\n\n";
+  existing =
+    "# Tech Debt\n\nTracked automatically by Claude Code hooks.\nMark items as `[x]` when resolved.\n\n";
 }
 
 const timestamp = new Date().toISOString().split("T")[0];
 let added = 0;
 
 for (const item of found) {
-  if (existing.includes(item.key)) continue;
-  existing += `- [ ] \`${item.key}\` — **${item.marker}**: ${item.text} _(${timestamp})_\n`;
+  // Match the backtick-wrapped key as written in the file to avoid substring false matches
+  // e.g., "file.ts:5" must not match "file.ts:51" — the backtick terminates the key
+  const writtenKey = `\`${item.key}\``;
+  if (existing.includes(writtenKey)) continue;
+  existing += `- [ ] ${writtenKey} — **${item.marker}**: ${item.text} _(${timestamp})_\n`;
   added++;
 }
 
 if (added > 0) fs.writeFileSync(debtPath, existing, "utf-8");
 
 // Report current debt for this file
-const escapedPath = filePath.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Count only open (unresolved) debt items to avoid inflating counts with resolved ones
 const openLines = existing.split("\n").filter((l) => l.startsWith("- [ ]"));
 const fileDebtCount = openLines.filter((l) => l.includes(filePath)).length;
@@ -73,6 +76,6 @@ if (fileDebtCount > 0) {
   process.stderr.write(
     `📋 Tech debt in ${path.basename(filePath)}: ${fileDebtCount} item(s)` +
       (added > 0 ? ` (${added} new)` : "") +
-      ` → .claude/tech-debt.md\n`
+      ` → .claude/tech-debt.md\n`,
   );
 }

@@ -34,7 +34,9 @@ test.describe("${Feature} Page", () => {
   });
 
   test("should load content", async ({ page }) => {
-    await expect(page.getByRole("heading", { name: "${Feature}" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "${Feature}" }),
+    ).toBeVisible();
   });
 
   test("should navigate correctly", async ({ page }) => {
@@ -130,7 +132,11 @@ test.describe("${Feature} CRUD", () => {
   test("should update ${feature}", async ({ page }) => {
     await page.goto("/${feature}s");
 
-    await page.getByRole("listitem").first().getByRole("button", { name: "Edit" }).click();
+    await page
+      .getByRole("listitem")
+      .first()
+      .getByRole("button", { name: "Edit" })
+      .click();
 
     await page.getByLabel("Name").clear();
     await page.getByLabel("Name").fill("Updated Name");
@@ -168,7 +174,9 @@ test.describe("${Feature} Form", () => {
     await page.goto("/${feature}/new");
   });
 
-  test("should show validation errors for required fields", async ({ page }) => {
+  test("should show validation errors for required fields", async ({
+    page,
+  }) => {
     await page.getByRole("button", { name: "Submit" }).click();
 
     await expect(page.getByText("Name is required")).toBeVisible();
@@ -197,7 +205,9 @@ test.describe("${Feature} Form", () => {
 
     await page.getByRole("button", { name: "Submit" }).click();
 
-    await expect(page.getByRole("button", { name: "Submitting..." })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Submitting..." }),
+    ).toBeVisible();
   });
 });
 ```

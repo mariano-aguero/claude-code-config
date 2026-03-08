@@ -199,7 +199,9 @@ forge test --fuzz-runs 10000
 # Security Audit Report
 
 ## Project: ${ProjectName}
+
 ## Auditor: ${Auditor}
+
 ## Date: ${Date}
 
 ---
@@ -210,19 +212,19 @@ Brief overview of findings and overall security posture.
 
 ## Scope
 
-| File | SLOC | Complexity |
-|------|------|------------|
-| Contract.sol | 150 | Medium |
+| File         | SLOC | Complexity |
+| ------------ | ---- | ---------- |
+| Contract.sol | 150  | Medium     |
 
 ## Findings Summary
 
-| Severity | Count |
-|----------|-------|
-| Critical | 0 |
-| High | 1 |
-| Medium | 2 |
-| Low | 3 |
-| Informational | 5 |
+| Severity      | Count |
+| ------------- | ----- |
+| Critical      | 0     |
+| High          | 1     |
+| Medium        | 2     |
+| Low           | 3     |
+| Informational | 5     |
 
 ---
 
@@ -246,12 +248,12 @@ Apply CEI pattern or use ReentrancyGuard.
 \`\`\`solidity
 // Before
 function withdraw() external {
-    // vulnerable code
+// vulnerable code
 }
 
 // After
 function withdraw() external nonReentrant {
-    // fixed code
+// fixed code
 }
 \`\`\`
 

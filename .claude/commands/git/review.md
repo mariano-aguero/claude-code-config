@@ -20,6 +20,7 @@ Perform a code review on current changes or a pull request.
 ## Review Checklist
 
 ### Code Quality
+
 - [ ] Code is readable and self-documenting
 - [ ] Functions/methods are small and focused
 - [ ] No code duplication
@@ -27,6 +28,7 @@ Perform a code review on current changes or a pull request.
 - [ ] Edge cases considered
 
 ### Security
+
 - [ ] No hardcoded secrets/credentials
 - [ ] Input validation present
 - [ ] SQL injection prevention
@@ -35,6 +37,7 @@ Perform a code review on current changes or a pull request.
 - [ ] Authentication/authorization checks
 
 ### Performance
+
 - [ ] No N+1 queries
 - [ ] Proper memoization (useMemo, useCallback)
 - [ ] No unnecessary re-renders
@@ -42,18 +45,21 @@ Perform a code review on current changes or a pull request.
 - [ ] Images are optimized
 
 ### Testing
+
 - [ ] Tests cover new functionality
 - [ ] Edge cases tested
 - [ ] Tests are meaningful (not just for coverage)
 - [ ] Mocks are appropriate
 
 ### TypeScript
+
 - [ ] Proper types (no `any`)
 - [ ] Interfaces over types where appropriate
 - [ ] Generics used correctly
 - [ ] Null/undefined handled
 
 ### React Specific
+
 - [ ] Proper use of hooks
 - [ ] Keys in lists
 - [ ] useEffect dependencies correct
@@ -61,6 +67,7 @@ Perform a code review on current changes or a pull request.
 - [ ] Components properly decomposed
 
 ### API/Backend
+
 - [ ] Proper HTTP methods
 - [ ] Validation on input
 - [ ] Error responses consistent
@@ -70,6 +77,7 @@ Perform a code review on current changes or a pull request.
 ## Review Comments Template
 
 ### Approve
+
 ```
 LGTM!
 
@@ -79,6 +87,7 @@ Minor suggestions:
 ```
 
 ### Request Changes
+
 ```
 Thanks for the PR! A few things need attention:
 
@@ -110,13 +119,13 @@ await db.query(query, [userId]);
 
 ## Comment Prefixes
 
-| Prefix | Meaning |
-|--------|---------|
-| `nit:` | Minor suggestion, optional |
-| `suggestion:` | Improvement idea |
-| `question:` | Need clarification |
-| `todo:` | Must be addressed |
-| `blocking:` | Prevents approval |
+| Prefix        | Meaning                    |
+| ------------- | -------------------------- |
+| `nit:`        | Minor suggestion, optional |
+| `suggestion:` | Improvement idea           |
+| `question:`   | Need clarification         |
+| `todo:`       | Must be addressed          |
+| `blocking:`   | Prevents approval          |
 
 ## Review Workflow
 
@@ -131,6 +140,7 @@ await db.query(query, [userId]);
    - Check for edge cases
 
 3. **Test locally** (if needed)
+
    ```bash
    gh pr checkout 123
    pnpm install
@@ -144,6 +154,7 @@ await db.query(query, [userId]);
    - Suggest alternatives
 
 5. **Submit review**
+
    ```bash
    # Approve
    gh pr review 123 --approve -b "LGTM!"
@@ -158,6 +169,7 @@ await db.query(query, [userId]);
 ## Common Issues to Look For
 
 ### React
+
 ```tsx
 // BAD: Missing dependency
 useEffect(() => {
@@ -170,10 +182,11 @@ useEffect(() => {
 }, [config]); // New object every render
 
 // BAD: Function recreated every render
-<Button onClick={() => handleClick(id)} />
+<Button onClick={() => handleClick(id)} />;
 ```
 
 ### TypeScript
+
 ```tsx
 // BAD: Using any
 const data: any = response.json();
@@ -186,6 +199,7 @@ const user = userSchema.parse(data);
 ```
 
 ### Performance
+
 ```tsx
 // BAD: Expensive calculation every render
 const sorted = items.sort((a, b) => a.name.localeCompare(b.name));
@@ -193,7 +207,7 @@ const sorted = items.sort((a, b) => a.name.localeCompare(b.name));
 // GOOD: Memoized
 const sorted = useMemo(
   () => items.sort((a, b) => a.name.localeCompare(b.name)),
-  [items]
+  [items],
 );
 ```
 
