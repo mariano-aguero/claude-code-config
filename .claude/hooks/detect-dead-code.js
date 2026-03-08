@@ -8,6 +8,8 @@
 const fs = require("fs");
 const path = require("path");
 
+if (process.env.CLAUDE_ANALYSIS === "0") process.exit(0);
+
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 const ext = path.extname(filePath);
 

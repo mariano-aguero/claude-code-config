@@ -86,7 +86,8 @@ Control formatting and linting per project via `.claude/settings.local.json` (no
 {
   "env": {
     "CLAUDE_FORMAT": "0",
-    "CLAUDE_LINT": "0"
+    "CLAUDE_LINT": "0",
+    "CLAUDE_ANALYSIS": "0"
   }
 }
 ```
@@ -95,6 +96,7 @@ Control formatting and linting per project via `.claude/settings.local.json` (no
 |---|---|---|
 | `CLAUDE_FORMAT` | `"1"` | Skips Prettier on every Write/Edit |
 | `CLAUDE_LINT` | `"1"` | Skips ESLint on every Write/Edit |
+| `CLAUDE_ANALYSIS` | `"1"` | Skips dead-code and duplicate-export analysis on every Write/Edit |
 
 Note: `detect-secrets` and `typecheck` always run regardless — they catch correctness and security issues, not style.
 

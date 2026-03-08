@@ -2,7 +2,8 @@
   "env": {
     "ENABLE_LSP_TOOL": "1",
     "CLAUDE_FORMAT": "1",
-    "CLAUDE_LINT": "1"
+    "CLAUDE_LINT": "1",
+    "CLAUDE_ANALYSIS": "1"
   },
   "hooks": {
     "PreToolUse": [
