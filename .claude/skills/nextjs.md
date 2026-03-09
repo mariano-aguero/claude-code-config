@@ -160,6 +160,78 @@ export function PostForm() {
 }
 ```
 
+### Async Dynamic APIs (Next.js 15+)
+
+`params`, `searchParams`, `cookies()`, and `headers()` are all async in Next.js 15+.
+
+```tsx
+// Dynamic route page — params is a Promise
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { id } = await params;
+  const { q } = await searchParams;
+  const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+  return <UserProfile user={user} query={q} />;
+}
+
+// Dynamic metadata — same pattern
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const user = await getUser(id);
+  return { title: user.name };
+}
+
+// cookies() and headers() are async
+import { cookies, headers } from "next/headers";
+
+export async function getSession() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  return token ? verifyToken(token) : null;
+}
+
+export async function getUserAgent() {
+  const headersList = await headers();
+  return headersList.get("user-agent");
+}
+```
+
+### `after()` — Post-Response Work
+
+Run side effects (analytics, logging) **after** the response is sent. Does not block the response.
+
+```tsx
+import { after } from "next/server";
+
+// In a Server Component or Server Action
+export default async function Page() {
+  const data = await fetchData();
+
+  // Runs after response is flushed — does not delay it
+  after(async () => {
+    await analytics.track("page-view", { path: "/dashboard" });
+    await logger.info("Dashboard viewed");
+  });
+
+  return <Dashboard data={data} />;
+}
+```
+
+Key rules:
+
+- Requires `experimental.dynamicIO: true` or Next.js 15.1+
+- `after()` callbacks run even if the component throws
+- Do not use `after()` for critical mutations — it's fire-and-forget
+
 ### `"use cache"` Directive (Next.js 15+)
 
 Fine-grained caching for Server Components and data functions. Replaces `fetch` cache options with explicit, composable cache control.
