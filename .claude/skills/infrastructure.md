@@ -198,10 +198,8 @@ export async function GET() {
 
     return NextResponse.json({ status: "healthy" }, { status: 200 });
   } catch (error) {
-    return NextResponse.json(
-      { status: "unhealthy", error: String(error) },
-      { status: 503 },
-    );
+    console.error("Health check failed:", error);
+    return NextResponse.json({ status: "unhealthy" }, { status: 503 });
   }
 }
 ```

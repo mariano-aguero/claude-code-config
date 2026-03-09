@@ -490,7 +490,7 @@ app.delete("/api/users/:id", requirePermission("users:delete"), async (c) => {
 ### Next.js Configuration
 
 ```typescript
-// next.config.js
+// next.config.ts
 // Note: nonce-based CSP requires middleware to generate a unique nonce per request.
 // See: https://nextjs.org/docs/app/building-your-application/configuring/content-security-policy
 // For a simpler starting point, use 'unsafe-inline' and migrate to nonce when ready:
@@ -519,7 +519,7 @@ const securityHeaders = [
   },
   {
     key: "X-Frame-Options",
-    value: "DENY",
+    value: "DENY", // Use SAMEORIGIN if same-origin embedding is intentionally needed
   },
   {
     key: "X-Content-Type-Options",
@@ -539,7 +539,7 @@ const securityHeaders = [
   },
 ];
 
-module.exports = {
+export default {
   async headers() {
     return [
       {

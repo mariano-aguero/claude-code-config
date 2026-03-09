@@ -137,14 +137,14 @@ Reference these skills for detailed patterns and code examples:
 ### Security Headers (Next.js)
 
 ```typescript
-// next.config.js
+// next.config.ts
 const securityHeaders = [
   { key: "X-DNS-Prefetch-Control", value: "on" },
   {
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "X-Frame-Options", value: "DENY" }, // Use SAMEORIGIN only if same-origin embedding is intentionally needed
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {

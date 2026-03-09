@@ -39,6 +39,7 @@ contract ${ContractName} is Ownable, ReentrancyGuard {
     // ============ Errors ============
     error InvalidAmount();
     error InsufficientBalance();
+    error TransferFailed();
 
     // ============ Events ============
     event Deposited(address indexed user, uint256 amount);
@@ -73,7 +74,7 @@ contract ${ContractName} is Ownable, ReentrancyGuard {
         totalDeposits -= amount;
 
         (bool success, ) = msg.sender.call{value: amount}("");
-        require(success, "Transfer failed");
+        if (!success) revert TransferFailed();
 
         emit Withdrawn(msg.sender, amount);
     }
@@ -134,6 +135,10 @@ contract ${NFTName} is ERC721, ERC721URIStorage, Ownable {
 
     error MaxSupplyReached();
     error InsufficientPayment();
+    error WithdrawFailed();
+
+    // ============ Events ============
+    event Withdrawn(address indexed to, uint256 amount);
 
     constructor() ERC721("${NFTName}", "${SYMBOL}") Ownable(msg.sender) {}
 
@@ -151,9 +156,6 @@ contract ${NFTName} is ERC721, ERC721URIStorage, Ownable {
     function setMintPrice(uint256 price) external onlyOwner {
         mintPrice = price;
     }
-
-    error WithdrawFailed();
-    event Withdrawn(address indexed to, uint256 amount);
 
     function withdraw() external onlyOwner {
         uint256 amount = address(this).balance;

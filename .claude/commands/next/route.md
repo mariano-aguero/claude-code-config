@@ -179,6 +179,8 @@ const createSchema = z.object({
   email: z.string().email(),
 });
 
+const updateSchema = createSchema.partial();
+
 type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
@@ -209,12 +211,14 @@ export async function create${Resource}(
 
 export async function update${Resource}(
   id: string,
-  input: Partial<z.infer<typeof createSchema>>
+  input: z.infer<typeof updateSchema>
 ): Promise<ActionResult<${Resource}>> {
   try {
+    const validated = updateSchema.parse(input);
+
     const [item] = await db
       .update(${resource}Table)
-      .set(input)
+      .set(validated)
       .where(eq(${resource}Table.id, id))
       .returning();
 

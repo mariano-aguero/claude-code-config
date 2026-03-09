@@ -109,6 +109,14 @@ const untested = sourceFiles.filter(
     ),
 );
 
+// Determine default/target branch
+const defaultBranch =
+  spawnSync("git", ["symbolic-ref", "--short", "refs/remotes/origin/HEAD"], {
+    encoding: "utf-8",
+  })
+    .stdout?.trim()
+    .replace("origin/", "") ?? "main";
+
 // Build checklist
 const date = new Date().toISOString().split("T")[0];
 
@@ -145,8 +153,8 @@ const checklist = [
   `- [ ] No TODO/FIXME left unresolved`,
   `- [ ] TypeScript passes (\`pnpm tsc --noEmit\`)`,
   `- [ ] No hardcoded secrets or credentials`,
-  `- [ ] Branch is up to date with main (\`git pull --rebase origin main\`)`,
-  `- [ ] Reviewed full diff (\`git diff origin/main...HEAD\`)`,
+  `- [ ] Branch is up to date with ${defaultBranch} (\`git pull --rebase origin ${defaultBranch}\`)`,
+  `- [ ] Reviewed full diff (\`git diff origin/${defaultBranch}...HEAD\`)`,
   `- [ ] PR description written`,
 ];
 
