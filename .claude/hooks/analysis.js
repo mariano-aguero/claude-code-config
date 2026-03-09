@@ -30,10 +30,11 @@ const BINARY_SKIP = new Set([
   ".lock",
   ".map",
 ]);
-const ENV_SKIP = new Set([".env", ".env.local", ".env.example"]);
 const SOURCE_EXTS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs"]);
 
-if (BINARY_SKIP.has(ext) || ENV_SKIP.has(basename)) process.exit(0);
+// Skip binary files; skip any .env file (.env, .env.local, .env.production, etc.)
+const isEnvFile = basename === ".env" || basename.startsWith(".env.");
+if (BINARY_SKIP.has(ext) || isEnvFile) process.exit(0);
 
 // Secrets always run regardless of CLAUDE_ANALYSIS (blocking check — not advisory)
 // Advisory checks (missing tests, complexity) respect CLAUDE_ANALYSIS=0
@@ -79,7 +80,7 @@ const SECRET_PATTERNS = [
   { name: "Bearer token", regex: /\bBearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
   {
     name: "Generic secret",
-    regex: /(?:secret|token|api_key)\s*[:=]\s*["'][a-zA-Z0-9\-_]{16,}["']/i,
+    regex: /(?:secret|token|api_key)\s*[:=]\s*["'](?!your[\-_]|placeholder|example|test|dummy|changeme|xxx|sample)[a-zA-Z0-9\-_]{16,}["']/i,
   },
 ];
 

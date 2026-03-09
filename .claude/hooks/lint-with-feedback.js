@@ -7,6 +7,7 @@
 
 const { spawnSync } = require("child_process");
 const path = require("path");
+const fs = require("fs");
 
 // Set CLAUDE_LINT=0 in settings.local.json → env to disable linting
 if (process.env.CLAUDE_LINT === "0") process.exit(0);
@@ -17,14 +18,41 @@ const ext = path.extname(filePath);
 const LINTABLE = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"];
 if (!LINTABLE.includes(ext)) process.exit(0);
 
+// Detect package manager from lockfile
+function detectPackageManager() {
+  const cwd = process.cwd();
+  // bun.lockb = binary (< 1.1.14), bun.lock = textual (>= 1.1.14)
+  if (
+    fs.existsSync(path.join(cwd, "bun.lockb")) ||
+    fs.existsSync(path.join(cwd, "bun.lock"))
+  )
+    return "bun";
+  if (fs.existsSync(path.join(cwd, "yarn.lock"))) return "yarn";
+  if (fs.existsSync(path.join(cwd, "package-lock.json"))) return "npm";
+  return "pnpm"; // default
+}
+const pm = detectPackageManager();
+
+const fixArgs =
+  pm === "npm"  ? ["exec", "eslint", "--", "--fix", filePath] :
+  pm === "bun"  ? ["x", "eslint", "--fix", filePath] :
+  pm === "yarn" ? ["dlx", "eslint", "--fix", filePath] :
+                  ["eslint", "--fix", filePath]; // pnpm
+
+const checkArgs =
+  pm === "npm"  ? ["exec", "eslint", "--", filePath] :
+  pm === "bun"  ? ["x", "eslint", filePath] :
+  pm === "yarn" ? ["dlx", "eslint", filePath] :
+                  ["eslint", filePath]; // pnpm
+
 // Step 1: auto-fix what ESLint can
-spawnSync("pnpm", ["eslint", "--fix", filePath], {
+spawnSync(pm, fixArgs, {
   stdio: "ignore",
   timeout: 30_000,
 });
 
 // Step 2: check for remaining unfixable issues
-const result = spawnSync("pnpm", ["eslint", filePath], {
+const result = spawnSync(pm, checkArgs, {
   encoding: "utf-8",
   timeout: 30_000,
 });

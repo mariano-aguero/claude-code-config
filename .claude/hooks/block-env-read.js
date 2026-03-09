@@ -33,16 +33,21 @@ try {
 } catch {}
 
 // Match shell commands that read .env files in two forms:
-//   Direct: cat .env, head .env.local (filename is first arg)
+//   Direct: cat .env, head .env.local, cat /path/to/.env, cat ~/.env
 //   Grep:   grep SECRET .env, rg "" .env.local (filename is a later arg)
+//   Source: source .env, source .env.local
+// Uses [/\s] instead of \s alone to also catch path-prefixed forms like
+// `cat /path/to/.env` or `cat ~./env` where .env follows a slash.
 const ENV_READ_DIRECT =
-  /(?:cat|head|tail|sed|awk|less|more|bat|vim?|nano|open|print)\b[^;\n&|]*\s\.env(?:\.[^\s;|&]*)?(?:\s|$)/i;
+  /(?:cat|head|tail|sed|awk|less|more|bat|vim?|nano|open|print|source)\b[^;\n&|]*[/\s]\.env(?:\.[^\s;|&]*)?(?:\s|$)/i;
 // Requires at least one arg before .env so .env is the filename, not the pattern
 // (handles: grep SECRET .env, rg -n "" .env.local, but not: grep .env file.txt)
 const ENV_GREP_PATTERN =
   /\b(?:grep|rg)\b\s+(?:\S+\s+)+\.env(?:\.[^\s;|&]*)?(?:\s|$)/;
+// POSIX dot-source: `. .env` or `. .env.local`
+const ENV_DOT_SOURCE = /(?:^|\s)\.\s+\.env(?:\.[^\s;|&]*)?(?:\s|$)/;
 
-if (ENV_READ_DIRECT.test(command) || ENV_GREP_PATTERN.test(command)) {
+if (ENV_READ_DIRECT.test(command) || ENV_GREP_PATTERN.test(command) || ENV_DOT_SOURCE.test(command)) {
   process.stderr.write(
     "🚫 Blocked: Reading .env files via shell commands is not allowed.\n",
   );

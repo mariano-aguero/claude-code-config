@@ -19,6 +19,8 @@ const SECRET_PATTERNS = [
   /ghp_[a-zA-Z0-9]{36}/,
   /sk-ant-[a-zA-Z0-9\-]{20,}/,
   /sk-(?:proj-|[a-zA-Z0-9]{20,}T3BlbkFJ)[a-zA-Z0-9\-_]{20,}/,
+  // Hardcoded password — same pattern as analysis.js with placeholder exclusions
+  /(?:password|passwd|pwd)\s*[:=]\s*["'](?!your|placeholder|example|test|dummy|changeme|xxx|sample)[^"']{8,}["']/i,
 ];
 
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
