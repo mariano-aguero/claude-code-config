@@ -49,14 +49,14 @@ Hooks are configured in `.claude/settings.json`:
 
 ## Current Configuration
 
-### PostToolUse Hooks (Write/Edit)
+### PostToolUse Hooks (Write/Edit/NotebookEdit)
 
-After every `Write` or `Edit`, these run in order:
+After every `Write`, `Edit`, or `NotebookEdit`, these run in order:
 
-1. **Prettier** — Format the file (skipped if `CLAUDE_FORMAT=0`)
-2. **ESLint** — Fix and report lint errors (skipped if `CLAUDE_LINT=0`)
-3. **TypeScript** — Type-check `.ts`/`.tsx` files
-4. **Analysis** — Detect secrets, missing tests, high complexity
+1. **Analysis** — Detect secrets, missing tests, high complexity _(skipped if `CLAUDE_ANALYSIS=0`)_
+2. **Prettier** — Format the file (skipped if `CLAUDE_FORMAT=0`)
+3. **ESLint** — Fix and report lint errors (skipped if `CLAUDE_LINT=0`)
+4. **TypeScript** — Type-check `.ts`/`.tsx` files
 5. **Tech Debt** — Track TODO/FIXME comments → `.claude/tech-debt.md`
 6. **Dead Code** — Check for unexported or unused named exports
 7. **Duplicates** — Per-file duplicate export check
