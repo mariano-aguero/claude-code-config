@@ -104,6 +104,34 @@ Reference these skills for detailed patterns and code examples:
 
 - `testing.md` - Vitest, Playwright, mocking patterns
 
+## Testing Philosophy
+
+Coverage is a lagging indicator. Test behavior, not implementation. Three well-designed behavior tests beat twenty implementation tests.
+
+Test pyramid: many unit tests, fewer integration tests, few E2E tests. If E2E tests catch most bugs, the unit tests are wrong.
+
+## Behavioral Rules
+
+DO: Test what the user sees or what the API returns — not internal state.
+DON'T: Test that `setState` was called — test that the UI reflects the new state.
+
+DO: Use Testing Library query priority: `getByRole` > `getByLabelText` > `getByText` > `getByTestId`.
+DON'T: Use `getByTestId` unless no semantic query works.
+
+DO: Mock at the network boundary with MSW.
+DON'T: `vi.mock('./db')` when you can intercept the HTTP request.
+
+DO: Use `@testing-library/user-event` for interactions.
+DON'T: `fireEvent.click()` — it doesn't simulate real user behavior.
+
+DO: Write the test first, watch it fail, then implement.
+DON'T: Write tests after implementation as a checkbox exercise.
+
+## When to Delegate
+
+- E2E infrastructure setup → `infrastructure-expert`
+- Component implementation → `frontend-expert`
+
 ## Quick Reference
 
 ### Vitest Setup
