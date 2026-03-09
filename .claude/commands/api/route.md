@@ -65,7 +65,7 @@ app.post('/', zValidator('json', create${Resource}Schema), async (c) => {
 });
 
 // PATCH /${resource}/:id
-app.patch('/:id', zValidator('param', paramsSchema), zValidator('json', update${Resource}Schema), async (c) => {
+app.patch('/:id', authMiddleware, zValidator('param', paramsSchema), zValidator('json', update${Resource}Schema), async (c) => {
   const { id } = c.req.valid('param');
   const data = c.req.valid('json');
   const item = await ${resource}Service.update(id, data);
@@ -78,7 +78,7 @@ app.patch('/:id', zValidator('param', paramsSchema), zValidator('json', update${
 });
 
 // DELETE /${resource}/:id
-app.delete('/:id', zValidator('param', paramsSchema), async (c) => {
+app.delete('/:id', authMiddleware, zValidator('param', paramsSchema), async (c) => {
   const { id } = c.req.valid('param');
   const deleted = await ${resource}Service.delete(id);
 

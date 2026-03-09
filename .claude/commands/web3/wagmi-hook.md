@@ -301,15 +301,16 @@ export function useApproveAnd${Action}(tokenAddress: `0x${string}`) {
     return (allowance ?? 0n) < amount;
   };
 
-  const handleApprove = () => {
+  const handleApprove = (amount: bigint) => {
     approve({
       address: tokenAddress,
       abi: erc20Abi,
       functionName: "approve",
-      // WARNING: maxUint256 grants unlimited approval — only use for gas-optimized DeFi protocols
-      // where repeated approvals are cost-prohibitive. For standard cases, use the exact amount:
-      //   args: [SPENDER_ADDRESS, amount],
-      args: [SPENDER_ADDRESS, maxUint256],
+      // Use exact amount by default to limit approval exposure
+      args: [SPENDER_ADDRESS, amount],
+      // NOTE: For gas-optimized DeFi protocols where repeated approvals are cost-prohibitive,
+      // you can use maxUint256 — but only if the spender contract is immutable and audited:
+      //   args: [SPENDER_ADDRESS, maxUint256],
     });
   };
 

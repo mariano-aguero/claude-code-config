@@ -246,7 +246,8 @@ describe("API /${route}", () => {
       const request = new NextRequest(
         "http://localhost/api/${route}?page=2&limit=10"
       );
-      await GET(request);
+      const response = await GET(request);
+      const data = await response.json();
 
       // Drizzle uses limit/offset, not skip/take
       expect(data).toEqual(mockItems);

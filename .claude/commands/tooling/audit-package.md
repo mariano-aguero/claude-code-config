@@ -27,9 +27,9 @@ Perform a comprehensive security audit and automatically fix vulnerabilities in 
 
 4. **Automatically fix vulnerabilities**:
 
-   **For Node.js (npm/yarn):**
-   - Run `npm audit fix` to auto-fix compatible updates
-   - If vulnerabilities remain, run `npm audit fix --force` for breaking changes (ask user first)
+   **For Node.js (pnpm):**
+   - Run `pnpm audit --fix` to auto-fix compatible updates
+   - If vulnerabilities remain, manually update: `pnpm up --latest <package-name>`
    - For unfixable issues, manually update the package version in package.json
 
    **For Python:**

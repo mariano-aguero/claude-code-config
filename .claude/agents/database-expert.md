@@ -186,10 +186,10 @@ export const posts = pgTable(
   {
     // ... columns
   },
-  (table) => ({
-    authorIdx: index("posts_author_idx").on(table.authorId),
-    createdAtIdx: index("posts_created_at_idx").on(table.createdAt.desc()),
-  }),
+  (table) => [
+    index("posts_author_idx").on(table.authorId),
+    index("posts_created_at_idx").on(table.createdAt.desc()),
+  ],
 );
 ```
 

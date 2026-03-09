@@ -76,7 +76,7 @@ export function ${ComponentName}({ className, children }: ${ComponentName}Props)
 3. Export named functions (not default)
 4. Include className prop for styling flexibility
 5. Use Tailwind for all styling
-6. Add forwardRef when component wraps native elements
+6. Pass `ref` as a prop directly — React 19 no longer requires `forwardRef`
 
 ## Post-Execution
 
