@@ -302,9 +302,8 @@ function TransferForm() {
       }}
       className="space-y-6"
     >
-      <form.Field
-        name="email"
-        children={(field) => (
+      <form.Field name="email">
+        {(field) => (
           <div className="space-y-2">
             <Label htmlFor={field.name}>Recipient Email</Label>
             <Input
@@ -317,18 +316,18 @@ function TransferForm() {
             <p className="text-sm text-muted-foreground">
               Enter the recipient's email address.
             </p>
-            {field.state.meta.errors.length > 0 && (
-              <p className="text-sm text-destructive">
-                {field.state.meta.errors.join(", ")}
-              </p>
-            )}
+            {field.state.meta.isTouched &&
+              field.state.meta.errors.length > 0 && (
+                <p className="text-sm text-destructive">
+                  {field.state.meta.errors.join(", ")}
+                </p>
+              )}
           </div>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="amount"
-        children={(field) => (
+      <form.Field name="amount">
+        {(field) => (
           <div className="space-y-2">
             <Label htmlFor={field.name}>Amount</Label>
             <Input
@@ -338,23 +337,25 @@ function TransferForm() {
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
-            {field.state.meta.errors.length > 0 && (
-              <p className="text-sm text-destructive">
-                {field.state.meta.errors.join(", ")}
-              </p>
-            )}
+            {field.state.meta.isTouched &&
+              field.state.meta.errors.length > 0 && (
+                <p className="text-sm text-destructive">
+                  {field.state.meta.errors.join(", ")}
+                </p>
+              )}
           </div>
         )}
-      />
+      </form.Field>
 
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
-        children={([canSubmit, isSubmitting]) => (
+      >
+        {([canSubmit, isSubmitting]) => (
           <Button type="submit" className="w-full" disabled={!canSubmit}>
             {isSubmitting ? "Sending..." : "Send"}
           </Button>
         )}
-      />
+      </form.Subscribe>
     </form>
   );
 }

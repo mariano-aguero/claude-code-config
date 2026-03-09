@@ -97,8 +97,8 @@ git commit -m "feat(auth,api): implement JWT authentication"
 ```bash
 git commit -m "chore(deps): update dependencies
 
-- react 18.2.0 -> 18.3.0
-- next 14.1.0 -> 14.2.0
+- react 19.0.0 -> 19.1.0
+- next 16.0.0 -> 16.1.0
 - typescript 5.3.0 -> 5.4.0"
 ```
 

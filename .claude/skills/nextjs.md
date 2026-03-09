@@ -502,9 +502,8 @@ export function CreateUserForm() {
       }}
       className="space-y-4"
     >
-      <form.Field
-        name="name"
-        children={(field) => (
+      <form.Field name="name">
+        {(field) => (
           <div>
             <input
               placeholder="Name"
@@ -512,17 +511,16 @@ export function CreateUserForm() {
               onChange={(e) => field.handleChange(e.target.value)}
               className="border rounded px-3 py-2"
             />
-            {field.state.meta.errors[0] && (
+            {field.state.meta.isTouched && field.state.meta.errors[0] && (
               <p className="text-red-500 text-sm">
                 {field.state.meta.errors[0]}
               </p>
             )}
           </div>
         )}
-      />
-      <form.Field
-        name="email"
-        children={(field) => (
+      </form.Field>
+      <form.Field name="email">
+        {(field) => (
           <div>
             <input
               placeholder="Email"
@@ -530,17 +528,18 @@ export function CreateUserForm() {
               onChange={(e) => field.handleChange(e.target.value)}
               className="border rounded px-3 py-2"
             />
-            {field.state.meta.errors[0] && (
+            {field.state.meta.isTouched && field.state.meta.errors[0] && (
               <p className="text-red-500 text-sm">
                 {field.state.meta.errors[0]}
               </p>
             )}
           </div>
         )}
-      />
+      </form.Field>
       <form.Subscribe
         selector={(state) => [state.canSubmit, state.isSubmitting]}
-        children={([canSubmit, isSubmitting]) => (
+      >
+        {([canSubmit, isSubmitting]) => (
           <button
             type="submit"
             disabled={!canSubmit || mutation.isPending}
@@ -549,7 +548,7 @@ export function CreateUserForm() {
             {mutation.isPending ? "Creating..." : "Create User"}
           </button>
         )}
-      />
+      </form.Subscribe>
     </form>
   );
 }

@@ -470,17 +470,22 @@ function CreateUserForm({
         validators={{
           onChange: ({ value }) => (!value ? "Required" : undefined),
         }}
-        children={(field) => (
+      >
+        {(field) => (
           <div>
             <input
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
-            {field.state.meta.errors[0] && <p>{field.state.meta.errors[0]}</p>}
+            {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              <p className="text-red-500 text-sm">
+                {field.state.meta.errors[0]}
+              </p>
+            )}
           </div>
         )}
-      />
+      </form.Field>
       <form.Field
         name="email"
         validators={{
@@ -489,7 +494,8 @@ function CreateUserForm({
               ? undefined
               : "Invalid email",
         }}
-        children={(field) => (
+      >
+        {(field) => (
           <div>
             <input
               type="email"
@@ -497,18 +503,21 @@ function CreateUserForm({
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
-            {field.state.meta.errors[0] && <p>{field.state.meta.errors[0]}</p>}
+            {field.state.meta.isTouched && field.state.meta.errors[0] && (
+              <p className="text-red-500 text-sm">
+                {field.state.meta.errors[0]}
+              </p>
+            )}
           </div>
         )}
-      />
-      <form.Subscribe
-        selector={(state) => state.isSubmitting}
-        children={(isSubmitting) => (
+      </form.Field>
+      <form.Subscribe selector={(state) => state.isSubmitting}>
+        {(isSubmitting) => (
           <button type="submit" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : "Submit"}
           </button>
         )}
-      />
+      </form.Subscribe>
     </form>
   );
 }
