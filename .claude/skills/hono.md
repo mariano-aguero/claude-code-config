@@ -21,9 +21,7 @@ import { Hono } from "hono";
 import { usersRoute } from "./routes/users";
 import { postsRoute } from "./routes/posts";
 
-const app = new Hono()
-  .route("/users", usersRoute)
-  .route("/posts", postsRoute);
+const app = new Hono().route("/users", usersRoute).route("/posts", postsRoute);
 
 export type AppType = typeof app;
 export default app;

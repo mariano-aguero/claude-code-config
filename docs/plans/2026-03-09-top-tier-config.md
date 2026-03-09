@@ -15,9 +15,11 @@
 ### Task 1: Update `react.md`
 
 **Files:**
+
 - Modify: `.claude/skills/react.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/react.md
 ```
@@ -25,6 +27,7 @@ cat .claude/skills/react.md
 **Step 2: Update the file**
 
 Changes needed:
+
 - Add "React 19 APIs" section with `use()`, `useOptimistic`, `useFormStatus`, `useActionState`
 - Remove `forwardRef` — replace with `ref` as a prop (React 19)
 - Add Server Actions as the mutation primitive (replaces useCallback + fetch)
@@ -33,6 +36,7 @@ Changes needed:
 - Ensure `"use client"` boundary examples are correct
 
 Key patterns:
+
 ```tsx
 // use() for async resources
 const data = use(fetchPromise); // inside Suspense boundary
@@ -47,18 +51,26 @@ const [state, formAction, isPending] = useActionState(action, initialState);
 const { pending, data, method, action } = useFormStatus();
 
 // ref as prop (no forwardRef needed in React 19)
-function Input({ ref, ...props }: { ref: React.Ref<HTMLInputElement> } & React.InputHTMLAttributes<HTMLInputElement>) {
+function Input({
+  ref,
+  ...props
+}: {
+  ref: React.Ref<HTMLInputElement>;
+} & React.InputHTMLAttributes<HTMLInputElement>) {
   return <input ref={ref} {...props} />;
 }
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "forwardRef\|useFormState" .claude/skills/react.md
 ```
+
 Expected: zero matches.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/skills/react.md
 git commit -m "feat(skills): update react.md to React 19 API surface"
@@ -69,11 +81,13 @@ git commit -m "feat(skills): update react.md to React 19 API surface"
 ### Task 2: Update `nextjs.md`
 
 **Files:**
+
 - Modify: `.claude/skills/nextjs.md`
 
 **Context:** Next.js 15+/16+ introduced `"use cache"` directive, async `params`/`searchParams`, `cacheTag`/`cacheLife`/`revalidateTag`, `dynamicIO`, and `after()`.
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/nextjs.md
 ```
@@ -81,6 +95,7 @@ cat .claude/skills/nextjs.md
 **Step 2: Update the file**
 
 Changes needed:
+
 - Update all page/layout examples to `Promise<{ params: {...} }>` (async params)
 - Update `cookies()`, `headers()` to `await cookies()`, `await headers()`
 - Add `"use cache"` directive section with presets (seconds, minutes, hours, days, weeks, max)
@@ -88,14 +103,19 @@ Changes needed:
 - Add `after()` API for post-response analytics/logging
 
 Key patterns:
+
 ```tsx
 // Async params (Next.js 15+)
-export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
 }
 
 // "use cache" directive
-"use cache";
+("use cache");
 import { cacheTag, cacheLife } from "next/cache";
 
 export async function getUser(id: string) {
@@ -110,12 +130,15 @@ after(() => analytics.track("page-view"));
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "await params\|await cookies\|use cache" .claude/skills/nextjs.md | wc -l
 ```
+
 Expected: â¥3 lines.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/skills/nextjs.md
 git commit -m "feat(skills): update nextjs.md to Next.js 15+/16+ patterns"
@@ -126,9 +149,11 @@ git commit -m "feat(skills): update nextjs.md to Next.js 15+/16+ patterns"
 ### Task 3: Update `drizzle.md`
 
 **Files:**
+
 - Modify: `.claude/skills/drizzle.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/drizzle.md
 ```
@@ -136,6 +161,7 @@ cat .claude/skills/drizzle.md
 **Step 2: Update the file**
 
 Changes needed:
+
 - Add `$with` CTE pattern
 - Add `onConflictDoUpdate` for upserts
 - Update drizzle-kit commands: `drizzle-kit generate` (not `generate:pg`)
@@ -143,15 +169,17 @@ Changes needed:
 - Verify index array form: `index('name').on(t.col)`
 
 Key patterns:
+
 ```typescript
 // CTE with $with
-const sq = db.$with('active_users').as(
-  db.select().from(users).where(eq(users.active, true))
-);
+const sq = db
+  .$with("active_users")
+  .as(db.select().from(users).where(eq(users.active, true)));
 const result = await db.with(sq).select().from(sq);
 
 // Upsert
-await db.insert(users)
+await db
+  .insert(users)
   .values(data)
   .onConflictDoUpdate({
     target: users.email,
@@ -165,12 +193,15 @@ await db.insert(users)
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "generate:pg\|generate:mysql" .claude/skills/drizzle.md
 ```
+
 Expected: zero matches.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/skills/drizzle.md
 git commit -m "feat(skills): update drizzle.md to v0.38+ patterns"
@@ -181,11 +212,13 @@ git commit -m "feat(skills): update drizzle.md to v0.38+ patterns"
 ### Task 4: Update `nodejs.md` (Hono focus)
 
 **Files:**
+
 - Modify: `.claude/skills/nodejs.md`
 
 **Context:** Refocus on Hono v4 as the primary framework. Add RPC, `zValidator`, `HTTPException`, middleware context, and `testClient`.
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/nodejs.md
 ```
@@ -193,6 +226,7 @@ cat .claude/skills/nodejs.md
 **Step 2: Update the file**
 
 Key Hono v4 patterns:
+
 ```typescript
 // Typed RPC route group
 const usersRoute = new Hono()
@@ -222,7 +256,7 @@ const authMiddleware = createMiddleware<{ Variables: { user: User } }>(
     if (!session) throw new HTTPException(401);
     c.set("user", session.user);
     await next();
-  }
+  },
 );
 
 // Test
@@ -233,12 +267,15 @@ expect(res.status).toBe(200);
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "testClient\|hc<\|HTTPException\|zValidator" .claude/skills/nodejs.md | wc -l
 ```
+
 Expected: â¥6 lines.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/skills/nodejs.md
 git commit -m "feat(skills): refocus nodejs.md on Hono v4 RPC patterns"
@@ -249,9 +286,11 @@ git commit -m "feat(skills): refocus nodejs.md on Hono v4 RPC patterns"
 ### Task 5: Update `typescript.md`
 
 **Files:**
+
 - Modify: `.claude/skills/typescript.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/typescript.md
 ```
@@ -269,7 +308,9 @@ const config = {
 config.port; // number, not string | number
 
 // const type parameters
-function identity<const T>(val: T): T { return val; }
+function identity<const T>(val: T): T {
+  return val;
+}
 const result = identity({ a: 1 }); // { readonly a: 1 }, not { a: number }
 
 // NoInfer<T>
@@ -283,12 +324,15 @@ const jsonSchema = z.toJSONSchema(schema);
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "satisfies\|NoInfer\|const T" .claude/skills/typescript.md | wc -l
 ```
+
 Expected: â¥3 lines.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/skills/typescript.md
 git commit -m "feat(skills): update typescript.md with satisfies, NoInfer, Zod v4"
@@ -299,9 +343,11 @@ git commit -m "feat(skills): update typescript.md with satisfies, NoInfer, Zod v
 ### Task 6: Update `security.md`
 
 **Files:**
+
 - Modify: `.claude/skills/security.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/security.md
 ```
@@ -313,12 +359,14 @@ Add: Better Auth Hono middleware, CSP nonce generation for Next.js middleware, `
 ```typescript
 // Better Auth + Hono session middleware
 import { auth } from "@/lib/auth";
-const requireAuth = createMiddleware<{ Variables: { user: User } }>(async (c, next) => {
-  const session = await auth.api.getSession({ headers: c.req.raw.headers });
-  if (!session) throw new HTTPException(401, { message: "Unauthorized" });
-  c.set("user", session.user);
-  await next();
-});
+const requireAuth = createMiddleware<{ Variables: { user: User } }>(
+  async (c, next) => {
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) throw new HTTPException(401, { message: "Unauthorized" });
+    c.set("user", session.user);
+    await next();
+  },
+);
 
 // CSP nonce in Next.js middleware.ts
 const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
@@ -335,6 +383,7 @@ response.headers.set("x-nonce", nonce);
 Remove: `X-Frame-Options` as primary header — use `frame-ancestors` in CSP instead.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/security.md
 git commit -m "feat(skills): update security.md with Better Auth middleware and CSP nonces"
@@ -345,9 +394,11 @@ git commit -m "feat(skills): update security.md with Better Auth middleware and 
 ### Task 7: Update `better-auth.md`
 
 **Files:**
+
 - Modify: `.claude/skills/better-auth.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/skills/better-auth.md
 ```
@@ -370,14 +421,20 @@ export const auth = betterAuth({
     delete: (key) => redis.del(key),
   },
   hooks: {
-    after: [{ matcher: () => true, handler: async (ctx) => {
-      if (ctx.error) console.error({ path: ctx.path, error: ctx.error });
-    }}],
+    after: [
+      {
+        matcher: () => true,
+        handler: async (ctx) => {
+          if (ctx.error) console.error({ path: ctx.path, error: ctx.error });
+        },
+      },
+    ],
   },
 });
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/better-auth.md
 git commit -m "feat(skills): update better-auth.md with Redis storage and full config"
@@ -390,9 +447,11 @@ git commit -m "feat(skills): update better-auth.md with Redis storage and full c
 ### Task 8: Create `.claude/skills/redis.md`
 
 **Files:**
+
 - Create: `.claude/skills/redis.md`
 
 **Content to include:**
+
 - Client setup (singleton pattern with ioredis)
 - Key naming conventions (`{namespace}:{id}:{field}`)
 - Cache-aside pattern with type safety
@@ -405,6 +464,7 @@ git commit -m "feat(skills): update better-auth.md with Redis storage and full c
 - Testing with `ioredis-mock`
 
 Key patterns:
+
 ```typescript
 // Singleton client
 import Redis from "ioredis";
@@ -414,7 +474,11 @@ export const redis = new Redis(process.env.REDIS_URL!, {
 });
 
 // Cache-aside
-async function getOrSet<T>(key: string, fetcher: () => Promise<T>, ttl: number): Promise<T> {
+async function getOrSet<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+  ttl: number,
+): Promise<T> {
   const cached = await redis.get(key);
   if (cached) return JSON.parse(cached) as T;
   const fresh = await fetcher();
@@ -428,22 +492,30 @@ const FEED_KEY = (userId: string) => `feed:${userId}:posts` as const;
 
 // Batch with pipeline (ioredis pipeline)
 const pipeline = redis.pipeline();
-ids.forEach(id => pipeline.get(USER_KEY(id)));
-const results = await pipeline.exec() as [Error | null, string | null][];
+ids.forEach((id) => pipeline.get(USER_KEY(id)));
+const results = (await pipeline.exec()) as [Error | null, string | null][];
 
 // TTL constants
-export const TTL = { MINUTE: 60, HOUR: 3600, DAY: 86400, WEEK: 604800 } as const;
+export const TTL = {
+  MINUTE: 60,
+  HOUR: 3600,
+  DAY: 86400,
+  WEEK: 604800,
+} as const;
 ```
 
 **Step 1: Write the file** (create with full content)
 
 **Step 2: Verify**
+
 ```bash
 wc -l .claude/skills/redis.md
 ```
+
 Expected: â¥150 lines.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/redis.md
 git commit -m "feat(skills): add redis.md with ioredis cache patterns"
@@ -454,9 +526,11 @@ git commit -m "feat(skills): add redis.md with ioredis cache patterns"
 ### Task 9: Create `.claude/skills/hono.md`
 
 **Files:**
+
 - Create: `.claude/skills/hono.md`
 
 **Content to include:**
+
 - App factory pattern
 - Route groups with typed RPC
 - `AppType` export for RPC client
@@ -470,12 +544,15 @@ git commit -m "feat(skills): add redis.md with ioredis cache patterns"
 **Step 1: Write the file**
 
 **Step 2: Verify**
+
 ```bash
 grep -n "hc<\|testClient\|HTTPException\|zValidator\|streamText" .claude/skills/hono.md | wc -l
 ```
+
 Expected: â¥6 lines.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/hono.md
 git commit -m "feat(skills): add hono.md with v4 RPC and middleware patterns"
@@ -486,9 +563,11 @@ git commit -m "feat(skills): add hono.md with v4 RPC and middleware patterns"
 ### Task 10: Create `.claude/skills/monorepo.md`
 
 **Files:**
+
 - Create: `.claude/skills/monorepo.md`
 
 **Content to include:**
+
 - pnpm-workspace.yaml setup
 - Directory structure: `apps/*`, `packages/*`
 - Shared package patterns (`@repo/ui`, `@repo/config`, `@repo/types`)
@@ -499,6 +578,7 @@ git commit -m "feat(skills): add hono.md with v4 RPC and middleware patterns"
 - Common pitfalls (circular deps, missing `"exports"` field, forgetting `"workspace:*"`)
 
 Key turbo.json:
+
 ```json
 {
   "$schema": "https://turbo.build/schema.json",
@@ -515,12 +595,15 @@ Key turbo.json:
 **Step 1: Write the file**
 
 **Step 2: Verify**
+
 ```bash
 wc -l .claude/skills/monorepo.md
 ```
+
 Expected: â¥150 lines.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/monorepo.md
 git commit -m "feat(skills): add monorepo.md with pnpm workspaces + Turborepo"
@@ -531,9 +614,11 @@ git commit -m "feat(skills): add monorepo.md with pnpm workspaces + Turborepo"
 ### Task 11: Create `.claude/skills/observability.md`
 
 **Files:**
+
 - Create: `.claude/skills/observability.md`
 
 **Content to include:**
+
 - Structured logging with pino (setup, child loggers, levels)
 - OpenTelemetry setup for Next.js (`instrumentation.ts`)
 - Web Vitals via `reportWebVitals` and `@next/third-parties`
@@ -547,7 +632,10 @@ import pino from "pino";
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? "info",
   formatters: { level: (label) => ({ level: label }) },
-  transport: process.env.NODE_ENV === "development" ? { target: "pino-pretty" } : undefined,
+  transport:
+    process.env.NODE_ENV === "development"
+      ? { target: "pino-pretty" }
+      : undefined,
 });
 
 // Child logger for request context
@@ -558,7 +646,9 @@ reqLogger.info({ path: req.path }, "Request received");
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { NodeSDK } = await import("@opentelemetry/sdk-node");
-    const sdk = new NodeSDK({ serviceName: process.env.OTEL_SERVICE_NAME ?? "app" });
+    const sdk = new NodeSDK({
+      serviceName: process.env.OTEL_SERVICE_NAME ?? "app",
+    });
     sdk.start();
   }
 }
@@ -566,27 +656,35 @@ export async function register() {
 // Web Vitals
 export function reportWebVitals(metric: NextWebVitalsMetric) {
   if (metric.label === "web-vital") {
-    logger.info({ name: metric.name, value: metric.value, id: metric.id }, "web-vital");
+    logger.info(
+      { name: metric.name, value: metric.value, id: metric.id },
+      "web-vital",
+    );
   }
 }
 
 // Health check (Hono)
-app.get("/health", (c) => c.json({
-  status: "ok",
-  uptime: process.uptime(),
-  timestamp: new Date().toISOString(),
-}));
+app.get("/health", (c) =>
+  c.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  }),
+);
 ```
 
 **Step 1: Write the file**
 
 **Step 2: Verify**
+
 ```bash
 grep -n "pino\|register\|reportWebVitals\|health" .claude/skills/observability.md | wc -l
 ```
+
 Expected: â¥6 lines.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/skills/observability.md
 git commit -m "feat(skills): add observability.md with pino, OTel, and Web Vitals"
@@ -599,9 +697,11 @@ git commit -m "feat(skills): add observability.md with pino, OTel, and Web Vital
 ### Task 12: Deepen `frontend-expert.md`
 
 **Files:**
+
 - Modify: `.claude/agents/frontend-expert.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/agents/frontend-expert.md
 ```
@@ -609,6 +709,7 @@ cat .claude/agents/frontend-expert.md
 **Step 2: Add Behavioral Rules and delegation section**
 
 Replace generic list with:
+
 ```markdown
 ## Behavioral Rules
 
@@ -637,12 +738,15 @@ DON'T: Use `useEffect` + `useState` for data that can be fetched server-side.
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "DO:\|DON'T:\|When to Delegate" .claude/agents/frontend-expert.md | wc -l
 ```
+
 Expected: â¥12 lines.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/agents/frontend-expert.md
 git commit -m "feat(agents): deepen frontend-expert with DO/DON'T rules"
@@ -653,9 +757,11 @@ git commit -m "feat(agents): deepen frontend-expert with DO/DON'T rules"
 ### Task 13: Deepen `backend-expert.md`
 
 **Files:**
+
 - Modify: `.claude/agents/backend-expert.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/agents/backend-expert.md
 ```
@@ -689,6 +795,7 @@ DON'T: Cache user-specific data without including the userId in the key.
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/agents/backend-expert.md
 git commit -m "feat(agents): deepen backend-expert with Hono-specific DO/DON'T rules"
@@ -699,9 +806,11 @@ git commit -m "feat(agents): deepen backend-expert with Hono-specific DO/DON'T r
 ### Task 14: Deepen `ui-expert.md`
 
 **Files:**
+
 - Modify: `.claude/agents/ui-expert.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/agents/ui-expert.md
 ```
@@ -733,6 +842,7 @@ DON'T: Use opacity variants (`text-foreground/60`) for primary content — use s
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/agents/ui-expert.md
 git commit -m "feat(agents): deepen ui-expert with Tailwind v4 and shadcn/ui rules"
@@ -743,9 +853,11 @@ git commit -m "feat(agents): deepen ui-expert with Tailwind v4 and shadcn/ui rul
 ### Task 15: Add severity framework to `code-reviewer.md`
 
 **Files:**
+
 - Modify: `.claude/agents/code-reviewer.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/agents/code-reviewer.md
 ```
@@ -755,12 +867,12 @@ cat .claude/agents/code-reviewer.md
 ```markdown
 ## Severity Framework
 
-| Level | Label | When | Action |
-|-------|-------|------|--------|
-| 🔴 Critical | Security vulnerability, data loss, broken auth | Always | Block merge |
-| 🟠 High | Incorrect logic, N+1 query, missing error handling | Always | Fix before merge |
-| 🟡 Medium | Missing types, poor naming, no test coverage | Often | Fix in follow-up |
-| 🔵 Low | Style, comments, minor DX improvements | Rarely | Optional |
+| Level       | Label                                              | When   | Action           |
+| ----------- | -------------------------------------------------- | ------ | ---------------- |
+| 🔴 Critical | Security vulnerability, data loss, broken auth     | Always | Block merge      |
+| 🟠 High     | Incorrect logic, N+1 query, missing error handling | Always | Fix before merge |
+| 🟡 Medium   | Missing types, poor naming, no test coverage       | Often  | Fix in follow-up |
+| 🔵 Low      | Style, comments, minor DX improvements             | Rarely | Optional         |
 
 ## Behavioral Rules
 
@@ -781,6 +893,7 @@ DON'T: Comment on formatting — Prettier handles it automatically.
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/agents/code-reviewer.md
 git commit -m "feat(agents): add severity framework to code-reviewer"
@@ -791,9 +904,11 @@ git commit -m "feat(agents): add severity framework to code-reviewer"
 ### Task 16: Deepen `testing-expert.md`
 
 **Files:**
+
 - Modify: `.claude/agents/testing-expert.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/agents/testing-expert.md
 ```
@@ -831,6 +946,7 @@ DON'T: Write tests after implementation as a checkbox exercise.
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/agents/testing-expert.md
 git commit -m "feat(agents): add testing philosophy and DO/DON'T to testing-expert"
@@ -843,9 +959,11 @@ git commit -m "feat(agents): add testing philosophy and DO/DON'T to testing-expe
 ### Task 17: Update `/component` command
 
 **Files:**
+
 - Modify: `.claude/commands/react/component.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/commands/react/component.md
 ```
@@ -853,6 +971,7 @@ cat .claude/commands/react/component.md
 **Step 2: Update output template to React 19**
 
 The generated component must:
+
 - Use `function Comp(props: Props)` not `React.FC`
 - Use `ref` as prop (no `forwardRef`)
 - Use Tailwind v4 with `cn()`
@@ -890,12 +1009,15 @@ export function Button({
 ```
 
 **Step 3: Verify**
+
 ```bash
 grep -n "React.FC\|forwardRef" .claude/commands/react/component.md
 ```
+
 Expected: zero matches.
 
 **Step 4: Commit**
+
 ```bash
 git add .claude/commands/react/component.md
 git commit -m "feat(commands): update /component to React 19 patterns"
@@ -906,9 +1028,11 @@ git commit -m "feat(commands): update /component to React 19 patterns"
 ### Task 18: Update `/feature` command
 
 **Files:**
+
 - Modify: `.claude/commands/react/feature.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/commands/react/feature.md
 ```
@@ -916,6 +1040,7 @@ cat .claude/commands/react/feature.md
 **Step 2: Update scaffold**
 
 A complete feature must include all layers:
+
 1. Server Component (page/section — no interactivity)
 2. Client Component (interactive parts only)
 3. Server Action (mutations)
@@ -925,6 +1050,7 @@ A complete feature must include all layers:
 The RSC → Client boundary must be explicit in the template.
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/commands/react/feature.md
 git commit -m "feat(commands): update /feature with RSC + Server Action + TanStack Query layers"
@@ -935,9 +1061,11 @@ git commit -m "feat(commands): update /feature with RSC + Server Action + TanSta
 ### Task 19: Update `/route` command (Hono v4 RPC)
 
 **Files:**
+
 - Modify: `.claude/commands/api/route.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/commands/api/route.md
 ```
@@ -960,7 +1088,9 @@ const createSchema = z.object({
 
 export const itemsRoute = new Hono()
   .get("/", async (c) => {
-    const result = await db.query.items.findMany({ orderBy: (t, { desc }) => [desc(t.createdAt)] });
+    const result = await db.query.items.findMany({
+      orderBy: (t, { desc }) => [desc(t.createdAt)],
+    });
     return c.json({ items: result });
   })
   .post("/", zValidator("json", createSchema), async (c) => {
@@ -982,6 +1112,7 @@ export const itemsRoute = new Hono()
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/commands/api/route.md
 git commit -m "feat(commands): update /route to Hono v4 RPC with zValidator"
@@ -992,9 +1123,11 @@ git commit -m "feat(commands): update /route to Hono v4 RPC with zValidator"
 ### Task 20: Update `/schema` command
 
 **Files:**
+
 - Modify: `.claude/commands/db/schema.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/commands/db/schema.md
 ```
@@ -1006,16 +1139,29 @@ import { pgTable, text, timestamp, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createId } from "@paralleldrive/cuid2";
 
-export const items = pgTable("items", {
-  id: text("id").primaryKey().$defaultFn(() => createId()),
-  name: text("name").notNull(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
-}, (t) => [
-  index("items_user_id_idx").on(t.userId),
-  index("items_created_at_idx").on(t.createdAt),
-]);
+export const items = pgTable(
+  "items",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    name: text("name").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [
+    index("items_user_id_idx").on(t.userId),
+    index("items_created_at_idx").on(t.createdAt),
+  ],
+);
 
 export const itemsRelations = relations(items, ({ one }) => ({
   user: one(users, { fields: [items.userId], references: [users.id] }),
@@ -1023,6 +1169,7 @@ export const itemsRelations = relations(items, ({ one }) => ({
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/commands/db/schema.md
 git commit -m "feat(commands): update /schema to Drizzle v0.38+ with array index form"
@@ -1033,9 +1180,11 @@ git commit -m "feat(commands): update /schema to Drizzle v0.38+ with array index
 ### Task 21: Verify `/contract` command
 
 **Files:**
+
 - Modify: `.claude/commands/web3/contract.md`
 
 **Step 1: Read current file**
+
 ```bash
 cat .claude/commands/web3/contract.md
 ```
@@ -1043,6 +1192,7 @@ cat .claude/commands/web3/contract.md
 **Step 2: Verify and fix if needed**
 
 Check:
+
 - `pragma solidity ^0.8.20` or higher (OZ 5.4 requires â¥0.8.20)
 - OpenZeppelin v5 import paths (e.g., `@openzeppelin/contracts/token/ERC20/ERC20.sol`)
 - CEI pattern in all state-changing functions
@@ -1061,7 +1211,7 @@ error InsufficientBalance(uint256 required, uint256 available);
 
 contract MyContract is Ownable {
   constructor(address initialOwner) Ownable(initialOwner) {}
-  
+
   // CEI: Checks → Effects → Interactions
   function withdraw(uint256 amount) external onlyOwner {
     if (amount > address(this).balance) revert InsufficientBalance(amount, address(this).balance);
@@ -1075,6 +1225,7 @@ contract MyContract is Ownable {
 ```
 
 **Step 3: Commit**
+
 ```bash
 git add .claude/commands/web3/contract.md
 git commit -m "feat(commands): verify /contract uses Solidity 0.8.20+ and OZ v5 patterns"
@@ -1087,9 +1238,11 @@ git commit -m "feat(commands): verify /contract uses Solidity 0.8.20+ and OZ v5 
 ### Task 22: Rewrite `README.md`
 
 **Files:**
+
 - Modify: `README.md`
 
 **Step 1: Read current README**
+
 ```bash
 cat README.md
 ```
@@ -1097,6 +1250,7 @@ cat README.md
 **Step 2: Rewrite with GitHub-first structure**
 
 New structure (in order):
+
 1. **Tagline** — one sentence, opinionated stack
 2. **What you get** — 4 bullet points, concrete value
 3. **Quick start** — install instructions (clone, symlink or copy)
@@ -1110,12 +1264,15 @@ New structure (in order):
 Target: 200-280 lines. Comprehensive but not bloated.
 
 **Step 3: Verify**
+
 ```bash
 wc -l README.md
 ```
+
 Expected: 200-280 lines.
 
 **Step 4: Commit**
+
 ```bash
 git add README.md
 git commit -m "docs: rewrite README for GitHub discovery"
@@ -1126,11 +1283,13 @@ git commit -m "docs: rewrite README for GitHub discovery"
 ### Task 23: Create `docs/CONTRIBUTING.md`
 
 **Files:**
+
 - Create: `docs/CONTRIBUTING.md`
 
 **Step 1: Create the file**
 
 Content sections:
+
 1. **Philosophy** — what this config is and is not
 2. **Adding a Skill** — step by step, with template
 3. **Adding an Agent** — required sections, quality bar
@@ -1139,9 +1298,11 @@ Content sections:
 6. **Quality Bar** — non-negotiables for any contribution
 
 Key rule to include:
+
 > All code examples must compile in a TypeScript strict project. Imports must be real — verify against npm or official docs. No pseudocode.
 
 **Step 2: Commit**
+
 ```bash
 git add docs/CONTRIBUTING.md
 git commit -m "docs: add CONTRIBUTING.md with contribution guidelines"
@@ -1152,11 +1313,13 @@ git commit -m "docs: add CONTRIBUTING.md with contribution guidelines"
 ### Task 24: Create `docs/philosophy.md`
 
 **Files:**
+
 - Create: `docs/philosophy.md`
 
 **Step 1: Create the file**
 
 Content:
+
 1. **The 4 pillars** — each with 2-3 sentences of rationale
 2. **Stack decisions** — why each technology was chosen:
    - Hono over Express (typed RPC, edge-ready, Zod-native)
@@ -1167,6 +1330,7 @@ Content:
 3. **What this config is NOT** — not exhaustive, not multi-stack, not beginner-focused
 
 **Step 2: Commit**
+
 ```bash
 git add docs/philosophy.md
 git commit -m "docs: add philosophy.md with stack decisions rationale"
@@ -1177,6 +1341,7 @@ git commit -m "docs: add philosophy.md with stack decisions rationale"
 ### Task 25: Final verification
 
 **Step 1: Count everything**
+
 ```bash
 echo "=== Skills ==="
 ls .claude/skills/ | sort
@@ -1194,14 +1359,17 @@ git log --oneline -30
 ```
 
 Expected:
+
 - Skills: 20 files (16 original + redis, hono, monorepo, observability)
 - Agents: 10 files (all with DO/DON'T + delegation sections)
 - Docs: CONTRIBUTING.md, philosophy.md, 2026-03-09-top-tier-config-design.md
 
 **Step 2: Clean working tree**
+
 ```bash
 git status
 ```
+
 Expected: nothing to commit.
 
 ---

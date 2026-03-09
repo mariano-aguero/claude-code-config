@@ -34,16 +34,22 @@ function detectPackageManager() {
 const pm = detectPackageManager();
 
 const fixArgs =
-  pm === "npm"  ? ["exec", "eslint", "--", "--fix", filePath] :
-  pm === "bun"  ? ["x", "eslint", "--fix", filePath] :
-  pm === "yarn" ? ["dlx", "eslint", "--fix", filePath] :
-                  ["eslint", "--fix", filePath]; // pnpm
+  pm === "npm"
+    ? ["exec", "eslint", "--", "--fix", filePath]
+    : pm === "bun"
+      ? ["x", "eslint", "--fix", filePath]
+      : pm === "yarn"
+        ? ["dlx", "eslint", "--fix", filePath]
+        : ["eslint", "--fix", filePath]; // pnpm
 
 const checkArgs =
-  pm === "npm"  ? ["exec", "eslint", "--", filePath] :
-  pm === "bun"  ? ["x", "eslint", filePath] :
-  pm === "yarn" ? ["dlx", "eslint", filePath] :
-                  ["eslint", filePath]; // pnpm
+  pm === "npm"
+    ? ["exec", "eslint", "--", filePath]
+    : pm === "bun"
+      ? ["x", "eslint", filePath]
+      : pm === "yarn"
+        ? ["dlx", "eslint", filePath]
+        : ["eslint", filePath]; // pnpm
 
 // Step 1: auto-fix what ESLint can
 spawnSync(pm, fixArgs, {

@@ -32,8 +32,8 @@ if (process.env.CLAUDE_NOTIFY_DEBUG === "1") {
 
 // Only handle events where Claude needs your attention
 const ATTENTION_EVENTS = ["permission_prompt", "idle_prompt"];
-const isAttentionNeeded = ATTENTION_EVENTS.some(
-  (e) => event.toLowerCase().includes(e),
+const isAttentionNeeded = ATTENTION_EVENTS.some((e) =>
+  event.toLowerCase().includes(e),
 );
 
 // Exit silently if this is not an attention-required event

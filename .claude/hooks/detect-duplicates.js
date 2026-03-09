@@ -30,7 +30,6 @@ const IGNORE_DIRS = new Set([
 const EXPORT_PATTERN =
   /export\s+(?:async\s+)?(?:function|class)\s+(\w+)|export\s+(?:const|let)\s+(\w+)\s*=/g;
 
-
 function* walkFiles(dir) {
   let entries;
   try {

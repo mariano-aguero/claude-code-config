@@ -80,7 +80,8 @@ const SECRET_PATTERNS = [
   { name: "Bearer token", regex: /\bBearer\s+[a-zA-Z0-9\-._~+/]{20,}/i },
   {
     name: "Generic secret",
-    regex: /(?:secret|token|api_key)\s*[:=]\s*["'](?!your[\-_]|placeholder|example|test|dummy|changeme|xxx|sample)[a-zA-Z0-9\-_]{16,}["']/i,
+    regex:
+      /(?:secret|token|api_key)\s*[:=]\s*["'](?!your[\-_]|placeholder|example|test|dummy|changeme|xxx|sample)[a-zA-Z0-9\-_]{16,}["']/i,
   },
 ];
 
@@ -195,9 +196,8 @@ if (!skipAdvisory && isSource && !isTestFile) {
       const complexity =
         1 +
         (
-          body.match(
-            /\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\|/g,
-          ) ?? []
+          body.match(/\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\|/g) ??
+          []
         ).length;
 
       let nestingDepth = 0,

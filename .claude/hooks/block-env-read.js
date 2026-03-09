@@ -47,7 +47,11 @@ const ENV_GREP_PATTERN =
 // POSIX dot-source: `. .env` or `. .env.local`
 const ENV_DOT_SOURCE = /(?:^|\s)\.\s+\.env(?:\.[^\s;|&]*)?(?:\s|$)/;
 
-if (ENV_READ_DIRECT.test(command) || ENV_GREP_PATTERN.test(command) || ENV_DOT_SOURCE.test(command)) {
+if (
+  ENV_READ_DIRECT.test(command) ||
+  ENV_GREP_PATTERN.test(command) ||
+  ENV_DOT_SOURCE.test(command)
+) {
   process.stderr.write(
     "🚫 Blocked: Reading .env files via shell commands is not allowed.\n",
   );

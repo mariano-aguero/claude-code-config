@@ -40,9 +40,9 @@ Desktop.ini
 .claude/pre-compact-snapshot.md
 
 # ----------------------------------------------------------------------------
-# Claude Code Planning docs (local brainstorming, not code artifacts)
+# Claude Code Planning docs (tracked for publishable config)
 # ----------------------------------------------------------------------------
-docs/plans/
+# docs/plans/ — intentionally tracked (design + implementation plans are part of the project)
 
 # ----------------------------------------------------------------------------
 # Node.js (if using any tooling)
