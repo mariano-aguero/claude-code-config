@@ -220,6 +220,88 @@ async function safeFetch(url: string): Promise<Response> {
 }
 ```
 
+## Better Auth + Hono Middleware
+
+The standard pattern for Next.js + Hono projects using Better Auth.
+
+```typescript
+// lib/auth-middleware.ts
+import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
+import { auth } from "@/lib/auth"; // Better Auth instance
+
+type AuthUser = { id: string; email: string; name: string; role: string };
+type Variables = { user: AuthUser };
+
+export const requireAuth = createMiddleware<{ Variables: Variables }>(
+  async (c, next) => {
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) throw new HTTPException(401, { message: "Unauthorized" });
+    c.set("user", session.user as AuthUser);
+    await next();
+  },
+);
+
+export const requireRole = (role: string) =>
+  createMiddleware<{ Variables: Variables }>(async (c, next) => {
+    const user = c.get("user");
+    if (!user || user.role !== role) {
+      throw new HTTPException(403, { message: "Forbidden" });
+    }
+    await next();
+  });
+
+// Usage
+app.get("/me", requireAuth, (c) => c.json(c.get("user")));
+app.delete("/admin/users/:id", requireAuth, requireRole("admin"), handler);
+```
+
+### CSP with Nonce (Next.js `middleware.ts`)
+
+Nonce-based CSP is strictly safer than `'unsafe-inline'`. The nonce is generated per request and passed to components via `x-nonce` header.
+
+```typescript
+// middleware.ts
+import { NextResponse, type NextRequest } from "next/server";
+
+export function middleware(request: NextRequest) {
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+
+  const cspHeader = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    `style-src 'self' 'nonce-${nonce}'`,
+    "img-src 'self' blob: data: https:",
+    "font-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'", // replaces X-Frame-Options: DENY
+    "upgrade-insecure-requests",
+  ].join("; ");
+
+  const response = NextResponse.next({
+    request: { headers: new Headers(request.headers) },
+  });
+
+  response.headers.set("Content-Security-Policy", cspHeader);
+  response.headers.set("x-nonce", nonce); // read in layout.tsx via headers()
+
+  return response;
+}
+
+// Read nonce in layout.tsx (Server Component)
+import { headers } from "next/headers";
+const nonce = (await headers()).get("x-nonce") ?? "";
+// Pass as prop to <Script nonce={nonce}> and <style nonce={nonce}>
+```
+
+Key rules:
+
+- `frame-ancestors 'none'` in CSP replaces `X-Frame-Options: DENY` — no need for both
+- Use `'strict-dynamic'` so nonce propagates to dynamically loaded scripts
+- Nonce must be different on every request — `crypto.randomUUID()` is sufficient
+
 ## Authentication
 
 > **Next.js projects**: Use Better Auth instead of custom JWT. See `better-auth.md`.
