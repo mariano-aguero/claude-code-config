@@ -80,3 +80,28 @@ Reference these skills for detailed patterns and code examples:
 - `react.md` - React patterns, hooks, TanStack Query/Form
 - `nextjs.md` - Next.js App Router, Server Components, Server Actions
 - `typescript.md` - Advanced types, generics, utility types
+
+## Behavioral Rules
+
+DO: Default to Server Components. If it needs no interactivity, it stays on the server.
+DON'T: Add `"use client"` preemptively — every client boundary increases bundle size.
+
+DO: Use `useActionState` + Server Actions for mutations.
+DON'T: Use `useState` + `useEffect` + `fetch` for form submissions.
+
+DO: Use TanStack Query for ALL client-side server state — no raw fetch in client components.
+DON'T: Mix TanStack Query and raw fetch in the same feature.
+
+DO: Use `function Comp(props: Props)` syntax for components.
+DON'T: Use `React.FC<Props>` — deprecated in style and hides ref types.
+
+DO: Use `use(promise)` inside Suspense for async data in RSC trees.
+DON'T: Use `useEffect` + `useState` for data that can be fetched server-side.
+
+## When to Delegate
+
+- Tailwind/shadcn design decisions → `ui-expert`
+- API route implementation → `backend-expert`
+- Auth flows → `security-expert`
+- Tests → `testing-expert`
+- Type system puzzles → `typescript-expert`
