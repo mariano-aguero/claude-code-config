@@ -242,7 +242,7 @@ if (result.success) {
 
 ```typescript
 // Extract return type
-type ReturnOf<T> = T extends (...args: any[]) => infer R ? R : never;
+type ReturnOf<T> = T extends (...args: unknown[]) => infer R ? R : never;
 
 // Extract promise value — use built-in Awaited<T> (TypeScript 4.5+)
 // type Awaited<T> = T extends Promise<infer U> ? Awaited<U> : T; // built-in, no need to redefine
@@ -328,8 +328,10 @@ class UserBuilder<T extends BuilderState = {}> {
     return new UserBuilder({ ...this.state, age });
   }
 
-  build(this: UserBuilder<{ name: string; email: string }>): User {
-    return this.state as User;
+  build(
+    this: UserBuilder<{ name: string; email: string }>,
+  ): T & { name: string; email: string } {
+    return this.state;
   }
 }
 

@@ -166,8 +166,8 @@ app.use(
 );
 
 // For APIs - use SameSite cookies + check Origin header
-function csrfMiddleware(c, next) {
-  const origin = c.req.header("Origin");
+function csrfMiddleware(c: Context, next: Next) {
+  const origin = c.req.header("Origin") ?? "";
   const allowedOrigins = [process.env.FRONTEND_URL];
 
   if (c.req.method !== "GET" && !allowedOrigins.includes(origin)) {
@@ -355,7 +355,7 @@ app.get("/auth/github/callback", async (c) => {
 
   // Get user info
   const userResponse = await fetch("https://api.github.com/user", {
-    headers: { Authorization: `Bearer ${tokens.accessToken}` },
+    headers: { Authorization: `Bearer ${tokens.accessToken()}` },
   });
   const githubUser = await userResponse.json();
 

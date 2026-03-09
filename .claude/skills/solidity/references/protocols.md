@@ -46,9 +46,10 @@ contract DynamicFeeHook is BaseHook {
 ## Aave Flash Loans
 
 ```solidity
-import {IFlashLoanSimpleReceiver} from "@aave/v3-core/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol";
+import {FlashLoanSimpleReceiverBase} from "@aave/core-v3/contracts/flashloan/base/FlashLoanSimpleReceiverBase.sol";
+import {IPoolAddressesProvider} from "@aave/core-v3/contracts/interfaces/IPoolAddressesProvider.sol";
 
-contract FlashLoanArbitrage is IFlashLoanSimpleReceiver {
+contract FlashLoanArbitrage is FlashLoanSimpleReceiverBase {
     function executeArbitrage(address asset, uint256 amount) external {
         POOL.flashLoanSimple(address(this), asset, amount, abi.encode(msg.sender), 0);
     }
