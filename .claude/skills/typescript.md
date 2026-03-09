@@ -424,6 +424,84 @@ const users = await api("/users", "GET"); // User[]
 const user = await api("/users/:id", "GET", { params: { id: "123" } }); // User
 ```
 
+### `const` Type Parameters (TypeScript 5.0+)
+
+Infer literal types instead of widened types from generic arguments.
+
+```typescript
+// Without const — T infers as string[], losing literals
+function createTuple<T extends string[]>(values: T): T {
+  return values;
+}
+const a = createTuple(["a", "b"]); // string[]
+
+// With const — T infers as readonly ["a", "b"]
+function createTupleLiteral<const T extends string[]>(values: T): T {
+  return values;
+}
+const b = createTupleLiteral(["a", "b"]); // readonly ["a", "b"]
+
+// Practical: type-safe route definitions
+function defineRoutes<const T extends Record<string, string>>(routes: T): T {
+  return routes;
+}
+const routes = defineRoutes({ home: "/", about: "/about" });
+routes.home; // "/" — not string
+```
+
+### `NoInfer<T>` (TypeScript 5.4+)
+
+Prevents a type parameter from being inferred from a specific argument — forces the caller to set it explicitly or let other arguments drive inference.
+
+```typescript
+// Without NoInfer — defaultValue incorrectly widens T
+function createStore<T>(initial: T, defaultValue: T): T {
+  return initial ?? defaultValue;
+}
+// createStore(42, "oops") — T becomes 42 | "oops" instead of an error
+
+// With NoInfer — only `initial` drives T inference
+function createStoreSafe<T>(initial: T, defaultValue: NoInfer<T>): T {
+  return initial ?? defaultValue;
+}
+createStoreSafe(42, "oops"); // Error: string is not assignable to number
+createStoreSafe(42, 0); // OK — T is number
+
+// Practical: component defaults
+function createContext<T>(defaultValue: T, fallback: NoInfer<T>) {
+  return { defaultValue, fallback };
+}
+```
+
+### Zod v4
+
+```typescript
+import { z } from "zod/v4"; // explicit v4 import
+
+// ZodEmail — stricter than z.string().email()
+const EmailSchema = z.email();
+const UrlSchema = z.url();
+
+// Schema metadata (for JSON Schema generation)
+const UserSchema = z
+  .object({
+    email: z.email(),
+    age: z.number().min(18),
+  })
+  .meta({ title: "User", description: "A registered user" });
+
+// Generate JSON Schema
+import { toJSONSchema } from "zod/v4";
+const jsonSchema = toJSONSchema(UserSchema);
+
+// z.templateLiteral — type-safe string templates
+const ApiRoute = z.templateLiteral(["/api/", z.string(), "/", z.number()]);
+ApiRoute.parse("/api/users/123"); // OK
+
+// z.pipe — transform chains without .transform()
+const CoercedId = z.string().pipe(z.coerce.number().int().positive());
+```
+
 ### Satisfies Operator
 
 ```typescript
