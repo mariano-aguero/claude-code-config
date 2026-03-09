@@ -110,42 +110,6 @@ Tabs.Panel = TabPanel;
 </Tabs>;
 ```
 
-### Render Props
-
-```tsx
-interface MousePosition {
-  x: number;
-  y: number;
-}
-
-interface MouseTrackerProps {
-  children: (position: MousePosition) => React.ReactNode;
-}
-
-function MouseTracker({ children }: MouseTrackerProps) {
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener("mousemove", handler);
-    return () => window.removeEventListener("mousemove", handler);
-  }, []);
-
-  return <>{children(position)}</>;
-}
-
-// Usage
-<MouseTracker>
-  {({ x, y }) => (
-    <div>
-      Mouse: {x}, {y}
-    </div>
-  )}
-</MouseTracker>;
-```
-
 ## Hooks
 
 ### Custom Hooks
@@ -209,10 +173,6 @@ const handleSubmit = useCallback(
 const sortedItems = useMemo(() => {
   return [...items].sort((a, b) => a.name.localeCompare(b.name));
 }, [items]); // Only recalculate when items change
-
-// When to use:
-// - useCallback: When passing callbacks to optimized child components
-// - useMemo: For expensive calculations or referential equality
 ```
 
 ### useReducer for Complex State
@@ -249,16 +209,6 @@ function reducer(state: State, action: Action): State {
     default:
       return state;
   }
-}
-
-function ItemList() {
-  const [state, dispatch] = useReducer(reducer, {
-    items: [],
-    loading: false,
-    error: null,
-  });
-
-  // Use dispatch({ type: "ADD_ITEM", payload: newItem })
 }
 ```
 
@@ -467,14 +417,6 @@ function SearchForm() {
 const ExpensiveComponent = memo(function ExpensiveComponent({ data }: Props) {
   return <div>{/* expensive render */}</div>;
 });
-
-// With custom comparison
-const ListItem = memo(
-  function ListItem({ item }: { item: Item }) {
-    return <div>{item.name}</div>;
-  },
-  (prevProps, nextProps) => prevProps.item.id === nextProps.item.id,
-);
 ```
 
 ### Lazy Loading
@@ -994,14 +936,3 @@ queryClient.invalidateQueries({ queryKey: userKeys.all });
 // Invalidate specific user
 queryClient.invalidateQueries({ queryKey: userKeys.detail(userId) });
 ```
-
-## Best Practices Summary
-
-1. **Prefer composition** over inheritance
-2. **Lift state up** only when necessary
-3. **Colocate state** with components that use it
-4. **Use keys properly** - never use index as key for dynamic lists
-5. **Avoid prop drilling** - use Context or state management
-6. **Keep components small** - single responsibility
-7. **Avoid inline objects/functions** in JSX when it causes re-renders
-8. **Use fragments** `<>...</>` to avoid unnecessary divs

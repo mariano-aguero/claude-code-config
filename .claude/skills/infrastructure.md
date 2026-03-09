@@ -285,15 +285,11 @@ resource "aws_dynamodb_table" "terraform_locks" {
 ### Module Example: VPC
 
 ```hcl
-# modules/networking/main.tf
+# modules/networking/main.tf — key pattern: merge tags, subnet per AZ, NAT gateway optional
 resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
-  enable_dns_support   = true
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-${var.environment}-vpc"
-  })
+  tags = merge(var.tags, { Name = "${var.project}-${var.environment}-vpc" })
 }
 
 resource "aws_subnet" "public" {
@@ -302,11 +298,7 @@ resource "aws_subnet" "public" {
   cidr_block              = cidrsubnet(var.vpc_cidr, 4, count.index)
   availability_zone       = var.availability_zones[count.index]
   map_public_ip_on_launch = true
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-${var.environment}-public-${count.index + 1}"
-    Tier = "public"
-  })
+  tags = merge(var.tags, { Name = "${var.project}-${var.environment}-public-${count.index + 1}", Tier = "public" })
 }
 
 resource "aws_subnet" "private" {
@@ -314,77 +306,13 @@ resource "aws_subnet" "private" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.vpc_cidr, 4, count.index + length(var.availability_zones))
   availability_zone = var.availability_zones[count.index]
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-${var.environment}-private-${count.index + 1}"
-    Tier = "private"
-  })
+  tags = merge(var.tags, { Name = "${var.project}-${var.environment}-private-${count.index + 1}", Tier = "private" })
 }
 
-resource "aws_internet_gateway" "main" {
-  vpc_id = aws_vpc.main.id
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-${var.environment}-igw"
-  })
-}
-
-resource "aws_nat_gateway" "main" {
-  count         = var.enable_nat_gateway ? length(var.availability_zones) : 0
-  allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = aws_subnet.public[count.index].id
-
-  tags = merge(var.tags, {
-    Name = "${var.project}-${var.environment}-nat-${count.index + 1}"
-  })
-}
-
-# modules/networking/variables.tf
-variable "project" {
-  type        = string
-  description = "Project name"
-}
-
-variable "environment" {
-  type        = string
-  description = "Environment (dev, staging, production)"
-}
-
-variable "vpc_cidr" {
-  type        = string
-  description = "VPC CIDR block"
-  default     = "10.0.0.0/16"
-}
-
-variable "availability_zones" {
-  type        = list(string)
-  description = "List of availability zones"
-}
-
-variable "enable_nat_gateway" {
-  type        = bool
-  description = "Enable NAT Gateway for private subnets"
-  default     = true
-}
-
-variable "tags" {
-  type        = map(string)
-  description = "Common tags for all resources"
-  default     = {}
-}
-
-# modules/networking/outputs.tf
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
-
-output "public_subnet_ids" {
-  value = aws_subnet.public[*].id
-}
-
-output "private_subnet_ids" {
-  value = aws_subnet.private[*].id
-}
+# outputs.tf
+output "vpc_id"             { value = aws_vpc.main.id }
+output "public_subnet_ids"  { value = aws_subnet.public[*].id }
+output "private_subnet_ids" { value = aws_subnet.private[*].id }
 ```
 
 ### Environment Configuration
@@ -578,32 +506,6 @@ resource "aws_ecs_service" "app" {
     ignore_changes = [desired_count]
   }
 }
-
-# Auto Scaling
-resource "aws_appautoscaling_target" "ecs" {
-  max_capacity       = var.max_capacity
-  min_capacity       = var.min_capacity
-  resource_id        = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.app.name}"
-  scalable_dimension = "ecs:service:DesiredCount"
-  service_namespace  = "ecs"
-}
-
-resource "aws_appautoscaling_policy" "cpu" {
-  name               = "${var.project}-${var.environment}-cpu"
-  policy_type        = "TargetTrackingScaling"
-  resource_id        = aws_appautoscaling_target.ecs.resource_id
-  scalable_dimension = aws_appautoscaling_target.ecs.scalable_dimension
-  service_namespace  = aws_appautoscaling_target.ecs.service_namespace
-
-  target_tracking_scaling_policy_configuration {
-    predefined_metric_specification {
-      predefined_metric_type = "ECSServiceAverageCPUUtilization"
-    }
-    target_value       = 70.0
-    scale_in_cooldown  = 300
-    scale_out_cooldown = 60
-  }
-}
 ```
 
 ### RDS Module
@@ -791,30 +693,3 @@ jobs:
         working-directory: terraform/environments/production
         run: terraform apply -auto-approve
 ```
-
----
-
-## Best Practices Summary
-
-### Docker
-
-1. **Multi-stage builds** - Smaller, more secure images
-2. **Specific base image tags** - Never use `:latest`
-3. **Non-root user** - Run containers as non-root
-4. **Health checks** - Proper container health monitoring
-5. **.dockerignore** - Exclude unnecessary files
-6. **Layer caching** - Order Dockerfile instructions wisely
-7. **Distroless/Alpine** - Minimal base images
-
-### Terraform
-
-1. **Remote state** - S3 + DynamoDB for locking
-2. **Modules** - Reusable, versioned components
-3. **Environments** - Separate state per environment
-4. **Variables + Locals** - Parameterize everything
-5. **Outputs** - Export values for other modules
-6. **Lifecycle rules** - Prevent accidental destruction
-7. **Tags** - Consistent resource tagging
-8. **CI/CD** - Automated plan and apply
-9. **State locking** - Prevent concurrent modifications
-10. **Secrets management** - Use AWS Secrets Manager/SSM

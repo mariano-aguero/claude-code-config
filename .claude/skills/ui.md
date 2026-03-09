@@ -9,19 +9,6 @@ description: Modern UI development with Tailwind CSS v4, shadcn/ui components, a
 
 The modern UI stack for React 19 applications. Tailwind v4 for CSS-first styling, shadcn/ui for accessible components (built on Radix UI), and Framer Motion for animations.
 
-### Installation
-
-```bash
-# Tailwind CSS v4 (Next.js 16+)
-pnpm add tailwindcss @tailwindcss/postcss
-
-# shadcn/ui (supports Tailwind v4)
-pnpm dlx shadcn@latest init
-
-# Framer Motion
-pnpm add framer-motion
-```
-
 ### Tailwind v4 Configuration (CSS-First)
 
 Tailwind v4 uses CSS-first configuration with `@theme` directive. No more `tailwind.config.js`.
@@ -129,63 +116,16 @@ export default {
 ### Button Component
 
 ```tsx
-// components/ui/button.tsx
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
-import { cn } from "@/lib/utils";
+// Add components via shadcn CLI — don't handwrite them
+// pnpm dlx shadcn@latest add button dialog card input label
 
-const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-);
-
-export interface ButtonProps
-  extends
-    React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
-  asChild?: boolean;
-}
-
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button";
-    return (
-      <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
-        ref={ref}
-        {...props}
-      />
-    );
-  },
-);
-Button.displayName = "Button";
-
-export { Button, buttonVariants };
+// Then import and use:
+import { Button } from "@/components/ui/button";
+// variant: "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"
+// size: "default" | "sm" | "lg" | "icon"
+<Button variant="outline" size="sm">
+  Click me
+</Button>;
 ```
 
 ### Dialog Component
@@ -686,21 +626,6 @@ function AnimatedNumber({ value }: { value: number }) {
 
   return <motion.span>{formatted}</motion.span>;
 }
-
-// With Framer Motion's useMotionValue
-import { useMotionValue, useTransform, animate } from "framer-motion";
-
-function Counter({ from, to }: { from: number; to: number }) {
-  const count = useMotionValue(from);
-  const rounded = useTransform(count, (latest) => Math.round(latest));
-
-  useEffect(() => {
-    const controls = animate(count, to, { duration: 2 });
-    return controls.stop;
-  }, [to]); // count is a stable MotionValue ref, not a dependency
-
-  return <motion.span>{rounded}</motion.span>;
-}
 ```
 
 ### Gesture Animations
@@ -721,16 +646,6 @@ function DraggableCard({ onDismiss }: { onDismiss: () => void }) {
     >
       Swipe to dismiss
     </motion.div>
-  );
-}
-
-// Pull to refresh indicator
-function PullIndicator({ progress }: { progress: number }) {
-  return (
-    <motion.div
-      style={{ rotate: progress * 360 }}
-      className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full"
-    />
   );
 }
 ```
@@ -890,18 +805,3 @@ function AnimatedComponent() {
   );
 }
 ```
-
----
-
-## Best Practices Summary
-
-1. **Use shadcn/ui** - Accessible, customizable, copy-paste components
-2. **Tailwind utilities** - Consistent spacing, colors, typography
-3. **Framer Motion** - Smooth, performant animations
-4. **Mobile-first** - Start with mobile, enhance for larger screens
-5. **Accessibility** - Focus states, ARIA labels, reduced motion support
-6. **Consistent tokens** - CSS variables for theming
-7. **Loading states** - Skeletons, spinners, optimistic updates
-8. **Feedback** - Toast notifications, form validation, hover states
-9. **Dark mode** - Support system preference and manual toggle
-10. **Performance** - Lazy load, virtualize long lists, optimize images
