@@ -24,30 +24,38 @@ import {
   pgTable,
   text,
   timestamp,
-  uuid,
   boolean,
   integer,
   pgEnum,
   index,
-} from 'drizzle-orm/pg-core';
-import { relations } from 'drizzle-orm';
+} from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
 
-export const ${tableName} = pgTable('${table_name}', {
-  id: uuid('id').primaryKey().defaultRandom(),
+export const ${tableName} = pgTable(
+  "${table_name}",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
 
-  // Add your columns here
-  name: text('name').notNull(),
+    // Add your columns here
+    name: text("name").notNull(),
 
-  // Timestamps
-  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-  updatedAt: timestamp('updated_at', { withTimezone: true })
-    .notNull()
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-}, (table) => [
-  // Indexes
-  index('${table_name}_name_idx').on(table.name),
-]);
+    // Timestamps
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [
+    // Drizzle v0.38+: index array form
+    index("${table_name}_name_idx").on(t.name),
+  ],
+);
 
 // Type inference
 export type ${TableName} = typeof ${tableName}.$inferSelect;
@@ -59,29 +67,124 @@ export const ${tableName}Relations = relations(${tableName}, ({ one, many }) => 
 }));
 ```
 
-## Examples
+## With Foreign Key
 
-### Basic Table
+```typescript
+// src/db/schema/posts.ts
+import { pgTable, text, timestamp, index } from "drizzle-orm/pg-core";
+import { relations } from "drizzle-orm";
+import { createId } from "@paralleldrive/cuid2";
+import { users } from "./users";
+
+export const posts = pgTable(
+  "posts",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    title: text("title").notNull(),
+    content: text("content").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [
+    index("posts_user_id_idx").on(t.userId),
+    index("posts_created_at_idx").on(t.createdAt),
+  ],
+);
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  user: one(users, { fields: [posts.userId], references: [users.id] }),
+}));
+```
+
+## With Enum
+
+```typescript
+// src/db/schema/orders.ts
+import { pgTable, text, timestamp, pgEnum, index } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
+
+export const orderStatusEnum = pgEnum("order_status", [
+  "pending",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+]);
+
+export const orders = pgTable(
+  "orders",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    status: orderStatusEnum("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [index("orders_status_idx").on(t.status)],
+);
+
+export type Order = typeof orders.$inferSelect;
+export type NewOrder = typeof orders.$inferInsert;
+export type OrderStatus = (typeof orders.$inferSelect)["status"];
+```
+
+## With Soft Delete
+
+```typescript
+// src/db/schema/users.ts
+import { pgTable, text, timestamp, index } from "drizzle-orm/pg-core";
+import { createId } from "@paralleldrive/cuid2";
+import { isNull } from "drizzle-orm";
+
+export const users = pgTable(
+  "users",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (t) => [
+    index("users_email_idx").on(t.email),
+    index("users_deleted_at_idx").on(t.deletedAt),
+  ],
+);
+
+// Helper to filter soft-deleted rows:
+// db.query.users.findMany({ where: isNull(users.deletedAt) })
+```
+
+## Examples
 
 ```
 /db/schema products
-```
-
-### With Relations
-
-```
 /db/schema posts --belongs-to=users --has-many=comments
-```
-
-### With Enum
-
-```
 /db/schema orders --with-enum=status:pending,processing,shipped,delivered
-```
-
-### With Soft Delete
-
-```
 /db/schema users --with-soft-delete
 ```
 
@@ -89,13 +192,13 @@ export const ${tableName}Relations = relations(${tableName}, ({ one, many }) => 
 
 - Schemas go in `src/db/schema/<table>.ts`
 - Export from `src/db/schema/index.ts`
-- Import in `src/db/index.ts` for client
+- Import in `src/db/index.ts` for the Drizzle client
 
-## Best Practices Applied
+## Rules
 
-1. UUID primary keys for distributed systems
-2. Timestamps with timezone
-3. Inferred TypeScript types
-4. Strategic indexes on query columns
-5. Proper foreign key constraints
-6. Soft delete support when needed
+1. `createId()` from `@paralleldrive/cuid2` for IDs — not `uuid().defaultRandom()`
+2. `{ withTimezone: true }` on ALL timestamps — never omit it
+3. `$onUpdate(() => new Date())` for updatedAt — not a trigger
+4. Index array form: `(t) => [index("name").on(t.col)]` — Drizzle v0.38+
+5. Always export `$inferSelect` and `$inferInsert` types
+6. Always export relations even if empty — required for relational queries
