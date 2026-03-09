@@ -357,6 +357,107 @@ Key rules:
 - Errors from the Promise bubble to the nearest **Error Boundary**
 - `use(Context)` is equivalent to `useContext()` but works conditionally
 
+### useActionState
+
+Replaces the deprecated `useFormState` from `react-dom`. Manages action state and pending status together.
+
+```tsx
+import { useActionState } from "react";
+
+type State = { error: string | null; success: boolean };
+
+async function createPost(prev: State, formData: FormData): Promise<State> {
+  "use server";
+  const title = formData.get("title") as string;
+  if (!title) return { error: "Title is required", success: false };
+  await db.insert(posts).values({ title });
+  revalidatePath("/posts");
+  return { error: null, success: true };
+}
+
+function CreatePostForm() {
+  const [state, formAction, isPending] = useActionState(createPost, {
+    error: null,
+    success: false,
+  });
+
+  return (
+    <form action={formAction}>
+      <input name="title" disabled={isPending} />
+      {state.error && <p className="text-red-500">{state.error}</p>}
+      <button type="submit" disabled={isPending}>
+        {isPending ? "Creating..." : "Create"}
+      </button>
+    </form>
+  );
+}
+```
+
+### useFormStatus
+
+Must be called inside a component rendered **inside a `<form>`**. Gives access to the parent form's submission state.
+
+```tsx
+import { useFormStatus } from "react-dom";
+
+function SubmitButton() {
+  const { pending } = useFormStatus(); // reads from parent <form>
+  return (
+    <button type="submit" disabled={pending}>
+      {pending ? "Saving..." : "Save"}
+    </button>
+  );
+}
+
+// usage
+function MyForm() {
+  return (
+    <form action={saveAction}>
+      <input name="name" />
+      <SubmitButton /> {/* SubmitButton is inside the form */}
+    </form>
+  );
+}
+```
+
+### ref as prop (React 19 — no forwardRef)
+
+In React 19, `ref` is a regular prop. `forwardRef` is no longer needed.
+
+```tsx
+// React 19 — ref is just a prop
+type InputProps = {
+  ref?: React.Ref<HTMLInputElement>;
+} & React.InputHTMLAttributes<HTMLInputElement>;
+
+export function Input({ ref, ...props }: InputProps) {
+  return <input ref={ref} {...props} />;
+}
+
+// Usage — same as before
+const inputRef = useRef<HTMLInputElement>(null);
+<Input ref={inputRef} placeholder="Type here" />;
+```
+
+### `<Form>` component (Next.js progressive enhancement)
+
+React 19's `<Form>` enables progressive enhancement — works without JS, enhances with it.
+
+```tsx
+import Form from "next/form";
+
+// Works without JS (falls back to full page navigation)
+// With JS: intercepts submit, calls Server Action, updates URL
+function SearchForm() {
+  return (
+    <Form action="/search">
+      <input name="q" placeholder="Search..." />
+      <button type="submit">Search</button>
+    </Form>
+  );
+}
+```
+
 ## Performance
 
 ### React.memo
