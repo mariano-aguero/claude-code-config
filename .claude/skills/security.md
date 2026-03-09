@@ -229,6 +229,7 @@ async function safeFetch(url: string): Promise<Response> {
 
 ```typescript
 import { sign, verify } from "hono/jwt";
+import { createHash, timingSafeEqual } from "crypto";
 
 const ACCESS_TOKEN_EXPIRY = 15 * 60; // 15 minutes
 const REFRESH_TOKEN_EXPIRY = 7 * 24 * 60 * 60; // 7 days
@@ -269,7 +270,6 @@ async function generateTokens(user: {
 
   // Store refresh token hash in database for revocation
   // Use SHA-256 (not Argon2) for tokens — they are random, not passwords
-  import { createHash } from "crypto";
   await db.insert(refreshTokens).values({
     userId: user.id,
     tokenHash: createHash("sha256").update(refreshToken).digest("hex"),
@@ -290,16 +290,15 @@ async function refreshAccessToken(refreshToken: string) {
     ),
   });
 
+  if (!stored) throw new Error("Invalid refresh token");
+
   // Compare token hashes with constant-time comparison (not Argon2 — tokens are random, not passwords)
-  import { createHash, timingSafeEqual } from "crypto";
   const providedHash = createHash("sha256").update(refreshToken).digest("hex");
   const hashesMatch = timingSafeEqual(
     Buffer.from(providedHash, "hex"),
     Buffer.from(stored.tokenHash, "hex"),
   );
-  if (!stored || !hashesMatch) {
-    throw new Error("Invalid refresh token");
-  }
+  if (!hashesMatch) throw new Error("Invalid refresh token");
 
   // Rotate: invalidate old token before issuing new one (prevents replay if token leaks)
   await db.delete(refreshTokens).where(eq(refreshTokens.userId, payload.sub));

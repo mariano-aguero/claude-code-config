@@ -320,7 +320,7 @@ async function getUsers(page: number, pageSize: number) {
 
   return {
     data,
-    total,
+    total: Number(total),
     page,
     pageSize,
     totalPages: Math.ceil(Number(total) / pageSize),
