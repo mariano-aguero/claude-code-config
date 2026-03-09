@@ -18,7 +18,7 @@ const DANGEROUS = [
   // ── Git ──────────────────────────────────────────────────────────────────
   {
     // Use negative lookahead to allow --force-with-lease (safer alternative to --force)
-    pattern: /git\s+push\s+.*?(?:--force(?!-with-lease)|-f)\b/,
+    pattern: /git\s+push\s+.*?(?:--force\b(?!-with-lease)|-f\b)/,
     label: "git push --force",
     hint: "Force pushing can overwrite remote history. Use --force-with-lease instead.",
   },
@@ -52,7 +52,7 @@ const DANGEROUS = [
     hint: "Recursive deletion of home or system directories is irreversible.",
   },
   {
-    pattern: /\brm\s+-[a-z]*rf?\s+\/\s*$/,
+    pattern: /\brm\s+-[a-z]*rf?\s+\/(?:\s|$|;|&&|\|)/,
     label: "rm -rf /",
     hint: "This would delete the entire filesystem.",
   },

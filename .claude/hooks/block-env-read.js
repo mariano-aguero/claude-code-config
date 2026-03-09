@@ -36,7 +36,7 @@ try {
 //   Direct: cat .env, head .env.local (filename is first arg)
 //   Grep:   grep SECRET .env, rg "" .env.local (filename is a later arg)
 const ENV_READ_DIRECT =
-  /(?:cat|head|tail|sed|awk|less|more|bat|vim?|nano|open|print)\s+\S*\.env(?:\.\S+)?\b/i;
+  /(?:cat|head|tail|sed|awk|less|more|bat|vim?|nano|open|print)\b[^;\n&|]*\s\.env(?:\.[^\s;|&]*)?(?:\s|$)/i;
 // Requires at least one arg before .env so .env is the filename, not the pattern
 // (handles: grep SECRET .env, rg -n "" .env.local, but not: grep .env file.txt)
 const ENV_GREP_PATTERN =

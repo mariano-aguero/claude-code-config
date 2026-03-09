@@ -195,7 +195,7 @@ if (!skipAdvisory && isSource && !isTestFile) {
         1 +
         (
           body.match(
-            /\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\||\?\./g,
+            /\bif\b|\bfor\b|\bwhile\b|\bcase\b|\bcatch\b|&&|\|\|/g,
           ) ?? []
         ).length;
 

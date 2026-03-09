@@ -30,10 +30,6 @@ const IGNORE_DIRS = new Set([
 const EXPORT_PATTERN =
   /export\s+(?:async\s+)?(?:function|class)\s+(\w+)|export\s+(?:const|let)\s+(\w+)\s*=/g;
 
-const DEF_PATTERN = (name) =>
-  new RegExp(
-    `\\bfunction\\s+${name}\\b|\\bconst\\s+${name}\\s*=|\\blet\\s+${name}\\s*=|\\bclass\\s+${name}\\b`,
-  );
 
 function* walkFiles(dir) {
   let entries;
@@ -152,3 +148,5 @@ if (projectDuplicates.length > 0) {
     `⚠️  Project-wide duplicate exports detected:\n${report}\n\nConsider consolidating into shared utilities.\n`,
   );
 }
+
+process.exit(0);

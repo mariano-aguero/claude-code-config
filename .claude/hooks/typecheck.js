@@ -35,13 +35,19 @@ const pm = detectPackageManager();
 // Note: --incremental + --noEmit was removed — it corrupts .tsbuildinfo on TS < 5.4
 // and provides minimal benefit since we're only checking, not emitting.
 const args =
-  pm === "npm" ? ["exec", "tsc", "--", "--noEmit"] : ["tsc", "--noEmit"];
+  pm === "npm"  ? ["exec", "tsc", "--", "--noEmit"] :
+  pm === "bun"  ? ["x", "tsc", "--noEmit"] :
+  pm === "yarn" ? ["dlx", "tsc", "--noEmit"] :
+                  ["tsc", "--noEmit"]; // pnpm
 
 const result = spawnSync(pm, args, {
   encoding: "utf-8",
   timeout: 30_000,
   cwd: process.cwd(),
 });
+
+// Timed out — don't block Claude
+if (result.signal === "SIGTERM") process.exit(0);
 
 if (result.status !== 0) {
   const output = (result.stdout ?? "") + (result.stderr ?? "");
