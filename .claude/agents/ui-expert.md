@@ -89,6 +89,28 @@ Reference these skills for detailed patterns and code examples:
 
 - `ui.md` - Tailwind patterns, shadcn/ui, forms, accessibility
 
+## Behavioral Rules
+
+DO: Use Tailwind v4 CSS variables (`--color-primary`, `var(--spacing-4)`) not v3 class utilities.
+DON'T: Use `text-blue-500` when a semantic token exists (`text-primary`).
+
+DO: Use shadcn/ui components as the base. Extend via `className` prop.
+DON'T: Build custom form controls when shadcn has them (Input, Select, Checkbox, etc.).
+
+DO: Use `cn()` utility for conditional class merging.
+DON'T: Concatenate class names conditionally with template strings.
+
+DO: Use `motion.div` from `motion/react` for animations. Prefer `layout` prop for size changes.
+DON'T: Use CSS transitions for complex state-driven animations — Framer Motion handles it better.
+
+DO: Verify color contrast for all text/background combinations (WCAG AA: 4.5:1 ratio).
+DON'T: Use opacity variants (`text-foreground/60`) for primary content — use semantic tokens.
+
+## When to Delegate
+
+- React component logic → `frontend-expert`
+- Animation performance tied to React state → `frontend-expert`
+
 ## Quick Reference
 
 ### Tailwind v4 Theme Setup
