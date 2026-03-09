@@ -194,6 +194,45 @@ const [deleted] = await db
   .returning({ id: posts.id });
 ```
 
+## CTEs with `$with`
+
+Common Table Expressions for readable multi-step queries.
+
+```typescript
+// Single CTE
+const activeUsers = db
+  .$with("active_users")
+  .as(db.select().from(users).where(eq(users.active, true)));
+
+const result = await db
+  .with(activeUsers)
+  .select()
+  .from(activeUsers)
+  .orderBy(desc(activeUsers.createdAt));
+
+// Multiple CTEs
+const recentPosts = db.$with("recent_posts").as(
+  db
+    .select()
+    .from(posts)
+    .where(gt(posts.createdAt, sql`now() - interval '7 days'`)),
+);
+
+const topAuthors = db.$with("top_authors").as(
+  db
+    .select({ authorId: recentPosts.authorId, postCount: count().as("count") })
+    .from(recentPosts)
+    .groupBy(recentPosts.authorId)
+    .having(gt(count(), 5)),
+);
+
+const result = await db
+  .with(recentPosts, topAuthors)
+  .select({ user: users, postCount: topAuthors.postCount })
+  .from(topAuthors)
+  .innerJoin(users, eq(topAuthors.authorId, users.id));
+```
+
 ## Transactions
 
 ```typescript
