@@ -216,6 +216,43 @@ pnpm drizzle-kit push
 
 The generated tables: `user`, `session`, `account`, `verification`.
 
+## Full Config with Redis Secondary Storage
+
+```typescript
+// lib/auth.ts
+import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "@/db";
+import { redis } from "@/lib/redis";
+import { env } from "@/lib/env";
+
+export const auth = betterAuth({
+  database: drizzleAdapter(db, { provider: "pg" }),
+  emailAndPassword: { enabled: true },
+  socialProviders: {
+    github: { clientId: env.GITHUB_ID, clientSecret: env.GITHUB_SECRET },
+  },
+  trustedOrigins: [env.NEXT_PUBLIC_APP_URL],
+  secondaryStorage: {
+    get: (key) => redis.get(key),
+    set: (key, value, ttl) => redis.setex(key, ttl ?? 3600, value),
+    delete: (key) => redis.del(key),
+  },
+  hooks: {
+    after: [
+      {
+        matcher: () => true,
+        handler: async (ctx) => {
+          if (ctx.error) console.error({ path: ctx.path, error: ctx.error });
+        },
+      },
+    ],
+  },
+});
+```
+
+`secondaryStorage` offloads session lookups to Redis — the primary DB adapter is only hit for user/account writes. `trustedOrigins` restricts CORS to your app URL, rejecting cross-origin auth requests from unknown domains.
+
 ## Role-Based Access Control (RBAC Plugin)
 
 ```typescript
