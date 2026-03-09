@@ -45,9 +45,9 @@ const DANGEROUS = [
 
   // ── Filesystem ───────────────────────────────────────────────────────────
   {
-    // Word boundary after each path prevents false positives like /var_backups or /usrshare
+    // Word boundary after each path prevents false positives like /var_backups or /usrshare or /homeless
     pattern:
-      /\brm\s+-[a-z]*r[a-z]*f\b[^;\n&|]*(?:~|\$HOME|\/root\b|\/usr\b|\/etc\b|\/var\b)/,
+      /\brm\s+-[a-z]*r[a-z]*f\b[^;\n&|]*(?:~|\$HOME|\/root\b|\/home\b|\/usr\b|\/etc\b|\/var\b)/,
     label: "rm -rf targeting home/system directory",
     hint: "Recursive deletion of home or system directories is irreversible.",
   },

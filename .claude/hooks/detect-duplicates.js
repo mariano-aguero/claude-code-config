@@ -32,7 +32,7 @@ const EXPORT_PATTERN =
 
 const DEF_PATTERN = (name) =>
   new RegExp(
-    `\\bfunction\\s+${name}\\b|\\bconst\\s+${name}\\s*=|\\bclass\\s+${name}\\b`,
+    `\\bfunction\\s+${name}\\b|\\bconst\\s+${name}\\s*=|\\blet\\s+${name}\\s*=|\\bclass\\s+${name}\\b`,
   );
 
 function* walkFiles(dir) {
@@ -79,7 +79,7 @@ if (filePath) {
     [...names].map((n) => [
       n,
       new RegExp(
-        `\\bfunction\\s+${n}\\b|\\bconst\\s+${n}\\s*=|\\bclass\\s+${n}\\b`,
+        `\\bfunction\\s+${n}\\b|\\bconst\\s+${n}\\s*=|\\blet\\s+${n}\\s*=|\\bclass\\s+${n}\\b`,
       ),
     ]),
   );

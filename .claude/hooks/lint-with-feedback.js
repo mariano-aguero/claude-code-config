@@ -18,13 +18,25 @@ const LINTABLE = [".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"];
 if (!LINTABLE.includes(ext)) process.exit(0);
 
 // Step 1: auto-fix what ESLint can
-spawnSync("pnpm", ["eslint", "--fix", filePath], { stdio: "ignore" });
+spawnSync("pnpm", ["eslint", "--fix", filePath], {
+  stdio: "ignore",
+  timeout: 30_000,
+});
 
 // Step 2: check for remaining unfixable issues
-const result = spawnSync("pnpm", ["eslint", filePath], { encoding: "utf-8" });
+const result = spawnSync("pnpm", ["eslint", filePath], {
+  encoding: "utf-8",
+  timeout: 30_000,
+});
 
 // status is null when the process couldn't be spawned (pnpm/eslint not in PATH)
 if (result.status === null) process.exit(0);
+if (result.signal === "SIGTERM") {
+  process.stderr.write(
+    `⚠️  ESLint timed out on ${path.basename(filePath)} — skipping lint check.\n`,
+  );
+  process.exit(0);
+}
 
 if (result.status !== 0) {
   const output = [result.stdout ?? "", result.stderr ?? ""].join("").trim();

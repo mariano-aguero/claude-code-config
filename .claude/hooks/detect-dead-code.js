@@ -112,3 +112,4 @@ if (deadExports.length > 0) {
       `\nVerify these are used or remove them to keep the codebase clean.\n`,
   );
 }
+process.exit(0);

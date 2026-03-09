@@ -7,7 +7,7 @@
  *   - detect-missing-tests (advisory)
  *   - check-complexity  (advisory)
  *
- * track-tech-debt runs at Stop (session-level bookkeeping, not per-file feedback).
+ * track-tech-debt runs at PostToolUse (per-file, each write — not just at Stop).
  */
 
 const fs = require("fs");
