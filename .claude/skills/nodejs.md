@@ -373,9 +373,6 @@ export const userService = {
 ```typescript
 import { sign, verify } from "hono/jwt";
 
-const ACCESS_TOKEN_EXPIRY = "15m";
-const REFRESH_TOKEN_EXPIRY = "7d";
-
 export async function generateTokens(userId: string) {
   const accessToken = await sign(
     {

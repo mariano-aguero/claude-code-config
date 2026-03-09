@@ -103,6 +103,12 @@ export function use${Feature}s(filters: ${Feature}Filters = {}) {
   });
 }
 
+async function fetch${Feature}(id: string): Promise<${Feature}> {
+  const response = await fetch(`/api/${feature}s/${id}`);
+  if (!response.ok) throw new Error("Failed to fetch ${feature}");
+  return response.json() as Promise<${Feature}>;
+}
+
 export function use${Feature}(id: string) {
   return useQuery({
     queryKey: ${feature}Keys.detail(id),
@@ -276,7 +282,7 @@ export function ${Feature}Form({ onSuccess }: ${Feature}FormProps) {
             />
             {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
               <p className="text-sm text-destructive">
-                {field.state.meta.errors[0]}
+                {field.state.meta.errors[0]?.toString()}
               </p>
             )}
           </div>

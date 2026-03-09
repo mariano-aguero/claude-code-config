@@ -477,20 +477,20 @@ const userSchema = z.object({
 export function CreateUserForm() {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: createUser,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      form.reset();
-    },
-  });
-
   const form = useForm({
     defaultValues: { name: "", email: "" },
     validatorAdapter: zodValidator(),
     validators: { onChange: userSchema },
     onSubmit: async ({ value }) => {
       mutation.mutate(value);
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: createUser,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+      form.reset();
     },
   });
 

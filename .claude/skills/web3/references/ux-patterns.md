@@ -153,15 +153,19 @@ function TokenListSkeleton() {
 ## Network Status
 
 ```tsx
+import { usePublicClient } from "wagmi";
+
 function NetworkStatus() {
   const chainId = useChainId();
   const chains = useChains();
   const chain = chains.find((c) => c.id === chainId);
+  const publicClient = usePublicClient();
   const [blockNumber, setBlockNumber] = useState<bigint>();
 
   useEffect(() => {
+    if (!publicClient) return;
     return publicClient.watchBlockNumber({ onBlockNumber: setBlockNumber });
-  }, []);
+  }, [publicClient]);
 
   return (
     <div className="flex items-center gap-2 text-sm">

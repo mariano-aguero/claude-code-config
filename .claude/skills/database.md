@@ -313,17 +313,17 @@ const drafts = await db.select().from(posts).where(isNull(posts.publishedAt));
 async function getUsers(page: number, pageSize: number) {
   const offset = (page - 1) * pageSize;
 
-  const [data, [{ count }]] = await Promise.all([
+  const [data, [{ total }]] = await Promise.all([
     db.select().from(users).limit(pageSize).offset(offset),
-    db.select({ count: sql<number>`count(*)` }).from(users),
+    db.select({ total: count() }).from(users),
   ]);
 
   return {
     data,
-    total: count,
+    total,
     page,
     pageSize,
-    totalPages: Math.ceil(count / pageSize),
+    totalPages: Math.ceil(Number(total) / pageSize),
   };
 }
 
@@ -439,16 +439,16 @@ const prolificAuthors = await db
 ### drizzle.config.ts
 
 ```typescript
-import type { Config } from "drizzle-kit";
+import { defineConfig } from "drizzle-kit";
 
-export default {
+export default defineConfig({
   schema: "./src/db/schema/*",
   out: "./drizzle",
   dialect: "postgresql",
   dbCredentials: {
     url: process.env.DATABASE_URL!,
   },
-} satisfies Config;
+});
 ```
 
 ### Commands

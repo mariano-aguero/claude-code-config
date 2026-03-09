@@ -59,7 +59,7 @@ contract YieldVault is ERC4626 {
     constructor(IERC20 asset_) ERC4626(asset_) ERC20("Vault Shares", "vSHARE") {}
 
     function totalAssets() public view override returns (uint256) {
-        return asset.balanceOf(address(this)) + _calculateYield();
+        return IERC20(asset()).balanceOf(address(this)) + _calculateYield();
     }
 }
 ```

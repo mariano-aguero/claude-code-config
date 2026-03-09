@@ -420,7 +420,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node: [18, 20, 22]
+        node: [20, 22]
         os: [ubuntu-latest, macos-latest, windows-latest]
 
     steps:

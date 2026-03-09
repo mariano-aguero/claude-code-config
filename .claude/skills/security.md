@@ -268,9 +268,11 @@ async function generateTokens(user: {
   );
 
   // Store refresh token hash in database for revocation
+  // Use SHA-256 (not Argon2) for tokens — they are random, not passwords
+  import { createHash } from "crypto";
   await db.insert(refreshTokens).values({
     userId: user.id,
-    tokenHash: await hash(refreshToken),
+    tokenHash: createHash("sha256").update(refreshToken).digest("hex"),
     expiresAt: new Date((now + REFRESH_TOKEN_EXPIRY) * 1000),
   });
 
@@ -288,8 +290,14 @@ async function refreshAccessToken(refreshToken: string) {
     ),
   });
 
-  // Compare plaintext token against stored hash
-  if (!stored || !(await verifyPassword(refreshToken, stored.tokenHash))) {
+  // Compare token hashes with constant-time comparison (not Argon2 — tokens are random, not passwords)
+  import { createHash, timingSafeEqual } from "crypto";
+  const providedHash = createHash("sha256").update(refreshToken).digest("hex");
+  const hashesMatch = timingSafeEqual(
+    Buffer.from(providedHash, "hex"),
+    Buffer.from(stored.tokenHash, "hex"),
+  );
+  if (!stored || !hashesMatch) {
     throw new Error("Invalid refresh token");
   }
 
@@ -343,11 +351,16 @@ app.get("/auth/github/callback", async (c) => {
   const code = c.req.query("code");
   const state = c.req.query("state");
 
+  if (!code || !state) {
+    return c.json({ error: "Missing code or state" }, 400);
+  }
+
   // Verify state
   const storedState = await redis.get(`oauth_state:${state}`);
   if (!storedState) {
     return c.json({ error: "Invalid state" }, 400);
   }
+  // Delete state token before using code to prevent replay attacks
   await redis.del(`oauth_state:${state}`);
 
   // Exchange code for tokens

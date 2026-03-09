@@ -91,6 +91,8 @@ contract VaultFactory {
 
 ```solidity
 abstract contract Multicall {
+    error MulticallFailed(uint256 index);
+
     function multicall(bytes[] calldata data) external returns (bytes[] memory results) {
         results = new bytes[](data.length);
         for (uint256 i = 0; i < data.length; i++) {
@@ -99,7 +101,7 @@ abstract contract Multicall {
                 if (result.length > 0) {
                     assembly { revert(add(result, 32), mload(result)) }
                 }
-                revert("Multicall failed");
+                revert MulticallFailed(i);
             }
             results[i] = result;
         }

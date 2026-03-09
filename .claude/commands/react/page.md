@@ -72,14 +72,15 @@ export default function ${Page}Layout({ children }: ${Page}LayoutProps) {
 ```tsx
 // app/<path>/layout.tsx
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 interface ${Page}LayoutProps {
   children: React.ReactNode;
 }
 
 export default async function ${Page}Layout({ children }: ${Page}LayoutProps) {
-  const session = await getSession();
+  const session = await auth.api.getSession({ headers: await headers() });
 
   if (!session) {
     redirect("/login");

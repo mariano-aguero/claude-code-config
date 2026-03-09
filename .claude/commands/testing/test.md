@@ -22,7 +22,7 @@ Generate unit tests with Vitest and React Testing Library.
 
 ```tsx
 // __tests__/<component>.test.tsx
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { ${Component} } from "@/components/${component}";
@@ -205,14 +205,25 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { NextRequest } from "next/server";
 import { GET, POST } from "@/app/api/${route}/route";
 
+const mockItems = [{ id: "1", name: "Test" }];
+const newItem = { id: "1", name: "New Item" };
+
 vi.mock("@/lib/db", () => ({
   db: {
     select: vi.fn().mockReturnThis(),
     from: vi.fn().mockReturnThis(),
     where: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    offset: vi.fn().mockResolvedValue(mockItems),
     insert: vi.fn().mockReturnThis(),
     values: vi.fn().mockReturnThis(),
-    returning: vi.fn(),
+    returning: vi.fn().mockResolvedValue([newItem]),
+    query: {
+      ${resource}s: {
+        findMany: vi.fn().mockResolvedValue(mockItems),
+        findFirst: vi.fn().mockResolvedValue(mockItems[0]),
+      },
+    },
   },
 }));
 
@@ -223,9 +234,6 @@ describe("API /${route}", () => {
 
   describe("GET", () => {
     it("returns list of items", async () => {
-      const mockItems = [{ id: "1", name: "Test" }];
-      vi.mocked(db.${resource}.findMany).mockResolvedValue(mockItems);
-
       const request = new NextRequest("http://localhost/api/${route}");
       const response = await GET(request);
       const data = await response.json();
@@ -240,18 +248,13 @@ describe("API /${route}", () => {
       );
       await GET(request);
 
-      expect(db.${resource}.findMany).toHaveBeenCalledWith({
-        skip: 10,
-        take: 10,
-      });
+      // Drizzle uses limit/offset, not skip/take
+      expect(data).toEqual(mockItems);
     });
   });
 
   describe("POST", () => {
     it("creates new item", async () => {
-      const newItem = { id: "1", name: "New Item" };
-      vi.mocked(db.${resource}.create).mockResolvedValue(newItem);
-
       const request = new NextRequest("http://localhost/api/${route}", {
         method: "POST",
         body: JSON.stringify({ name: "New Item" }),

@@ -206,7 +206,7 @@ const sorted = items.sort((a, b) => a.name.localeCompare(b.name));
 
 // GOOD: Memoized
 const sorted = useMemo(
-  () => items.sort((a, b) => a.name.localeCompare(b.name)),
+  () => [...items].sort((a, b) => a.name.localeCompare(b.name)),
   [items],
 );
 ```
