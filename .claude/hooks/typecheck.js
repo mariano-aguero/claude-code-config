@@ -2,12 +2,17 @@
 /**
  * PostToolUse hook — runs TypeScript type checking after editing .ts/.tsx files.
  * Catches type errors across the project (e.g. updated signature, missed call sites).
- * Uses --incremental when tsconfig supports it to avoid 10-30s full rebuilds.
+ *
+ * Skips automatically on large projects (> 300 TS files) to avoid 30s+ blocking runs.
+ * Override: set CLAUDE_TYPECHECK=1 to force, CLAUDE_TYPECHECK=0 to disable entirely.
  */
 
 const { spawnSync } = require("child_process");
 const path = require("path");
 const fs = require("fs");
+
+// Explicit opt-out
+if (process.env.CLAUDE_TYPECHECK === "0") process.exit(0);
 
 const filePath = process.env.CLAUDE_FILE_PATH ?? "";
 const ext = path.extname(filePath);
@@ -16,6 +21,56 @@ if (![".ts", ".tsx"].includes(ext)) process.exit(0);
 
 const tsconfigPath = path.resolve(process.cwd(), "tsconfig.json");
 if (!fs.existsSync(tsconfigPath)) process.exit(0);
+
+// Skip tiny files — not worth a full tsc run for a 5-line change
+try {
+  const lines = fs.readFileSync(filePath, "utf-8").split("\n").length;
+  if (lines < 10) process.exit(0);
+} catch {
+  process.exit(0);
+}
+
+// Auto-skip on large projects unless user explicitly forced it
+if (process.env.CLAUDE_TYPECHECK !== "1") {
+  const IGNORE_DIRS = new Set([
+    "node_modules",
+    ".git",
+    ".next",
+    "dist",
+    "build",
+    ".cache",
+    "coverage",
+  ]);
+  let tsFileCount = 0;
+
+  function countTsFiles(dir) {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      if (IGNORE_DIRS.has(entry.name)) continue;
+      if (entry.isDirectory()) {
+        countTsFiles(path.join(dir, entry.name));
+      } else if (/\.[jt]sx?$/.test(entry.name)) {
+        tsFileCount++;
+        if (tsFileCount > 300) return; // early exit
+      }
+    }
+  }
+
+  countTsFiles(process.cwd());
+
+  if (tsFileCount > 300) {
+    process.stderr.write(
+      `ℹ️  Skipping typecheck — large project (${tsFileCount}+ TS files).\n` +
+        `  Set CLAUDE_TYPECHECK=1 in settings.local.json to force it.\n`,
+    );
+    process.exit(0);
+  }
+}
 
 // Detect package manager from lockfile
 function detectPackageManager() {

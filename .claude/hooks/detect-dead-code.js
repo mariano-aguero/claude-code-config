@@ -1,17 +1,16 @@
 #!/usr/bin/env node
 /**
- * PostToolUse hook — detects namedExports that are never imported elsewhere.
- * Helps prevent Claude from leaving dead code in the codebase.
- * Uses pure Node.js file walking and matchAll (no exec, no child_process).
+ * Hook — detects named exports that are never imported elsewhere.
+ *
+ * Two modes:
+ *   PostToolUse (CLAUDE_FILE_PATH set): checks only the written file against the project
+ *   Stop (no CLAUDE_FILE_PATH):         full project scan — one O(2n) pass over all files
  */
 
 const fs = require("fs");
 const path = require("path");
 
 if (process.env.CLAUDE_ANALYSIS === "0") process.exit(0);
-
-const filePath = process.env.CLAUDE_FILE_PATH ?? "";
-const ext = path.extname(filePath);
 
 const CHECKABLE = [".ts", ".tsx", ".js", ".jsx"];
 const SKIP = [
@@ -31,33 +30,9 @@ const IGNORE_DIRS = new Set([
   "coverage",
 ]);
 
-if (!CHECKABLE.includes(ext)) process.exit(0);
-if (SKIP.some((p) => p.test(filePath))) process.exit(0);
-
-let content;
-try {
-  content = fs.readFileSync(filePath, "utf-8");
-} catch {
-  process.exit(0);
-}
-
-// Extract named exports using matchAll
 const EXPORT_PATTERN =
   /export\s+(?:async\s+)?(?:function|class)\s+(\w+)|export\s+(?:const|let|var)\s+(\w+)|export\s+(?:type|interface)\s+(\w+)/g;
 
-const namedExports = new Set(
-  [...content.matchAll(EXPORT_PATTERN)]
-    .map((m) => m[1] ?? m[2] ?? m[3])
-    .filter((n) => n && n.length > 2),
-);
-
-if (namedExports.size === 0) process.exit(0);
-
-const normalizedPath = path.normalize(filePath);
-const withoutExt = filePath.replace(/\.[jt]sx?$/, "");
-const baseName = path.basename(withoutExt);
-
-// Walk project files
 function* walkFiles(dir) {
   let entries;
   try {
@@ -73,43 +48,114 @@ function* walkFiles(dir) {
   }
 }
 
-const usedExports = new Set();
+function extractExports(content) {
+  return new Set(
+    [...content.matchAll(EXPORT_PATTERN)]
+      .map((m) => m[1] ?? m[2] ?? m[3])
+      .filter((n) => n && n.length > 2),
+  );
+}
 
+// ── Per-file mode (PostToolUse) ──────────────────────────────────────────────
+const filePath = process.env.CLAUDE_FILE_PATH ?? "";
+
+if (filePath) {
+  const ext = path.extname(filePath);
+  if (!CHECKABLE.includes(ext)) process.exit(0);
+  if (SKIP.some((p) => p.test(filePath))) process.exit(0);
+
+  let content;
+  try {
+    content = fs.readFileSync(filePath, "utf-8");
+  } catch {
+    process.exit(0);
+  }
+
+  const namedExports = extractExports(content);
+  if (namedExports.size === 0) process.exit(0);
+
+  const normalizedPath = path.normalize(filePath);
+  const baseName = path.basename(filePath.replace(/\.[jt]sx?$/, ""));
+  const usedExports = new Set();
+
+  for (const file of walkFiles(process.cwd())) {
+    if (path.normalize(file) === normalizedPath) continue;
+    let src;
+    try {
+      src = fs.readFileSync(file, "utf-8");
+    } catch {
+      continue;
+    }
+    const importsFromUs =
+      new RegExp(`['"][^'"]*\\/${baseName}['"]`).test(src) ||
+      new RegExp(`from\\s+['"]${baseName}['"]`).test(src) ||
+      new RegExp(`require\\(['"]${baseName}['"]\\)`).test(src);
+    if (!importsFromUs) continue;
+    for (const name of namedExports) {
+      if (!/^\w+$/.test(name)) continue;
+      if (new RegExp(`\\b${name}\\b`).test(src)) usedExports.add(name);
+    }
+  }
+
+  const dead = [...namedExports].filter((n) => !usedExports.has(n));
+  if (dead.length > 0) {
+    process.stderr.write(
+      `⚠️  Potentially unused exports in ${path.basename(filePath)}:\n` +
+        dead.map((n) => `  - ${n}`).join("\n") +
+        `\nVerify these are used or remove them to keep the codebase clean.\n`,
+    );
+  }
+  process.exit(0);
+}
+
+// ── Full-scan mode (Stop) ────────────────────────────────────────────────────
+// Pass 1: collect all exports per file
+const exportMap = new Map(); // file → Set<name>
 for (const file of walkFiles(process.cwd())) {
-  if (path.normalize(file) === normalizedPath) continue;
-
+  if (SKIP.some((p) => p.test(file))) continue;
   let src;
   try {
     src = fs.readFileSync(file, "utf-8");
   } catch {
     continue;
   }
+  const exports = extractExports(src);
+  if (exports.size > 0) exportMap.set(file, exports);
+}
 
-  // Check files that import from ours via any path variant:
-  //   from './Button', from '../utils/Button', from '@/components/Button', from 'Button'
-  //   require('./Button'), require('Button')
-  // Require a '/' prefix or explicit from/require keyword to avoid matching string literals.
-  // Use word-boundary-aware check to avoid matching 'format' inside 'dateFormat'
-  const importsFromUs =
-    new RegExp(`['"][^'"]*\\/${baseName}['"]`).test(src) ||
-    new RegExp(`from\\s+['"]${baseName}['"]`).test(src) ||
-    new RegExp(`require\\(['"]${baseName}['"]\\)`).test(src);
-  if (!importsFromUs) continue;
+if (exportMap.size === 0) process.exit(0);
 
-  for (const name of namedExports) {
-    // Validate name is a safe identifier before using in RegExp constructor
-    if (!/^\w+$/.test(name)) continue;
-    if (new RegExp(`\\b${name}\\b`).test(src)) usedExports.add(name);
+// Pass 2: collect all identifiers used across the entire codebase
+const allUsed = new Set();
+for (const file of walkFiles(process.cwd())) {
+  let src;
+  try {
+    src = fs.readFileSync(file, "utf-8");
+  } catch {
+    continue;
+  }
+  // Extract imported names from: import { A, B } from '...'; require('...')
+  const importedNames = [...src.matchAll(/import\s+\{([^}]+)\}/g)].flatMap(
+    (m) => m[1].split(",").map((s) => s.trim().replace(/\s+as\s+\w+/, "")),
+  );
+  for (const n of importedNames) {
+    if (n && /^\w+$/.test(n)) allUsed.add(n);
   }
 }
 
-const deadExports = [...namedExports].filter((name) => !usedExports.has(name));
+// Report dead exports (names never imported anywhere)
+const issues = [];
+for (const [file, exports] of exportMap) {
+  const dead = [...exports].filter((n) => !allUsed.has(n));
+  if (dead.length > 0) {
+    issues.push(`  ${path.relative(process.cwd(), file)}: ${dead.join(", ")}`);
+  }
+}
 
-if (deadExports.length > 0) {
+if (issues.length > 0) {
   process.stderr.write(
-    `⚠️  Potentially unused namedExports in ${path.basename(filePath)}:\n` +
-      deadExports.map((n) => `  - ${n}`).join("\n") +
-      `\nVerify these are used or remove them to keep the codebase clean.\n`,
+    `⚠️  Potentially unused exports detected at session end:\n${issues.join("\n")}\n` +
+      `Verify these are used or remove them to keep the codebase clean.\n`,
   );
 }
 process.exit(0);

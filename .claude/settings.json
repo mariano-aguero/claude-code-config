@@ -4,6 +4,7 @@
     "CLAUDE_FORMAT": "1",
     "CLAUDE_LINT": "1",
     "CLAUDE_ANALYSIS": "1",
+    "CLAUDE_TYPECHECK": "1",
     "CLAUDE_RUN_TESTS": "0"
   },
   "hooks": {
@@ -48,14 +49,6 @@
           {
             "type": "command",
             "command": "node .claude/hooks/track-tech-debt.js"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/detect-dead-code.js"
-          },
-          {
-            "type": "command",
-            "command": "node .claude/hooks/detect-duplicates.js"
           },
           { "type": "command", "command": "node .claude/hooks/auto-stage.js" }
         ]
@@ -107,6 +100,10 @@
           {
             "type": "command",
             "command": "node .claude/hooks/save-session-notes.js"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/hooks/detect-dead-code.js"
           },
           {
             "type": "command",

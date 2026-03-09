@@ -44,45 +44,6 @@ Technical reference materials with patterns and code examples:
 
 Slash command templates: `/react/*`, `/git/*`, `/testing/*`, `/api/*`, `/db/*`, `/web3/*`, `/infra/*`
 
-## Tech Stack Conventions
-
-| Domain   | Technologies                                                                                   |
-| -------- | ---------------------------------------------------------------------------------------------- |
-| Frontend | TypeScript 5.x, React 19, Next.js 16+, TanStack (Query v5, Form v1), Tailwind v4.1, Zustand v5 |
-| Backend  | Node.js 20+, Hono/Fastify, Drizzle ORM, PostgreSQL, Redis                                      |
-| Testing  | Vitest, Testing Library, Playwright, MSW                                                       |
-| Web3     | Solidity 0.8.33, Foundry, OpenZeppelin 5.4, Viem 2.45+, Wagmi 3.4+                             |
-
-## Key Principles
-
-- **TanStack for data** - Use Query for client-side server state, Form for forms (never React Hook Form); use `fetch()` or ORM calls directly in Server Components
-- **Server Components default** - Use `"use client"` only when necessary
-- **TypeScript strict** - No `any`, proper generics, Zod for runtime validation
-- **Drizzle for database** - Type-safe queries, proper migrations
-- **Web3 security** - CEI pattern, reentrancy guards, simulate before send
-
-## Proactive Agent & Skill Routing
-
-Use agents and skills **without waiting for the user to ask**. Route based on task type:
-
-| Task                                    | Use                                              |
-| --------------------------------------- | ------------------------------------------------ |
-| React components, hooks, Next.js pages  | `frontend-expert` agent                          |
-| API routes, DB queries, server logic    | `backend-expert` agent                           |
-| SQL schema, migrations, Drizzle queries | `database-expert` agent + `drizzle.md` skill     |
-| Auth, OWASP, secrets, headers           | `security-expert` agent + `better-auth.md` skill |
-| Tailwind, shadcn/ui, animations         | `ui-expert` agent                                |
-| Solidity contracts, DeFi, Wagmi         | `web3-expert` agent                              |
-| Vitest, Playwright, mocking             | `testing-expert` agent                           |
-| Advanced TypeScript, generics, Zod      | `typescript-expert` agent                        |
-| Docker, CI/CD, GitHub Actions           | `infrastructure-expert` agent                    |
-| After finishing a feature or PR         | `code-reviewer` agent                            |
-| Creating a commit                       | `/commit` skill                                  |
-| Starting a feature                      | `/react/feature` or `/api/route` skill           |
-| Writing tests                           | `/testing/test` or `/react/test` skill           |
-
-Skills also apply — check if a relevant skill exists before responding to any non-trivial request.
-
 ## Hook Toggles
 
 Control formatting and linting per project via `.claude/settings.local.json` (not committed to git):
@@ -93,29 +54,18 @@ Control formatting and linting per project via `.claude/settings.local.json` (no
     "CLAUDE_FORMAT": "0",
     "CLAUDE_LINT": "0",
     "CLAUDE_ANALYSIS": "0",
+    "CLAUDE_TYPECHECK": "0",
     "CLAUDE_RUN_TESTS": "1"
   }
 }
 ```
 
-| Variable           | Default | Effect                                                                                 |
-| ------------------ | ------- | -------------------------------------------------------------------------------------- |
-| `CLAUDE_FORMAT`    | `"1"`   | Set `"0"` to skip Prettier on every Write/Edit                                         |
-| `CLAUDE_LINT`      | `"1"`   | Set `"0"` to skip ESLint on every Write/Edit                                           |
-| `CLAUDE_ANALYSIS`  | `"1"`   | Set `"0"` to skip advisory analysis (missing tests, complexity, dead-code, duplicates) |
-| `CLAUDE_RUN_TESTS` | `"0"`   | Set `"1"` to run `pnpm test` at every session Stop                                     |
+| Variable           | Default | Effect                                                                                      |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------- |
+| `CLAUDE_FORMAT`    | `"1"`   | Set `"0"` to skip Prettier on every Write/Edit                                              |
+| `CLAUDE_LINT`      | `"1"`   | Set `"0"` to skip ESLint on every Write/Edit                                                |
+| `CLAUDE_ANALYSIS`  | `"1"`   | Set `"0"` to skip advisory analysis (missing tests, complexity, dead-code, duplicates)      |
+| `CLAUDE_TYPECHECK` | `"1"`   | Set `"0"` to disable tsc. Auto-skips on projects > 300 TS files; set `"1"` to force it back |
+| `CLAUDE_RUN_TESTS` | `"0"`   | Set `"1"` to run `pnpm test` at every session Stop                                          |
 
-Note: Secrets detection (embedded in `analysis.js`) and `typecheck` always run regardless — `CLAUDE_ANALYSIS=0` skips only the advisory checks (missing tests, complexity), not the secrets scan.
-
-## Code Intelligence
-
-Claude Code has native LSP support (enabled via `ENABLE_LSP_TOOL=1` in shell). Prefer LSP tools over Grep/Read for code navigation — 900x faster and semantically precise:
-
-- `workspaceSymbol` to find where something is defined
-- `findReferences` to see all usages across the codebase
-- `goToDefinition` / `goToImplementation` to jump to source
-- `hover` for type info without reading the file
-
-Use Grep only for text/pattern searches (comments, strings, config files).
-
-After writing or editing code, check LSP diagnostics and fix errors before proceeding.
+Note: Secrets detection (`analysis.js`) always runs regardless of any toggle — it cannot be disabled. `CLAUDE_ANALYSIS=0` skips only the advisory checks (missing tests, complexity, dead-code, duplicates).
