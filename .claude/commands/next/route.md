@@ -36,10 +36,11 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") ?? "1");
     const limit = parseInt(searchParams.get("limit") ?? "10");
 
-    const items = await db.${resource}.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
-    });
+    const items = await db
+      .select()
+      .from(${resource}Table)
+      .limit(limit)
+      .offset((page - 1) * limit);
 
     return NextResponse.json(items);
   } catch (error) {
@@ -56,9 +57,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validated = createSchema.parse(body);
 
-    const item = await db.${resource}.create({
-      data: validated,
-    });
+    const [item] = await db
+      .insert(${resource}Table)
+      .values(validated)
+      .returning();
 
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
@@ -91,13 +93,14 @@ const updateSchema = z.object({
 });
 
 interface RouteParams {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
-    const item = await db.${resource}.findUnique({
-      where: { id: params.id },
+    const { id } = await params;
+    const item = await db.query.${resource}.findFirst({
+      where: (t, { eq }) => eq(t.id, id),
     });
 
     if (!item) {
@@ -119,13 +122,15 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PATCH(request: NextRequest, { params }: RouteParams) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const validated = updateSchema.parse(body);
 
-    const item = await db.${resource}.update({
-      where: { id: params.id },
-      data: validated,
-    });
+    const [item] = await db
+      .update(${resource}Table)
+      .set(validated)
+      .where(eq(${resource}Table.id, id))
+      .returning();
 
     return NextResponse.json(item);
   } catch (error) {
@@ -146,9 +151,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    await db.${resource}.delete({
-      where: { id: params.id },
-    });
+    const { id } = await params;
+    await db.delete(${resource}Table).where(eq(${resource}Table.id, id));
 
     return new NextResponse(null, { status: 204 });
   } catch (error) {
@@ -185,9 +189,10 @@ export async function create${Resource}(
   try {
     const validated = createSchema.parse(input);
 
-    const item = await db.${resource}.create({
-      data: validated,
-    });
+    const [item] = await db
+      .insert(${resource}Table)
+      .values(validated)
+      .returning();
 
     revalidatePath("/${resource}s");
 
@@ -207,10 +212,11 @@ export async function update${Resource}(
   input: Partial<z.infer<typeof createSchema>>
 ): Promise<ActionResult<${Resource}>> {
   try {
-    const item = await db.${resource}.update({
-      where: { id },
-      data: input,
-    });
+    const [item] = await db
+      .update(${resource}Table)
+      .set(input)
+      .where(eq(${resource}Table.id, id))
+      .returning();
 
     revalidatePath("/${resource}s");
     revalidatePath(`/${resource}s/${id}`);
@@ -224,9 +230,9 @@ export async function update${Resource}(
 
 export async function delete${Resource}(id: string): Promise<ActionResult<null>> {
   try {
-    await db.${resource}.delete({
-      where: { id },
-    });
+    await db
+      .delete(${resource}Table)
+      .where(eq(${resource}Table.id, id));
 
     revalidatePath("/${resource}s");
 
@@ -241,11 +247,10 @@ export async function delete${Resource}(id: string): Promise<ActionResult<null>>
 ### With Authentication
 
 ```tsx
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { auth } from "@/lib/auth";
 
 export async function POST(request: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await auth.api.getSession({ headers: request.headers });
 
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

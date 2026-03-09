@@ -224,6 +224,7 @@ export function ${Feature}List() {
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import { z } from "zod";
 import { useCreate${Feature} } from "../hooks/use-${feature}-mutations";
 import { Button } from "@/components/ui/button";

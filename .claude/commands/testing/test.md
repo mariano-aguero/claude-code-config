@@ -207,10 +207,12 @@ import { GET, POST } from "@/app/api/${route}/route";
 
 vi.mock("@/lib/db", () => ({
   db: {
-    ${resource}: {
-      findMany: vi.fn(),
-      create: vi.fn(),
-    },
+    select: vi.fn().mockReturnThis(),
+    from: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
+    values: vi.fn().mockReturnThis(),
+    returning: vi.fn(),
   },
 }));
 
