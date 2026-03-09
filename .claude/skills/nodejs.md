@@ -76,6 +76,130 @@ const start = async () => {
 start();
 ```
 
+## Hono v4 RPC Pattern
+
+The primary API architecture. Typed routes enable a full-stack type-safe client without code generation.
+
+```typescript
+// routes/users.ts
+import { Hono } from "hono";
+import { zValidator } from "@hono/zod-validator";
+import { HTTPException } from "hono/http-exception";
+import { z } from "zod";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+const createUserSchema = z.object({
+  email: z.string().email(),
+  name: z.string().min(1).max(100),
+});
+
+export const usersRoute = new Hono()
+  .get("/", async (c) => {
+    const result = await db.query.users.findMany({
+      orderBy: (t, { desc }) => [desc(t.createdAt)],
+    });
+    return c.json({ users: result });
+  })
+  .post("/", zValidator("json", createUserSchema), async (c) => {
+    const data = c.req.valid("json"); // fully typed
+    const [user] = await db.insert(users).values(data).returning();
+    return c.json(user, 201);
+  })
+  .get("/:id", async (c) => {
+    const id = c.req.param("id");
+    const user = await db.query.users.findFirst({ where: eq(users.id, id) });
+    if (!user) throw new HTTPException(404, { message: "User not found" });
+    return c.json(user);
+  })
+  .delete("/:id", async (c) => {
+    const id = c.req.param("id");
+    await db.delete(users).where(eq(users.id, id));
+    return c.body(null, 204);
+  });
+
+// app.ts — export AppType for RPC client
+export const app = new Hono().route("/users", usersRoute);
+export type AppType = typeof app;
+```
+
+```typescript
+// RPC client (frontend or test) — no code generation needed
+import { hc } from "hono/client";
+import type { AppType } from "@/server/app";
+
+const client = hc<AppType>(process.env.NEXT_PUBLIC_API_URL!);
+
+// Fully typed: response is inferred from the route definition
+const res = await client.users.$get();
+const { users } = await res.json();
+
+// POST with typed body
+const created = await client.users.$post({
+  json: { email: "a@b.com", name: "Alice" },
+});
+```
+
+### Middleware with Typed Context
+
+```typescript
+import { createMiddleware } from "hono/factory";
+import { HTTPException } from "hono/http-exception";
+import { auth } from "@/lib/auth"; // Better Auth instance
+
+type Variables = { user: { id: string; email: string; role: string } };
+
+export const requireAuth = createMiddleware<{ Variables: Variables }>(
+  async (c, next) => {
+    const session = await auth.api.getSession({ headers: c.req.raw.headers });
+    if (!session) throw new HTTPException(401, { message: "Unauthorized" });
+    c.set("user", session.user as Variables["user"]);
+    await next();
+  },
+);
+
+// Usage — c.get("user") is typed
+app.get("/me", requireAuth, (c) => c.json(c.get("user")));
+```
+
+### Testing with `testClient`
+
+```typescript
+import { testClient } from "hono/testing";
+import { app } from "@/server/app";
+
+const client = testClient(app);
+
+it("GET /users returns list", async () => {
+  const res = await client.users.$get();
+  expect(res.status).toBe(200);
+  const data = await res.json();
+  expect(Array.isArray(data.users)).toBe(true);
+});
+
+it("POST /users creates user", async () => {
+  const res = await client.users.$post({
+    json: { email: "test@example.com", name: "Test" },
+  });
+  expect(res.status).toBe(201);
+});
+```
+
+### Streaming
+
+```typescript
+import { streamText } from "hono/streaming";
+
+app.get("/stream", (c) => {
+  return streamText(c, async (stream) => {
+    for await (const chunk of generateResponse()) {
+      await stream.writeln(chunk);
+    }
+  });
+});
+```
+
 ## Layered Architecture
 
 ```
