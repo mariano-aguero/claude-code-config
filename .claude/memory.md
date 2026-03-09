@@ -8,7 +8,7 @@ Update this file when new patterns or preferences are confirmed.
 - Senior full-stack developer — skip basic explanations
 - Language: Spanish for conversation, English for code and comments
 - Prefers concise responses, no filler text or emojis unless asked
-- Stack: TypeScript, React 19, Next.js 15+, Hono, Drizzle ORM, PostgreSQL, Redis, Web3
+- Stack: TypeScript, React 19, Next.js 16+, Hono, Drizzle ORM, PostgreSQL, Redis, Web3
 
 ## Don't repeat or over-explain
 

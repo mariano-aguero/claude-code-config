@@ -33,8 +33,9 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Write|Edit",
+        "matcher": "Write|Edit|NotebookEdit",
         "hooks": [
+          { "type": "command", "command": "node .claude/hooks/analysis.js" },
           {
             "type": "command",
             "command": "sh -c '[ \"${CLAUDE_FORMAT:-1}\" = \"0\" ] || pnpm prettier --write \"$CLAUDE_FILE_PATH\" 2>/dev/null || true'"
@@ -44,7 +45,6 @@
             "command": "node .claude/hooks/lint-with-feedback.js"
           },
           { "type": "command", "command": "node .claude/hooks/typecheck.js" },
-          { "type": "command", "command": "node .claude/hooks/analysis.js" },
           {
             "type": "command",
             "command": "node .claude/hooks/track-tech-debt.js"
@@ -107,35 +107,19 @@
           {
             "type": "command",
             "command": "node .claude/hooks/save-session-notes.js"
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node .claude/hooks/detect-duplicates.js"
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "node .claude/hooks/pre-pr-checklist.js"
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "sh -c '[ \"${CLAUDE_RUN_TESTS:-0}\" = \"1\" ] && pnpm test 2>/dev/null || true'"
-          }
-        ]
-      },
-      {
-        "hooks": [
+          },
           {
             "type": "command",
             "command": "printf '\\n💡 Reminder: Run /log-auto before closing the session\\n'"

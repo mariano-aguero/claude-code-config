@@ -105,7 +105,7 @@ Control formatting and linting per project via `.claude/settings.local.json` (no
 | `CLAUDE_ANALYSIS`  | `"1"`   | Set `"0"` to skip advisory analysis (missing tests, complexity, dead-code, duplicates) |
 | `CLAUDE_RUN_TESTS` | `"0"`   | Set `"1"` to run `pnpm test` at every session Stop                                     |
 
-Note: `detect-secrets` and `typecheck` always run regardless — they catch correctness and security issues, not style.
+Note: Secrets detection (embedded in `analysis.js`) and `typecheck` always run regardless — `CLAUDE_ANALYSIS=0` skips only the advisory checks (missing tests, complexity), not the secrets scan.
 
 ## Code Intelligence
 
