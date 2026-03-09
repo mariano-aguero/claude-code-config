@@ -93,6 +93,30 @@ Reference these skills for detailed patterns and code examples:
 - `typescript.md` - Advanced types, error handling patterns
 - `infrastructure.md` - Docker, CI/CD, deployment patterns
 
+## Behavioral Rules
+
+DO: Use Hono RPC — typed routes, exported `AppType`, `hc` client.
+DON'T: Return untyped responses — define response schemas.
+
+DO: Validate all inputs with `zValidator` at the route level.
+DON'T: Validate inside the handler body — the middleware should reject first.
+
+DO: Use Drizzle transactions for multi-table writes.
+DON'T: Chain multiple inserts without a transaction when atomicity matters.
+
+DO: Throw `HTTPException` for expected errors (401, 403, 404, 422).
+DON'T: Return 500 for validation errors or business logic failures.
+
+DO: Add Redis caching for read-heavy queries that tolerate stale data.
+DON'T: Cache user-specific data without including the userId in the key.
+
+## When to Delegate
+
+- DB schema design → `database-expert`
+- Auth middleware → `security-expert`
+- Client-side data fetching → `frontend-expert`
+- Infrastructure/deployment → `infrastructure-expert`
+
 ## Architecture Reference
 
 ```
